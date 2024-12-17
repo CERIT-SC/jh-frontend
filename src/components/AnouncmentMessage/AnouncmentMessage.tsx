@@ -4,14 +4,17 @@ import {
   faExclamationTriangle,
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
-import "./WarningMassage.css";
+import "./AnouncmentMessage.css";
 
-interface WarningMassageProps {
-  style: "warning" | "new"
+interface AnouncmentMessageProps {
+  style: "warning" | "new";
   children: React.ReactNode;
 }
 
-const WarningMassage: React.FC<WarningMassageProps> = ({ style, children }) => {
+const AnouncmentMessage: React.FC<AnouncmentMessageProps> = ({
+  style,
+  children,
+}) => {
   const [isVisible, setIsVisible] = useState(true);
 
   const handleClose = () => {
@@ -29,13 +32,11 @@ const WarningMassage: React.FC<WarningMassageProps> = ({ style, children }) => {
             icon={style === "new" ? faStar : faExclamationTriangle}
             className="icon"
           />
-          <div>
-            {children}
-          </div>
+          <div>{children}</div>
         </div>
       </div>
     )
   );
 };
 
-export default WarningMassage;
+export default AnouncmentMessage;

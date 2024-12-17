@@ -24,7 +24,7 @@ export const images = {
     "minimalnb-cs:31-10-2024": "Minimal NB with Integrated VS Code",
     "minimalnb-cs:17-11-2024-ai": "Minimal NB with Integrated VS Code and AI",
     "datasciencenb:26-09-2024": "DataScience NB",
-    "datasciencenb:31-10-2024-ssh": "DataScience NB with SSH access"
+    "datasciencenb:31-10-2024-ssh": "DataScience NB with SSH access",
   },
   r: {
     "jupyterhubronly:05-02-2024": "Python 3.11 and R 4.3.1 kernels",
@@ -33,7 +33,7 @@ export const images = {
     "rstudio:4.3.1": "RStudio with R 4.3.1",
     "rstudio:4.4.0": "RStudio with R 4.4.0",
     "rstudio:4.4.1": "RStudio with R 4.4.1",
-    "rstudio:4.4.1-ai": "RStudio with R 4.4.1 and AI"
+    "rstudio:4.4.1-ai": "RStudio with R 4.4.1 and AI",
   },
   tf: {
     "tensorflownb:31-08-2023": "TensorFlow 2.10 (CPU only)",
@@ -43,12 +43,12 @@ export const images = {
     "tensorflowgpu:2.17.0": "TensorFlow 2.17.0 with GPU and TensorBoard",
     "pytorchgpu:2.4.1": "Pytorch 2.4.1",
     "nvidia-pytorch:2.5.0": "NVIDIA Pytorch 2.5.0",
-    "nvidia-tensorflow:2.16.1": "NVIDIA Tensorflow 2.16.1"
+    "nvidia-tensorflow:2.16.1": "NVIDIA Tensorflow 2.16.1",
   },
   matlab: {
     "matlab:r2022b": "MATLAB R2022b",
     "matlab:r2023a": "MATLAB R2023a",
-    "matlab:r2024a": "MATLAB R2024a"
+    "matlab:r2024a": "MATLAB R2024a",
   },
   various: {
     "colab:2024-10-17": "Google Colab",
@@ -58,11 +58,11 @@ export const images = {
     "cuda-ubuntu:12.1-22.04": "CUDA 12.1",
     "cuda-ubuntu:12.2-22.04": "CUDA 12.2",
     "cuda-ubuntu:12.3-22.04": "CUDA 12.3",
-    "cuda-ubuntu:12.4-22.04": "CUDA 12.4"
+    "cuda-ubuntu:12.4-22.04": "CUDA 12.4",
   },
   folding: {
     "colabfold:1.5.5": "Colabfold 1.5.5",
-    "esmfold:2.0.0": "ESM Fold 2.0"
+    "esmfold:2.0.0": "ESM Fold 2.0",
   },
 };
 
@@ -72,7 +72,7 @@ export const sectionTitles = {
   tf: "TensorFlow Images",
   matlab: "Matlab Images",
   various: "Various Images",
-  folding: "Folding Images"
+  folding: "Folding Images",
 };
 
 export const formImagesName = {
@@ -81,7 +81,7 @@ export const formImagesName = {
   tf: "tfnbname",
   matlab: "matlabnbname",
   various: "varnbname",
-  folding: "foldnbname"
+  folding: "foldnbname",
 };
 
 export const gpu_instance = {

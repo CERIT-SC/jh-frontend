@@ -1,9 +1,9 @@
 import "./index.css";
 import "./NotRunning.css";
 import React from "react";
-import { Button } from "./stories/Button";
-import { EinfraFooter } from "./stories/EinfraFooter";
-import JupyterHubHeader from "./stories/JupyterHubHeader";
+import { Button } from "./components/Button/Button";
+import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
+import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
 
 function NotRunning() {
   return (

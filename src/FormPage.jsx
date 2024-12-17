@@ -1,11 +1,14 @@
 import "./Form.css";
-import ProgressiveForm from "./stories/ProgressiveForm";
-import { EinfraFooter } from "./stories/EinfraFooter";
-import { FieldHeader } from "./stories/FieldHeader";
-import { SliderCheckBox } from "./stories/SliderCheckBox";
-import { DropDownMenu } from "./stories/DropDownMenu";
-import { DropDownButton, DropDownOption } from "./stories/DropDownButton";
-import { TileSelector } from "./stories/TileSelector";
+import ProgressiveForm from "./components/Form/ProgressiveForm";
+import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
+import { FieldHeader } from "./components/FieldHeader/FieldHeader";
+import { SliderCheckBox } from "./components/SliderCheckBox/SliderCheckBox";
+import { DropDownMenu } from "./components/DropDownMenu/DropDownMenu";
+import {
+  DropDownButton,
+  DropDownOption,
+} from "./components/DropDownButton/DropDownButton";
+import { TileSelector } from "./components/TileSelector/TileSelector";
 import React, { useState } from "react";
 import {
   selectOptionsStorage,
@@ -14,8 +17,8 @@ import {
   formImagesName,
   gpu_instance,
 } from "./data/formData";
-import JupyterHubHeader from "./stories/JupyterHubHeader";
-import WarningMassage from "./stories/WarningMassage";
+import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
+import WarningMassage from "./components/AnouncmentMessage/AnouncmentMessage";
 
 const StepOne = ({ setFormData }) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
@@ -106,7 +109,9 @@ const StepOne = ({ setFormData }) => {
         key={Object.entries(images).length + 1}
         isActive={isActiveIndex(Object.entries(images).length + 1)}
         isSelected={isSelectedIndex(Object.entries(images).length + 1)}
-        onActivate={() => setActiveDropdownIndex(Object.entries(images).length + 1)}
+        onActivate={() =>
+          setActiveDropdownIndex(Object.entries(images).length + 1)
+        }
         title="Custom Image"
         infoText="Provide image name in format repo/image_name:tag"
       >
@@ -123,7 +128,8 @@ const StepOne = ({ setFormData }) => {
         title="Ensure ssh access into the notebook"
         onChange={handleSshCheck}
       >
-        Connection will be available at jovyan@jupyter-{appConfig.userName}{formattedName}.dyn.cloud.e-infra.cz
+        Connection will be available at jovyan@jupyter-{appConfig.userName}
+        {formattedName}.dyn.cloud.e-infra.cz
       </SliderCheckBox>
     </div>
   );
@@ -289,8 +295,7 @@ const StepTwo = ({ setFormData, formData }) => {
           <SliderCheckBox
             title={`Mount selected home to /storage/${formData["home"] === undefined ? "chosen_storage" : formData["home"]}/home/${appConfig.userName}`}
             onChange={handleLocationStorageCheck}
-          >
-          </SliderCheckBox>
+          ></SliderCheckBox>
         </SliderCheckBox>
 
         <SliderCheckBox
@@ -307,7 +312,7 @@ const StepTwo = ({ setFormData, formData }) => {
   );
 };
 
-const StepThree = ({ formData, setFormData, prevStep, submitForm }) => {
+const StepThree = ({ setFormData }) => {
   const handleCPUSelect = (value) => {
     setFormData((prev) => ({
       ...prev,
@@ -362,12 +367,54 @@ const StepThree = ({ formData, setFormData, prevStep, submitForm }) => {
         <p>Current GPUs Free: </p>
         <div>
           <div className="GPU-wrapper">
-              <iframe className="GPU-stats" src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A10&theme=light&panelId=2" width="200" height="200" frameborder="0" align="left"></iframe>
-              <iframe className="GPU-stats" src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A40&theme=light&panelId=2" width="200" height="200" frameborder="0" align="left"></iframe>
-              <iframe className="GPU-stats" src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A100-80GB-PCIe&theme=light&panelId=3" width="200" height="200" frameborder="0" align="left"></iframe>
-              <iframe className="GPU-stats" src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-H100-NVL&theme=light&panelId=2" width="200" height="200" frameborder="0" align="left"></iframe>
-              <iframe className="GPU-stats" src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-H100-PCIe&theme=light&panelId=2" width="200" height="200" frameborder="0" align="left"></iframe>
-              <iframe className="GPU-stats" src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/H5q_43FVk/jupyterhub?orgId=1&theme=light&panelId=50" width="200" height="200" frameborder="0" align="left"></iframe>
+            <iframe
+              className="GPU-stats"
+              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A10&theme=light&panelId=2"
+              width="200"
+              height="200"
+              frameborder="0"
+              align="left"
+            ></iframe>
+            <iframe
+              className="GPU-stats"
+              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A40&theme=light&panelId=2"
+              width="200"
+              height="200"
+              frameborder="0"
+              align="left"
+            ></iframe>
+            <iframe
+              className="GPU-stats"
+              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A100-80GB-PCIe&theme=light&panelId=3"
+              width="200"
+              height="200"
+              frameborder="0"
+              align="left"
+            ></iframe>
+            <iframe
+              className="GPU-stats"
+              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-H100-NVL&theme=light&panelId=2"
+              width="200"
+              height="200"
+              frameborder="0"
+              align="left"
+            ></iframe>
+            <iframe
+              className="GPU-stats"
+              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-H100-PCIe&theme=light&panelId=2"
+              width="200"
+              height="200"
+              frameborder="0"
+              align="left"
+            ></iframe>
+            <iframe
+              className="GPU-stats"
+              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/H5q_43FVk/jupyterhub?orgId=1&theme=light&panelId=50"
+              width="200"
+              height="200"
+              frameborder="0"
+              align="left"
+            ></iframe>
           </div>
         </div>
       </FieldHeader>
@@ -376,8 +423,18 @@ const StepThree = ({ formData, setFormData, prevStep, submitForm }) => {
         infoText="This information is for your awareness, showing the estimated cost of running your notebooks, but no payment is required."
       >
         <div className="GPU-wrapper">
-          <iframe src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=3&theme=light`} width="300" height="200" frameborder="0"></iframe>
-          <iframe src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=4&theme=light`} width="300" height="200" frameborder="0"></iframe>
+          <iframe
+            src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=3&theme=light`}
+            width="300"
+            height="200"
+            frameborder="0"
+          ></iframe>
+          <iframe
+            src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=4&theme=light`}
+            width="300"
+            height="200"
+            frameborder="0"
+          ></iframe>
         </div>
       </FieldHeader>
     </div>
@@ -446,15 +503,43 @@ function FormPage() {
     <>
       <WarningMassage style="new">
         <ul>
-          <li>We added GPT support into the Minimal notebook, for more info see <a href="https://docs-ng.cerit.io/en/web-apps/jupyterhub#ai-gpt-support">our documentation.</a></li>
-          <li>It is possible to connect to the running notebook via SSH, for more info see <a href="https://docs.cerit.io/en/web-apps/jupyterhub#notebook-ssh-access">our documentation.</a></li>
-          <li>We integrated VS Code into Minimal notebook. Choose below <b>Simple Jupyter images</b> and <b>Minimal NB with Integrated VS Code</b> to try it. After startup, click on VS Code icon. It is possible to upload/download files using this option.</li> 
-          <li>Checkout resource utilisation (GPU, CPU, Memory) in <a href="https://grafana.hub.cloud.e-infra.cz/d/H5q_43FVk/jupyterhub">grafana</a>. Click on <b>Sign in with e-INFRA CZ</b> to log in.</li>
+          <li>
+            We added GPT support into the Minimal notebook, for more info see{" "}
+            <a href="https://docs-ng.cerit.io/en/web-apps/jupyterhub#ai-gpt-support">
+              our documentation.
+            </a>
+          </li>
+          <li>
+            It is possible to connect to the running notebook via SSH, for more
+            info see{" "}
+            <a href="https://docs.cerit.io/en/web-apps/jupyterhub#notebook-ssh-access">
+              our documentation.
+            </a>
+          </li>
+          <li>
+            We integrated VS Code into Minimal notebook. Choose below{" "}
+            <b>Simple Jupyter images</b> and{" "}
+            <b>Minimal NB with Integrated VS Code</b> to try it. After startup,
+            click on VS Code icon. It is possible to upload/download files using
+            this option.
+          </li>
+          <li>
+            Checkout resource utilisation (GPU, CPU, Memory) in{" "}
+            <a href="https://grafana.hub.cloud.e-infra.cz/d/H5q_43FVk/jupyterhub">
+              grafana
+            </a>
+            . Click on <b>Sign in with e-INFRA CZ</b> to log in.
+          </li>
         </ul>
       </WarningMassage>
       <WarningMassage style="warning">
         <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>
-        <p> We will have scheduled maintenance and cluster reboot between 16th and 17th of December 2024. All running notebooks will be interrupted and have to be started again. </p>
+        <p>
+          {" "}
+          We will have scheduled maintenance and cluster reboot between 16th and
+          17th of December 2024. All running notebooks will be interrupted and
+          have to be started again.{" "}
+        </p>
       </WarningMassage>
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="wrapper">

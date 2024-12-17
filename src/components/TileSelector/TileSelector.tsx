@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import "./TileSelector.css";
 
-export const TileSelector = ({
+interface TileSelectorProps {
+  title: string;
+  selectionText: string;
+  numberOptions: number[];
+  setFormData: (value: number) => void;
+}
+
+export const TileSelector: React.FC<TileSelectorProps> = ({
   title,
   selectionText,
   numberOptions,

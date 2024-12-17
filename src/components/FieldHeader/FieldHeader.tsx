@@ -1,6 +1,6 @@
 import "./FieldHeader.css";
 import React from "react";
-import { InfoBox } from "./InfoBox";
+import { InfoBox } from "../InfoBox/InfoBox";
 
 interface FieldHeaderProps {
   infoText?: string;

@@ -1,7 +1,7 @@
 import "./SpawnPending.css";
 import React, { useEffect, useState } from "react";
-import { EinfraFooter } from "./stories/EinfraFooter";
-import JupyterHubHeader from "./stories/JupyterHubHeader";
+import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
+import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
 
 const SpawnPending = () => {
   const [progress, setProgress] = useState("0");
@@ -18,7 +18,6 @@ const SpawnPending = () => {
     const evtSource = new EventSource(appConfig.progressUrl);
     const progressMessage = document.getElementById("progress-message");
     const progressBar = document.getElementById("progress-line-filled");
-    const srProgress = document.getElementById("sr-progress");
     const progressLog = document.getElementById("progress-log");
 
     evtSource.onmessage = (e) => {

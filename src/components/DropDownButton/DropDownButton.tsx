@@ -1,6 +1,6 @@
 import "./DropDownButton.css";
 import React, { useState, useEffect } from "react";
-import { InfoBox } from "./InfoBox";
+import { InfoBox } from "../InfoBox/InfoBox";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
@@ -57,7 +57,19 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
   );
 };
 
-export const DropDownOption = ({ title, index, activeIndex, onSelect }) => {
+interface DropDownOptionProps {
+  index: number;
+  activeIndex: number;
+  title: string;
+  onSelect: (title, index) => void;
+}
+
+export const DropDownOption: React.FC<DropDownOptionProps> = ({
+  title,
+  index,
+  activeIndex,
+  onSelect,
+}) => {
   const isActive = activeIndex === index;
   const [isSelected, setIsSelected] = useState(isActive);
 

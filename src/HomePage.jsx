@@ -2,30 +2,32 @@ import "./index.css";
 import "./HomePage.css";
 import { JupyterHubApiClient } from "./api/JupyterHubAPI";
 import React, { useState } from "react";
-import { DropDownButton } from "./stories/DropDownButton";
-import { Button } from "./stories/Button";
-import { EinfraFooter } from "./stories/EinfraFooter";
-import JupyterHubHeader from "./stories/JupyterHubHeader";
+import { DropDownButton } from "./components/DropDownButton/DropDownButton";
+import { Button } from "./components/Button/Button";
+import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
+import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
 
 function HomePage() {
+  // for testing with npm run dev please uncomment this block
   // const appConfig = {
-  //     default_server_active: true,
-  //     spawners: {
-  //         test: {
-  //             last_activity: "2024-11-24T15:48:29.604740Z",
-  //             active: true,
-  //             ready: false,
-  //             url: null
-  //         },
-  //         test1: {
-  //             last_activity: "2024-11-24T15:46:56.719146Z",
-  //             active: false,
-  //             ready: false,
-  //             url: "/user/dev"
-  //         }
+  //   spawners: {
+  //     "test": {
+  //       last_activity: "2024-11-24T15:48:29.604740Z",
+  //       url: "/user/test",
+  //       active: true,
+  //       ready: false,
   //     },
-  //     userName: "dev",
-  //     xsrf: ""
+  //     "test1": {
+  //       last_activity: "2024-11-24T15:46:56.719146Z",
+  //       url: "/user/test1",
+  //       active: false,
+  //       ready: false,
+  //     }
+  //   },
+  //   default_server_active: false,
+  //   url: "http://localhost",
+  //   userName: "dev",
+  //   xsrf: "sample-xsrf-token",
   // };
 
   const [spawners, setSpawners] = useState(appConfig.spawners);
@@ -51,7 +53,7 @@ function HomePage() {
     }
   };
 
-  const handleStopDefaultServer = async (name) => {
+  const handleStopDefaultServer = async () => {
     try {
       await apiClient.stopDefaultServer(appConfig.userName);
 

@@ -1,7 +1,17 @@
 import React, { useState } from "react";
 import "./SliderCheckBox.css";
 
-export const SliderCheckBox = ({ title, onChange, children }) => {
+interface TileSelectorProps {
+  title: string;
+  children: React.ReactNode;
+  onChange: (checked) => void;
+}
+
+export const SliderCheckBox: React.FC<TileSelectorProps> = ({
+  title,
+  onChange,
+  children,
+}) => {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleCheck = (checked) => {

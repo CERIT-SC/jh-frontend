@@ -1,7 +1,8 @@
 import "./Login.css";
-import { Button } from "./stories/Button";
+import { Button } from "./components/Button/Button";
+import React from "react";
 
-function LoginPage({ buttonText, infoText, imagePath, link }) {
+function LoginPage({ buttonText, imagePath, link }) {
   return (
     <div className="wrapper">
       <div className="login">

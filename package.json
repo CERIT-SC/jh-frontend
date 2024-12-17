@@ -23,17 +23,17 @@
     "react-dom": "^18.2.0"
   },
   "scripts": {
-    "dev:form": "ENTRY=home.html vite",
-    "dev:login": "ENTRY=spawn_pending.html vite",
-    "dev:bio": "cd src/bioconductor && ENTRY=bioconductor_form.html vite --config vite.config.bioconductor.js",
-    "dev:PV211": "cd src/PV211 && ENTRY=PV211_form.html vite --config vite.config.PV211.js",
+    "dev:form": "ENTRY=spawn.html vite",
+    "dev:spawn_p": "ENTRY=spawn_pending.html vite",
+    "dev:login": "ENTRY=login.html vite",
+    "dev:not_running": "ENTRY=not_running.html vite",
+    "dev:home": "ENTRY=home.html vite",
     "build": "vite build",
-    "build:bio": "cd src/bioconductor && vite build --config vite.config.bioconductor.js --emptyOutDir",
-    "build:PV211": "cd src/PV211 && vite build --config vite.config.PV211.js --emptyOutDir",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lint": "npx eslint .",
+    "format": "npx prettier --write \"src/**/*.{js,ts,jsx,tsx,json,css,html}\"",
     "lintc": "npx eslint --print-config .",
     "init-msw": "msw init public/"
   },

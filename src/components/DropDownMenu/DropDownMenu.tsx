@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./DropDownMenu.css";
 
-export const DropDownMenu = ({
+interface DropDownMenuProps {
+  menuOptions: { [key: string]: string };
+  title: string;
+  formSelect: (value) => void;
+  defaultOption?: [string, string];
+}
+
+export const DropDownMenu: React.FC<DropDownMenuProps> = ({
   menuOptions,
   title,
   formSelect,
@@ -45,7 +52,7 @@ export const DropDownMenu = ({
               className="select-option"
               onClick={() => handleOptionClick(key, name)}
             >
-              {name}
+              {name as string}
             </div>
           ))}
         </div>

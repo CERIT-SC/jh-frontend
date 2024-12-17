@@ -1,5 +1,5 @@
 import { DropDownMenu } from "./DropDownMenu";
-import { gpu_instance } from "../data/formData"
+import { gpu_instance } from "../../data/formData";
 
 export default {
   title: "Example/DropDownMenu",
@@ -15,7 +15,7 @@ export default {
 export const NoDefault = {
   args: {
     title: "With No Default Option",
-    menuOptions: gpu_instance
+    menuOptions: gpu_instance,
   },
 };
 
@@ -23,6 +23,6 @@ export const WithDefault = {
   args: {
     title: "With Default Option",
     menuOptions: gpu_instance,
-    defaultOption: gpu_instance[2]
+    defaultOption: gpu_instance[2],
   },
 };

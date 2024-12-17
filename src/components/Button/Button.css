@@ -18,7 +18,7 @@
   text-decoration: none;
 }
 
-.btn--primary :hover{
+.btn--primary :hover {
   background-color: var(--primary-color);
   color: white;
   padding: 16px;
@@ -30,7 +30,7 @@
   text-decoration: none;
 }
 
-.btn:hover{
+.btn:hover {
   opacity: 0.8;
 }
 
