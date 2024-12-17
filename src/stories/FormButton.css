@@ -1,0 +1,44 @@
+.btn-next {
+  border: 0;
+  padding: 12px 15px;
+  background: #2f2557;
+  color: white;
+  width: 135px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  border-radius: 8px;
+  transition: 0.5s ease;
+  cursor: pointer;
+}
+
+.btn-submit {
+  border: 0;
+  padding: 12px 15px;
+  background: #2f2557;
+  color: white;
+  width: 135px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  border-radius: 8px;
+  transition: 0.5s ease;
+  cursor: pointer;
+}
+
+.btn-back {
+  border: 0;
+  padding: 12px 15px;
+  background: #2f2557;
+  color: white;
+  width: 135px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  border-radius: 8px;
+  transition: 0.5s ease;
+  cursor: pointer;
+}

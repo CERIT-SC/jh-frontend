@@ -1,0 +1,109 @@
+.navbar {
+  display: grid;
+  align-items: center;
+  grid-template-areas: "logo home token . . . . . . . . . . . . . . . . . . name logout";
+  background: rgba(174, 173, 173, 0.5);
+  padding: 0.25rem;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  min-height: 45px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.container-fluid {
+  grid-area: logo;
+}
+
+.home {
+  grid-area: home;
+}
+
+.token {
+  grid-area: token;
+}
+
+.me {
+  grid-area: name;
+}
+
+.logout {
+  grid-area: logout;
+}
+
+a {
+  text-decoration: none;
+}
+
+.navbar-toggler {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  grid-area: toggle;
+}
+
+.menu {
+  display: grid;
+  grid-template-areas:
+    "home"
+    "token"
+    "name"
+    "logout";
+  gap: 0.5rem;
+}
+
+.menu a,
+.menu span {
+  text-decoration: none;
+  color: #333;
+  padding: 0.5rem 1rem;
+  text-align: center;
+}
+
+.menu.open {
+  width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    grid-template-areas:
+      "logo . . toggle"
+      "menu menu menu menu";
+    grid-template-columns: auto 1fr;
+  }
+
+  .navbar-toggler {
+    display: block;
+  }
+
+  .menu {
+    grid-template-areas:
+      "home"
+      "token"
+      "name"
+      "logout";
+    grid-template-columns: 1fr;
+    gap: 0;
+    grid-area: menu;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.5s ease-in-out;
+  }
+
+  .menu.open {
+    display: grid;
+    max-height: 200px;
+    transition: max-height 0.5s ease-in-out;
+  }
+
+  .menu a,
+  .menu span {
+    text-align: left;
+    padding: 10px;
+  }
+}
