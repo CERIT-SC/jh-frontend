@@ -18,7 +18,7 @@
 }
 
 .switch-input:checked + .slider {
-  background-color: #de73e5;
+  background-color: var(--secondary-color);
 }
 
 .switch-input:checked + .slider::before {

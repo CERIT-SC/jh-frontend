@@ -1,7 +1,7 @@
 .btn-next {
   border: 0;
   padding: 12px 15px;
-  background: #2f2557;
+  background: var(--primary-color);
   color: white;
   width: 135px;
   justify-content: center;
@@ -16,7 +16,7 @@
 .btn-submit {
   border: 0;
   padding: 12px 15px;
-  background: #2f2557;
+  background: var(--primary-color);
   color: white;
   width: 135px;
   justify-content: center;
@@ -31,7 +31,7 @@
 .btn-back {
   border: 0;
   padding: 12px 15px;
-  background: #2f2557;
+  background: var(--primary-color);
   color: white;
   width: 135px;
   justify-content: center;

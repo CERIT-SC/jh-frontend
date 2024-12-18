@@ -1,6 +1,6 @@
 import React from "react";
 import LoginPage from "./LoginPage";
-import WarningMassage from "./components/AnouncmentMessage/AnouncmentMessage";
+import AnouncmentMessage from "./components/AnouncmentMessage/AnouncmentMessage";
 import { createRoot } from "react-dom/client";
 import "@fontsource/montserrat/600.css";
 import "./index.css";
@@ -8,7 +8,7 @@ import "./index.css";
 const root = createRoot(document.getElementById("root"));
 root.render(
   <div>
-    <WarningMassage style="warning">
+    <AnouncmentMessage style="warning">
       <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>
       <p>
         {" "}
@@ -16,7 +16,7 @@ root.render(
         17th of December 2024. All running notebooks will be interrupted and
         have to be started again.{" "}
       </p>
-    </WarningMassage>
+    </AnouncmentMessage>
     <LoginPage
       buttonText="Sign in via unified login e-INFRA CZ AAI"
       imagePath="/static/custom-images/logo-einfra_barvy.svg"

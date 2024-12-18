@@ -6,7 +6,7 @@
 }
 
 .tile {
-  background-color: #2f2557;
+  background-color: var(--primary-color);
   color: white;
   text-align: center;
   font-size: 1em;
@@ -21,15 +21,15 @@
 }
 
 .tile:hover {
-  background-color: #4cd9f4;
+  background-color: var(--hover-color);
 }
 
 .tile.active {
-  background-color: #de73e5;
+  background-color: var(--secondary-color);
 }
 
 .field-title {
-  background-color: #2f2557;
+  background-color: var(--primary-color);
   color: white;
   padding: 16px;
   font-size: 16px;

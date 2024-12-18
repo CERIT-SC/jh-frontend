@@ -7,7 +7,7 @@ import { SliderCheckBox } from "./components/SliderCheckBox/SliderCheckBox";
 import { DropDownMenu } from "./components/DropDownMenu/DropDownMenu";
 import { TileSelector } from "./components/TileSelector/TileSelector";
 import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
-import WarningMassage from "./components/AnouncmentMessage/AnouncmentMessage";
+import AnouncmentMessage from "./components/AnouncmentMessage/AnouncmentMessage";
 import {
   DropDownButton,
   DropDownOption,
@@ -499,7 +499,7 @@ function FormPage() {
 
   return (
     <>
-      <WarningMassage style="new">
+      <AnouncmentMessage style="new">
         <ul>
           <li>
             We added GPT support into the Minimal notebook, for more info see{" "}
@@ -529,7 +529,7 @@ function FormPage() {
             . Click on <b>Sign in with e-INFRA CZ</b> to log in.
           </li>
         </ul>
-      </WarningMassage>
+      </AnouncmentMessage>
       <WarningMassage style="warning">
         <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>
         <p>

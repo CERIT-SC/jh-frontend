@@ -45,11 +45,11 @@
 }
 
 .progress-circle.completed {
-  background-color: #2f2557;
+  background-color: var(--primary-color);
 }
 
 .progress-circle.active {
-  background-color: #de73e5;
+  background-color: var(--secondary-color);
 }
 
 .progress-line {
@@ -65,7 +65,7 @@
 
 .progress-line-filled {
   height: 4px;
-  background-color: #2f2557;
+  background-color: var(--primary-color);
   transition: width 0.5s ease;
   z-index: 1;
 }
