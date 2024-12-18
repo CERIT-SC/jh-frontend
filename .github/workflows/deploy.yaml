@@ -46,3 +46,10 @@ jobs:
           create_configmap "static-files-woff" "$BASE_DIR/static/woff"
           create_configmap "static-files-woff2" "$BASE_DIR/static/woff2"
           create_configmap "static-files-images" "$BASE_DIR/static"
+
+
+      - name: Upload ConfigMap YAML Files
+        uses: actions/upload-artifact@v3
+        with:
+          name: configmap-yamls
+          path: ./*.yaml
