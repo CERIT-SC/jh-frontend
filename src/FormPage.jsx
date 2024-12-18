@@ -530,7 +530,7 @@ function FormPage() {
           </li>
         </ul>
       </AnouncmentMessage>
-      <WarningMassage style="warning">
+      <AnouncmentMessage style="warning">
         <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>
         <p>
           {" "}
@@ -538,7 +538,7 @@ function FormPage() {
           17th of December 2024. All running notebooks will be interrupted and
           have to be started again.{" "}
         </p>
-      </WarningMassage>
+      </AnouncmentMessage>
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="wrapper">
         <ProgressiveForm
