@@ -6,7 +6,7 @@ export default {
   component: JupyterHubHeader,
   decorators: [
     (Story) => (
-      <div style={{ border: "1px solid #ccc", width: "400px" }}>
+      <div style={{ border: "1px solid #ccc", width: "100vw" }}>
         <Story />
       </div>
     ),
