@@ -12,6 +12,18 @@
   min-height: 100vh;
 }
 
+.GPU-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.GPU-stats {
+  border: none;
+}
+
 @media (max-width: 768px) {
   .wrapper {
     display: flex;
