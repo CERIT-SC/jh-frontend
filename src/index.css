@@ -51,15 +51,3 @@ h2 {
 p {
   margin: 0.5rem;
 }
-
-.GPU-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-
-.GPU-stats {
-  border: none;
-}

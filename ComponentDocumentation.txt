@@ -1,0 +1,87 @@
+Here is a Brief Component Documentation.
+
+AnnouncementMessage:
+    parameters:
+        style: can be either "warning" or "new".
+        children: ReactNode, can be any HTML.
+    usage:
+        Used for making announcements, such as system reboots or new features.
+
+Button:
+    parameters:
+        primary: false/true, default is true; changes the styling of the button.
+        link: if the button is supposed to redirect the user, provide a link.
+        title: the title of the button.
+        onClickFun: function that the button should perform on onClick.
+        disabled: if the button should be disabled, default is false.
+    usage:
+        Used for any link redirection or button with a function.
+
+DropDownButton:
+    parameters:
+        infoText: text that should be displayed in the info box.
+        primary: parameter that changes the style of the component.
+        title: title text for the component.
+        children: HTML that should be displayed after opening the dropdown.
+        isActive: parameter that determines if other dropdowns should be connected and close depending on others.
+        hasIcon: dropdown icon that displays when the dropdown is opened/closed.
+        isSelected: changes style if true.
+        onActivate: action to be performed when the component is activated.
+    usage:
+        A dropdown that holds any HTML inside.
+
+DropDownMenuProps:
+    parameters:
+        menuOptions: options offered when the dropdown menu is opened.
+        title: title of the component.
+        formSelect: function that updates the form with the selected option.
+        defaultOption: default option provided as [value, displayText].
+    usage:
+        Provides users with multiple options.
+
+FieldHeader:
+    parameters:
+        infoText: info text that should be displayed in the info box.
+        title: title for the component.
+        children: HTML that should be displayed.
+    usage:
+        Used as a header for a section.
+
+EinfraFooter:
+    usage:
+        Footer displaying the Einfra logo, contact information, and documentation.
+
+JupyterHubHeader:
+    parameters:
+        userName: the name of the current user.
+    usage:
+        Header of the hub; should be on each page.
+
+ProgressiveForm:
+    parameters:
+        steps: array of steps.
+        submitForm: function that should be executed when submitting the form.
+        error: if an error occurs, provide the error message.
+    usage:
+        Used for any form, mostly for spawning forms.
+
+InfoBox:
+    parameters:
+        infoText: text that should be displayed.
+    usage:
+        Can be placed in a component that needs additional information.
+
+SliderCheckBox:
+    parameters:
+        title: title for the checkbox.
+        children: HTML that should be displayed when the checkbox is checked.
+        onChange: function that is triggered when the checkbox is checked.
+
+TileSelector:
+    parameters:
+        title: title of the component.
+        selectionText: additional text for more information.
+        numberOptions: array of numbers displayed for selection.
+        setFormData: function for setting form data.
+    usage:
+        Used when a user needs to pick from a set of numbers.

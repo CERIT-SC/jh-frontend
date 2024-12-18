@@ -2,14 +2,14 @@ import AnouncmentMessage from "./AnouncmentMessage";
 import React from "react";
 
 export default {
-  title: "Example/Button",
+  title: "Example/AnouncmentMessage",
   component: AnouncmentMessage,
   parameters: {
     layout: "centered",
   },
 };
 
-export const Primary = {
+export const Warning = {
   args: {
     style: "warning",
     children : ( <div>
@@ -25,24 +25,12 @@ export const Primary = {
   },
 };
 
-export const InputDropdown = {
-  args: {
-    title: "Input Drop Down",
-    children: <input></input>,
-  },
-};
-
-export const infoDropdown = {
-  args: {
-    title: "Info Drop Down",
-    infoText:
-      "Provide image name in format repo/image_name:tag or repo/image_name. No tag will be interpreted as latest.",
-  },
-};
-
-export const Secondary = {
-  args: {
-    title: "Secondary Drop Down",
-    primary: false,
-  },
-};
+export const New = {
+    args: {
+      style: "new",
+      children : ( <div>
+        There are so many new features!!
+      </div>
+      )
+    },
+  };
