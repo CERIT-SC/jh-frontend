@@ -1,15 +1,17 @@
 import "./Form.css";
+import React, { useState } from "react";
 import ProgressiveForm from "./components/Form/ProgressiveForm";
 import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
 import { FieldHeader } from "./components/FieldHeader/FieldHeader";
 import { SliderCheckBox } from "./components/SliderCheckBox/SliderCheckBox";
 import { DropDownMenu } from "./components/DropDownMenu/DropDownMenu";
+import { TileSelector } from "./components/TileSelector/TileSelector";
+import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
+import WarningMassage from "./components/AnouncmentMessage/AnouncmentMessage";
 import {
   DropDownButton,
   DropDownOption,
 } from "./components/DropDownButton/DropDownButton";
-import { TileSelector } from "./components/TileSelector/TileSelector";
-import React, { useState } from "react";
 import {
   selectOptionsStorage,
   images,
@@ -17,14 +19,11 @@ import {
   formImagesName,
   gpu_instance,
 } from "./data/formData";
-import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
-import WarningMassage from "./components/AnouncmentMessage/AnouncmentMessage";
 
 const StepOne = ({ setFormData }) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
   const [selectedDropdownIndex, setSelectedDropdownIndex] = useState(null);
-  const [activeDropdownOptionIndex, setActiveDropdownOptionIndex] =
-    useState(null);
+  const [activeDropdownOptionIndex, setActiveDropdownOptionIndex] = useState(null);
 
   const handleSelect = (key, image, index, dindex) => {
     setSelectedDropdownIndex(dindex);
@@ -128,8 +127,7 @@ const StepOne = ({ setFormData }) => {
         title="Ensure ssh access into the notebook"
         onChange={handleSshCheck}
       >
-        Connection will be available at jovyan@jupyter-{appConfig.userName}
-        {formattedName}.dyn.cloud.e-infra.cz
+        Connection will be available at jovyan@jupyter-{appConfig.userName}{formattedName}.dyn.cloud.e-infra.cz
       </SliderCheckBox>
     </div>
   );

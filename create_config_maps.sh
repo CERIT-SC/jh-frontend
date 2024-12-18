@@ -10,8 +10,10 @@ create_configmap() {
   local name=$1
   local path=$2
 
+  # applying the ConfigMaps directly to cluster
   kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
   kubectl create configmap $name --from-file=$path --namespace $NAMESPACE
+  # creating the ConfigMaps locally
   kubectl create configmap $name --from-file=$path --dry-run=client -o yaml > $name.yaml
 }
 

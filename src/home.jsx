@@ -5,5 +5,4 @@ import "@fontsource/montserrat/600.css";
 import "./index.css";
 
 const root = createRoot(document.getElementById("root"));
-console.log(root);
 root.render(<HomePage />);
