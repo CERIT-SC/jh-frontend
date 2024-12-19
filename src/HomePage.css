@@ -50,6 +50,10 @@ input {
   gap: 0.5rem;
 }
 
+.server-url {
+  grid-area: url;
+}
+
 .time-col {
   grid-area: time;
 }

@@ -155,7 +155,7 @@ function HomePage() {
               onActivate={() => setActiveDropdownIndex(dropdownIndex)}
             >
               <div className="server-properties">
-                {spawner.active && <a href={spawner.url}> {spawner.url} </a>
+                {spawner.active && <a className="server-url" href={spawner.url}> {spawner.url} </a>
                 }
                 <div className="time-col">
                   {spawner.last_activity
