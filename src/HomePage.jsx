@@ -6,6 +6,7 @@ import { DropDownButton } from "./components/DropDownButton/DropDownButton";
 import { Button } from "./components/Button/Button";
 import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
 import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
+import { FieldHeader } from "./components/FieldHeader/FieldHeader";
 
 function HomePage() {
   // for testing with npm run dev please uncomment this block
@@ -22,7 +23,16 @@ function HomePage() {
   //       url: "/user/test1",
   //       active: false,
   //       ready: false,
-  //     }
+  //     },
+  //     ...Array.from({ length: 50 }, (_, i) => `spawner${i + 1}`).reduce((acc, spawner) => {
+  //       acc[spawner] = {
+  //         last_activity: new Date().toISOString(),
+  //         url: `/user/${spawner}`,
+  //         active: Math.random() < 0.5, // Randomly set active status
+  //         ready: Math.random() < 0.5, // Randomly set ready status
+  //       };
+  //       return acc;
+  //     }, {})
   //   },
   //   default_server_active: false,
   //   url: "http://localhost",
@@ -138,18 +148,15 @@ function HomePage() {
             <Button title="Add New Server" onClickFun={handleAddServer} />
           </div>
           {Object.entries(spawners).map(([name, spawner], dropdownIndex) => (
-            <DropDownButton
+            <FieldHeader
               title={name}
               isActive={isActiveIndex(dropdownIndex)}
               hasIcon={true}
               onActivate={() => setActiveDropdownIndex(dropdownIndex)}
             >
               <div className="server-properties">
-                <Button
-                  title="Link"
-                  link={spawner.url}
-                  disabled={!spawner.active}
-                />
+                {spawner.active && <a href={spawner.url}> {spawner.url} </a>
+                }
                 <div className="time-col">
                   {spawner.last_activity
                     ? dateFormat(spawner.last_activity)
@@ -178,7 +185,7 @@ function HomePage() {
                   )}
                 </div>
               </div>
-            </DropDownButton>
+            </FieldHeader>
           ))}
         </div>
         <EinfraFooter />

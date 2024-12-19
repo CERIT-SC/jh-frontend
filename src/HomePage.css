@@ -45,7 +45,8 @@ input {
 .server-properties {
   display: grid;
   align-items: center;
-  grid-template-areas: "url url time time time btn btn btn";
+  grid-template-areas: "url url url url url url"
+                       "time time time btn btn btn";
   gap: 0.5rem;
 }
 
@@ -74,10 +75,10 @@ input {
     position: absolute;
     width: 90%;
     padding: 5%;
+    font-size: 12px;
     background: rgba(255, 255, 255, 0.5);
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-height: 80vh;
   }
 
   .start-named-server {

@@ -9,7 +9,7 @@
 .btn--primary {
   background-color: var(--primary-color);
   color: white;
-  padding: 16px;
+  padding: 1rem;
   border: none;
   cursor: pointer;
   text-align: center;
@@ -21,7 +21,6 @@
 .btn--primary :hover {
   background-color: var(--primary-color);
   color: white;
-  padding: 16px;
   border: none;
   cursor: pointer;
   text-align: center;
@@ -35,9 +34,9 @@
 }
 
 .btn--secondary {
-  background-color: var(--secondary-color);
+  background-color: rgb(117, 5, 5);
   color: white;
-  padding: 16px;
+  padding: 1rem;
   border: none;
   cursor: pointer;
   text-align: center;
@@ -51,4 +50,30 @@
   color: #312f2f;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .btn--secondary {
+    color: white;
+    padding: 0.5rem;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 8px;
+    display: inline-block;
+    text-decoration: none;
+  }
+
+  .btn--primary {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 8px;
+    display: inline-block;
+    text-decoration: none;
+  }
+  
 }
