@@ -10,9 +10,7 @@ create_configmap() {
   local name=$1
   local path=$2
 
-  # applying the ConfigMaps directly to cluster
-
-  # don't delete configmaps from cluster automatically! if ns changes, it could lead to catastrophe
+    # don't delete configmaps from cluster automatically! if ns changes, it could lead to catastrophe
   #  kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
   #  kubectl create configmap $name --from-file=$path --namespace $NAMESPACE
   # creating the ConfigMaps locally
@@ -27,4 +25,6 @@ create_configmap "static-files-js" "$BASE_DIR/static/custom-js"
 create_configmap "static-files-css" "$BASE_DIR/static/custom-css"
 create_configmap "static-files-woff" "$BASE_DIR/static/woff"
 create_configmap "static-files-woff2" "$BASE_DIR/static/woff2"
+create_configmap "static-files-images" "$BASE_DIR/static/custom-images"
+
 echo "All ConfigMaps processed successfully."
