@@ -8,15 +8,15 @@ import "./index.css";
 const root = createRoot(document.getElementById("root"));
 root.render(
   <div>
-    <AnouncmentMessage style="warning">
-      <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>
-      <p>
-        {" "}
-        We will have scheduled maintenance and cluster reboot between 16th and
-        17th of December 2024. All running notebooks will be interrupted and
-        have to be started again.{" "}
-      </p>
-    </AnouncmentMessage>
+    {/*<AnouncmentMessage style="warning">*/}
+    {/*  <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>*/}
+    {/*  <p>*/}
+    {/*    {" "}*/}
+    {/*    We will have scheduled maintenance and cluster reboot between 16th and*/}
+    {/*    17th of December 2024. All running notebooks will be interrupted and*/}
+    {/*    have to be started again.{" "}*/}
+    {/*  </p>*/}
+    {/*</AnouncmentMessage>*/}
     <LoginPage
       buttonText="Sign in via unified login e-INFRA CZ AAI"
       imagePath="/static/custom-images/logo-einfra_barvy.svg"
