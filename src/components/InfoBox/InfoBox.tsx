@@ -19,7 +19,7 @@ export const InfoBox: React.FC<InfoBoxProps> = ({ infoText }) => {
   };
 
   return (
-    <div
+      <div
       className="info-icon"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

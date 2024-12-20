@@ -1,6 +1,7 @@
 .info-icon {
   position: relative;
   display: inline-block;
+  margin-left: auto;
 }
 
 .info-text {

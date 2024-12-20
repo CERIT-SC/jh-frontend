@@ -23,6 +23,7 @@
 
  .icon {
   grid-area: icon;
+
   /*margin: 0;*/
   font-size: 16px;
 }
@@ -125,12 +126,12 @@
   border: none;
 }
 
-.info-icon {
-  margin-left: 10px;
-  cursor: pointer;
-  position: relative;
-  display: inline-block;
-}
+/*.info-icon {*/
+/*  margin-left: 10px;*/
+/*  cursor: pointer;*/
+/*  position: relative;*/
+/*  display: inline-block;*/
+/*}*/
 
 .dropbtn--secondary {
   display: flex;
