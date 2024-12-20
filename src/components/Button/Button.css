@@ -9,7 +9,7 @@
 .btn--primary {
   background-color: var(--primary-color);
   color: white;
-  padding: 1rem;
+  padding: 0.6rem;
   border: none;
   cursor: pointer;
   text-align: center;
@@ -36,7 +36,7 @@
 .btn--secondary {
   background-color: rgb(117, 5, 5);
   color: white;
-  padding: 1rem;
+  padding: 0.6rem;
   border: none;
   cursor: pointer;
   text-align: center;

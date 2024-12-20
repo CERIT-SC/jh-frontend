@@ -16,6 +16,7 @@ interface DropDownButtonProps {
   hasIcon: boolean;
   isSelected: boolean;
   onActivate: () => void;
+  activeText?: string;
 }
 
 export const DropDownButton: React.FC<DropDownButtonProps> = ({
@@ -24,8 +25,10 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
   children,
   primary = true,
   isActive = false,
+  activeText = "",
   hasIcon = false,
   isSelected = false,
+
   onActivate = () => {},
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,10 +50,12 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
         className={`dropbtn--${primary ? "primary" : "secondary"} ${isOpen ? "active" : ""} ${isSelected ? "selected" : ""}`}
         onClick={toggleDropdown}
       >
-        {title}
-        {infoText && <InfoBox infoText={infoText} />}
-        {hasIcon && !isOpen && <FontAwesomeIcon icon={faChevronCircleDown} />}
-        {hasIcon && isOpen && <FontAwesomeIcon icon={faChevronCircleUp} />}
+        <div className="title">{title}</div>
+        <div className="activeText">{activeText}</div>
+        {/*<div className="activeText"><p>{activeText}</p></div>*/}
+        {infoText && <InfoBox className="icon" infoText={infoText} />}
+        {hasIcon && !isOpen && <FontAwesomeIcon className="icon" icon={faChevronCircleDown} />}
+        {hasIcon && isOpen && <FontAwesomeIcon className="icon" icon={faChevronCircleUp} />}
       </button>
       {isOpen && <div className="dropdown-content">{children}</div>}
     </div>

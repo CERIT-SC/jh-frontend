@@ -1,8 +1,30 @@
 .dropdown {
   position: relative;
   display: flex;
-  width: 100%;
   flex-direction: column;
+  width: 100%;
+  padding: 0.6rem;
+}
+
+.activeText {
+  /*margin-left: auto;*/
+  grid-area: text;
+  /*margin: 0;*/
+  font-size: 16px;
+}
+
+ .title {
+  grid-area: title;
+  /*margin: 0;*/
+  /* margin-left: auto;*/
+  /* justify-self: left;*/
+  font-size: 16px;
+}
+
+ .icon {
+  grid-area: icon;
+  /*margin: 0;*/
+  font-size: 16px;
 }
 
 .dropbtn--primary {
@@ -17,8 +39,12 @@
 
   margin-bottom: 4px;
 
-  display: flex;
   justify-content: space-between;
+
+  display: grid;
+  grid-template-areas: "title . text . icon";
+  grid-template-columns: auto 25fr auto 1fr auto;
+
 }
 
 .dropbtn--primary.selected {

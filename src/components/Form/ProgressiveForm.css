@@ -1,7 +1,7 @@
 .form-wrap {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0rem;
 }
 
 .btns_wrap {
