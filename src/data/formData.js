@@ -19,7 +19,7 @@ export const selectOptionsStorage = {
 export const images = {
   simple: {
     "minimalnb:26-09-2024": "Minimal NB",
-    "minimalnb:27-09-2024-ai": "Minimal NB with AI",
+    "minimalnb:02-01-2025-ai": "Minimal NB with AI",
     "minimalnb:26-09-2024-ssh": "Minimal NB with SSH access",
     "minimalnb-cs:31-10-2024": "Minimal NB with Integrated VS Code",
     "minimalnb-cs:17-11-2024-ai": "Minimal NB with Integrated VS Code and AI",
