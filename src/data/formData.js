@@ -84,6 +84,15 @@ export const formImagesName = {
   folding: "foldnbname",
 };
 
+export const defaultImagesName = {
+  simple: "simplenb",
+  r: "rnb",
+  tf: "tfnb",
+  matlab: "matlabnb",
+  various: "variousnb",
+  folding: "foldingnb",
+};
+
 export const gpu_instance = {
   none: "None",
   "mig-1g.10gb": "10GB part A100",

@@ -1,5 +1,5 @@
 import "./Form.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProgressiveForm from "./components/Form/ProgressiveForm";
 import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
 import { FieldHeader } from "./components/FieldHeader/FieldHeader";
@@ -18,12 +18,46 @@ import {
   sectionTitles,
   formImagesName,
   gpu_instance,
+  defaultImagesName,
 } from "./data/formData";
+import { gatherFormData } from "./scripts/gatherFormData";
+import { faCodePullRequest } from "@fortawesome/free-solid-svg-icons";
 
-const StepOne = ({ setFormData }) => {
+const StepOne = ({ setFormData, defaultFormData }) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
+  const [checkSsh, setCheckSsh] = useState(null);
   const [selectedDropdownIndex, setSelectedDropdownIndex] = useState(null);
   const [activeDropdownOptionIndex, setActiveDropdownOptionIndex] = useState(null);
+
+  useEffect(() => {
+    if (defaultFormData) {
+      if (defaultFormData.notebookImage) {
+        const text = defaultFormData.notebookImage.type;
+        if (text === "customnb") {
+          handleInputChange({
+            target: {
+              value: defaultFormData.notebookImage.selectedOption,
+            },
+          }, Object.entries(images).length + 1)
+        } else {
+          const key = Object.keys(defaultImagesName).find((key) => defaultImagesName[key] === text);
+          const dindex = Object.keys(images).indexOf(key);
+
+          const flattenedImages = Object.entries(images).flatMap(([category, options]) =>
+            Object.keys(options).map((key) => ({ category, key }))
+          );
+
+          const image = defaultFormData.notebookImage.selectedOption.value.replace("cerit.io/hubs/", "");
+          const index = flattenedImages.findIndex((entry) => entry.key === image);
+
+          handleSelect(key, image, index, dindex);
+        }
+        handleSshCheck(defaultFormData.notebookImage.sshAccess);
+        setCheckSsh(defaultFormData.notebookImage.sshAccess);
+      }
+
+    }
+  }, []);
 
   const handleSelect = (key, image, index, dindex) => {
     setSelectedDropdownIndex(dindex);
@@ -126,6 +160,8 @@ const StepOne = ({ setFormData }) => {
       <SliderCheckBox
         title="Ensure ssh access into the notebook"
         onChange={handleSshCheck}
+        id="sshCheckBox"
+        init={checkSsh}
       >
         Connection will be available at jovyan@jupyter-{appConfig.userName}{formattedName}.dyn.cloud.e-infra.cz
       </SliderCheckBox>
@@ -133,8 +169,94 @@ const StepOne = ({ setFormData }) => {
   );
 };
 
-const StepTwo = ({ setFormData, formData }) => {
+const StepTwo = ({ setFormData, formData, defaultFormData }) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
+  const [defaultOptionPhname, setDefaultOptionPhname] = useState(null);
+  const [checkedErased, setCheckErased] = useState(false);
+  const [checkedDirectories, setCheckedDirectories] = useState(false);
+  const [checkedStorage, setCheckedStorage] = useState(false);
+  const [defaultHome, setDefaultHome] = useState(false);
+  const [checkedMount, setCheckedMount] = useState(false);
+
+  useEffect(() => {
+    if (defaultFormData) {
+      if (defaultFormData.persistentHome) {
+
+
+        const text = defaultFormData.persistentHome.type;
+        setFormData((prev) => ({
+          ...prev,
+          phselection: text,
+        }));
+        setActiveDropdownIndex(text === "new" ? 0 : 1);
+        const check = defaultFormData.persistentHome.eraseIfExists
+        if (check) {
+          setFormData((prev) => ({
+            ...prev,
+            phCheck: check,
+          }));
+          setCheckErased(check)
+        }
+        const phname = defaultFormData.persistentHome.selectedHome
+        if (phname) {
+          const name = defaultFormData.persistentHome.selectedHome.value;
+          setFormData((prev) => ({
+            ...prev,
+            phname: name,
+          }));
+          setDefaultOptionPhname([name, name]);
+        }
+
+        const projectDirectories = defaultFormData.projectDirectories
+
+        if (projectDirectories) {
+          setFormData((prev) => ({
+            ...prev,
+            projectCheck: "yes"
+          }));
+
+          setCheckedDirectories(projectDirectories)
+        }
+
+        const metaCentrumHome = defaultFormData.metaCentrumHome
+
+        if (metaCentrumHome) {
+
+          const enabled = metaCentrumHome.enabled
+
+          if (enabled) {
+            setFormData((prev) => ({
+              ...prev,
+              storageCheck: "yes"
+            }));
+
+            setCheckedStorage(enabled)
+
+            const selectedHome = metaCentrumHome.selectedHome.value;
+
+            setFormData((prev) => ({
+              ...prev,
+              home: selectedHome
+            }));
+
+            setDefaultHome([selectedHome, selectedHome])
+
+            const mountToStorage = metaCentrumHome.mountToStorage;
+
+            if(mountToStorage) {
+              setFormData((prev) => ({
+                ...prev,
+                locationStorageCheck: "yes"
+              }));
+
+              setCheckedMount(mountToStorage)
+            }
+          }
+        }
+      }
+
+    }
+  }, []);
 
   const handleStorage = (storage) => {
     setFormData((prev) => ({
@@ -251,6 +373,8 @@ const StepTwo = ({ setFormData, formData }) => {
           <SliderCheckBox
             title="Erase if home exists"
             onChange={handleErase}
+            id="phCheckId"
+            init={checkedErased}
           ></SliderCheckBox>
           <div>
             Mounted to
@@ -274,6 +398,7 @@ const StepTwo = ({ setFormData, formData }) => {
             formSelect={handlePersistentHome}
             title="Select Persistent Home"
             menuOptions={values}
+            defaultOption={defaultOptionPhname}
           ></DropDownMenu>
         </DropDownButton>
       </FieldHeader>
@@ -281,6 +406,7 @@ const StepTwo = ({ setFormData, formData }) => {
         <SliderCheckBox
           title="Mount MetaCentrum storage"
           onChange={handleStorageCheck}
+          init={checkedStorage}
         >
           <p>
             Mounted to <code>/home/meta/username </code>{" "}
@@ -289,16 +415,19 @@ const StepTwo = ({ setFormData, formData }) => {
             formSelect={handleStorage}
             title="Select MetaCentrum Storage"
             menuOptions={selectOptionsStorage}
+            defaultOption={defaultHome}
           ></DropDownMenu>
           <SliderCheckBox
             title={`Mount selected home to /storage/${formData["home"] === undefined ? "chosen_storage" : formData["home"]}/home/${appConfig.userName}`}
             onChange={handleLocationStorageCheck}
+            init={checkedMount}
           ></SliderCheckBox>
         </SliderCheckBox>
 
         <SliderCheckBox
           onChange={handleCheckboxDirectories}
           title="Mount project directories"
+          init={checkedDirectories}
         >
           <p>
             All projects mounted to /home/projects/brno12, specific projects are
@@ -310,7 +439,39 @@ const StepTwo = ({ setFormData, formData }) => {
   );
 };
 
-const StepThree = ({ setFormData }) => {
+const StepThree = ({ setFormData, defaultFormData }) => {
+  const [defMem, setDefMem] = useState(null);
+  const [defCPU, setDefCPU] = useState(null);
+  const [defGPU, setDefGPU] = useState(null);
+
+  useEffect(() => {
+    if (defaultFormData) {
+      const mem = Number(defaultFormData.memory.value);
+      const cpu = defaultFormData.cpu;
+      const val = defaultFormData.gpu.value;
+      const txt = defaultFormData.gpu.text;
+
+      setFormData((prev) => ({
+        ...prev,
+        cpuselection: cpu,
+      }));
+
+      setFormData((prev) => ({
+        ...prev,
+        memselection: mem,
+      }));
+      
+      setFormData((prev) => ({
+        ...prev,
+        gpuselection: val,
+      }));
+
+      setDefMem(mem)
+      setDefCPU(cpu)
+      setDefGPU([val, txt])
+    }
+  }, []);
+
   const handleCPUSelect = (value) => {
     setFormData((prev) => ({
       ...prev,
@@ -334,6 +495,7 @@ const StepThree = ({ setFormData }) => {
 
   return (
     <div className="form-wrap">
+      {defCPU !== null && defMem !== null && defGPU !== null ? ( <>
       <h2>Resources</h2>
       <p>
         The notebook is spawned only when one node fulfills <b>all</b> your
@@ -344,12 +506,14 @@ const StepThree = ({ setFormData }) => {
         title="CPU"
         selectionText="Select CPU limit:"
         numberOptions={[1, 4, 6, 8, 10, 16, 24, 32]}
+        defaultSelect={defCPU}
       ></TileSelector>
       <TileSelector
         setFormData={handleMemSelect}
         title="Memory"
         selectionText={"Select memory limit (in GB):"}
         numberOptions={[4, 8, 16, 32, 64, 128, 256]}
+        defaultSelect={defMem}
       ></TileSelector>
       <FieldHeader
         title="GPU"
@@ -360,7 +524,7 @@ const StepThree = ({ setFormData }) => {
           formSelect={handleGPUSelect}
           title="Select an option"
           menuOptions={gpu_instance}
-          defaultOption={Object.entries(gpu_instance)[0]}
+          defaultOption={defGPU}
         ></DropDownMenu>
         <p>Current GPUs Free: </p>
         <div>
@@ -435,11 +599,50 @@ const StepThree = ({ setFormData }) => {
           ></iframe>
         </div>
       </FieldHeader>
+      </>) : <></>};
     </div>
   );
 };
 
 function FormPage() {
+  
+  var defaultFormData = gatherFormData();
+  console.log(defaultFormData);
+  if (defaultFormData === null) {
+    defaultFormData = {
+      "memory": {
+        "value": "256",
+        "text": "256"
+      },
+      "gpu": {
+        "value": "a10",
+        "text": "whole A10"
+      },
+      "cpu": 1,
+      "metaCentrumHome": {
+        "enabled": true,
+        "selectedHome": {
+          "value": "du-cesnet",
+          "text": "du-cesnet"
+        },
+        "mountToStorage": false
+      },
+      "projectDirectories": true,
+      "persistentHome": {
+        "type": "new",
+        "eraseIfExists": false
+      },
+      "notebookImage": {
+        "type": "variousnb",
+        "selectedOption": {
+          "value": "cerit.io/hubs/colab:2024-10-17",
+          "text": "Google Colab"
+        },
+        "sshAccess": true
+      }
+    }
+  }
+
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     memselection: 4,
@@ -492,9 +695,9 @@ function FormPage() {
   };
 
   const steps = [
-    <StepOne key={0} formData={formData} setFormData={setFormData} />,
-    <StepTwo key={1} formData={formData} setFormData={setFormData} />,
-    <StepThree key={2} formData={formData} setFormData={setFormData} />,
+    <StepOne key={0} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData} />,
+    <StepTwo key={1} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData} />,
+    <StepThree key={2} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData} />,
   ];
 
   return (

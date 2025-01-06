@@ -13,6 +13,7 @@
       const appConfig = {
         postUrl: "{{ url | safe }}",
         userName: "{{ for_user.name }}",
+        spawner: "{{ self.user_options }}",
       };
     </script>
     <script type="module" src="/src/form.jsx"></script>

@@ -6,6 +6,7 @@ interface TileSelectorProps {
   selectionText: string;
   numberOptions: number[];
   setFormData: (value: number) => void;
+  defaultSelect?: number;
 }
 
 export const TileSelector: React.FC<TileSelectorProps> = ({
@@ -13,8 +14,9 @@ export const TileSelector: React.FC<TileSelectorProps> = ({
   selectionText,
   numberOptions,
   setFormData,
+  defaultSelect,
 }) => {
-  const [selectedMemory, setSelected] = useState(numberOptions[0]);
+  const [selectedMemory, setSelected] = useState(defaultSelect ? defaultSelect : numberOptions[0]);
 
   const handleSelection = (value) => {
     setSelected(value);
