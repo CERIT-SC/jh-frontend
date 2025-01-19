@@ -1,27 +1,24 @@
 import "./Form.css";
 import React, { useState, useEffect } from "react";
-import ProgressiveForm from "./components/Form/ProgressiveForm";
-import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
-import { FieldHeader } from "./components/FieldHeader/FieldHeader";
-import { SliderCheckBox } from "./components/SliderCheckBox/SliderCheckBox";
-import { DropDownMenu } from "./components/DropDownMenu/DropDownMenu";
-import { TileSelector } from "./components/TileSelector/TileSelector";
-import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
-import AnouncmentMessage from "./components/AnouncmentMessage/AnouncmentMessage";
+import ProgressiveForm from "../../src/components/Form/ProgressiveForm";
+import { EinfraFooter } from "../../src/components/FooterAndHeader/EinfraFooter";
+import { FieldHeader } from "../../src/components/FieldHeader/FieldHeader";
+import { SliderCheckBox } from "../../src/components/SliderCheckBox/SliderCheckBox";
+import { DropDownMenu } from "../../src/components/DropDownMenu/DropDownMenu";
+import { TileSelector } from "../../src/components/TileSelector/TileSelector";
+import JupyterHubHeader from "../../src/components/FooterAndHeader/JupyterHubHeader";
 import {
   DropDownButton,
   DropDownOption,
-} from "./components/DropDownButton/DropDownButton";
+} from "../../src/components/DropDownButton/DropDownButton";
 import {
-  selectOptionsStorage,
   images,
   sectionTitles,
   formImagesName,
   gpu_instance,
   defaultImagesName,
-} from "./data/formData";
-import { gatherFormData } from "./scripts/gatherFormData";
-import { faCodePullRequest } from "@fortawesome/free-solid-svg-icons";
+} from "../data/formData";
+import { gatherFormData } from "../scripts/gatherFormData";
 
 const StepOne = ({ setFormData, defaultFormData }) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
@@ -381,59 +378,6 @@ const StepTwo = ({ setFormData, formData, defaultFormData }) => {
             <code>/home/jovyan</code>
           </div>
         </DropDownButton>
-        <DropDownButton
-          key={1}
-          isActive={activeDropdownIndex === 1}
-          onActivate={() => {
-            handleExisting(1);
-          }}
-          primary={false}
-          title="Existing"
-        >
-          <div>
-            Mounted to
-            <code>/home/jovyan</code>
-          </div>
-          <DropDownMenu
-            formSelect={handlePersistentHome}
-            title="Select Persistent Home"
-            menuOptions={values}
-            defaultOption={defaultOptionPhname}
-          ></DropDownMenu>
-        </DropDownButton>
-      </FieldHeader>
-      <FieldHeader title="MetaCentrum Storage">
-        <SliderCheckBox
-          title="Mount MetaCentrum storage"
-          onChange={handleStorageCheck}
-          init={checkedStorage}
-        >
-          <p>
-            Mounted to <code>/home/meta/username </code>{" "}
-          </p>
-          <DropDownMenu
-            formSelect={handleStorage}
-            title="Select MetaCentrum Storage"
-            menuOptions={selectOptionsStorage}
-            defaultOption={defaultHome}
-          ></DropDownMenu>
-          <SliderCheckBox
-            title={`Mount selected home to /storage/${formData["home"] === undefined ? "chosen_storage" : formData["home"]}/home/${appConfig.userName}`}
-            onChange={handleLocationStorageCheck}
-            init={checkedMount}
-          ></SliderCheckBox>
-        </SliderCheckBox>
-
-        <SliderCheckBox
-          onChange={handleCheckboxDirectories}
-          title="Mount project directories"
-          init={checkedDirectories}
-        >
-          <p>
-            All projects mounted to /home/projects/brno12, specific projects are
-            subfolders of that path
-          </p>
-        </SliderCheckBox>
       </FieldHeader>
     </div>
   );
@@ -702,46 +646,6 @@ function FormPage() {
 
   return (
     <>
-      <AnouncmentMessage style="new">
-        <ul>
-          <li>
-            We added GPT support into the Minimal notebook, for more info see{" "}
-            <a href="https://docs-ng.cerit.io/en/web-apps/jupyterhub#ai-gpt-support">
-              our documentation.
-            </a>
-          </li>
-          <li>
-            It is possible to connect to the running notebook via SSH, for more
-            info see{" "}
-            <a href="https://docs.cerit.io/en/web-apps/jupyterhub#notebook-ssh-access">
-              our documentation.
-            </a>
-          </li>
-          <li>
-            We integrated VS Code into Minimal notebook. Choose below{" "}
-            <b>Simple Jupyter images</b> and{" "}
-            <b>Minimal NB with Integrated VS Code</b> to try it. After startup,
-            click on VS Code icon. It is possible to upload/download files using
-            this option.
-          </li>
-          <li>
-            Checkout resource utilisation (GPU, CPU, Memory) in{" "}
-            <a href="https://grafana.hub.cloud.e-infra.cz/d/H5q_43FVk/jupyterhub">
-              grafana
-            </a>
-            . Click on <b>Sign in with e-INFRA CZ</b> to log in.
-          </li>
-        </ul>
-      </AnouncmentMessage>
-      {/*<AnouncmentMessage style="warning">*/}
-      {/*  <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>*/}
-      {/*  <p>*/}
-      {/*    {" "}*/}
-      {/*    We will have scheduled maintenance and cluster reboot between 16th and*/}
-      {/*    17th of December 2024. All running notebooks will be interrupted and*/}
-      {/*    have to be started again.{" "}*/}
-      {/*  </p>*/}
-      {/*</AnouncmentMessage>*/}
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="wrapper">
         <ProgressiveForm

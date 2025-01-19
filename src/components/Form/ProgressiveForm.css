@@ -11,6 +11,7 @@
 }
 
 .btns_wrap {
+  padding: 0.5rem;
   display: flex;
   justify-content: flex-end;
   gap: 5rem;

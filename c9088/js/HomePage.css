@@ -1,0 +1,102 @@
+.default-server-btns {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.btn-wrapper {
+  width: 30%;
+}
+
+.start-named-server {
+  width: 60%;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.named-servers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input {
+  width: calc(100%);
+  box-sizing: border-box;
+  border-radius: 8px;
+  background-color: #f2f6f8;
+  color: black;
+  border: none;
+}
+
+.action-buttons {
+  grid-area: btn;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  direction: rtl;
+  grid-auto-flow: dense;
+  gap: 0.5rem;
+  font-size: 10px;
+}
+
+.server-properties {
+  display: grid;
+  align-items: center;
+  grid-template-areas: "url url url url url url"
+                       "time time time btn btn btn";
+  gap: 0.5rem;
+}
+
+.server-url {
+  grid-area: url;
+}
+
+.time-col {
+  grid-area: time;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 50px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-height: 80vh;
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    width: 90%;
+    padding: 5%;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .start-named-server {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .btn-wrapper {
+    width: 45%;
+  }
+}
+
+p {
+  font-size: 12px;
+}

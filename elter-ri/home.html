@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JupyterHub</title>
+  </head>
+
+  <body>
+    {% block main %} {% set named_spawners =
+    user.all_spawners(include_default=False)|list %}
+    <div id="root"></div>
+    <script>
+      const appConfig = {
+          spawners: {
+          {% for spawner in named_spawners %}
+      "{{ spawner.name }}": {
+          last_activity: {% if spawner.last_activity %} "{{ spawner.last_activity.isoformat() + 'Z' }}"{% else %} null{% endif %},
+          url: {% if spawner.ready %} "{{ user.server_url(spawner.name) }}"{% else %} null{% endif %},
+          active: {{ "true" if spawner.active else "false" }},
+          ready: {{ "true" if spawner.ready else "false" }},
+      } {% if not loop.last %}, {% endif %}
+      {% endfor %}
+        },
+        default_server_active: {{ "true" if default_server.active else "false" }},
+        url: "{{ url }}",
+        userName: "{{ user.name }}",
+        xsrf: "{{ xsrf_token }}",
+      };
+    </script>
+    <script type="module" src="/js/home.jsx"></script>
+    {% endblock main %}
+  </body>
+</html>
