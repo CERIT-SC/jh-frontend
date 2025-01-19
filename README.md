@@ -76,4 +76,8 @@ Then execute the script:
 ./create_config_maps.sh {build_target} or {namespace}
 ```
 
+## Creating interface for new instance
+
+To create a new interface for a hub, feel free to copy the code of other hubs and add/remove features from *Page.jsx files. When making a new FormPage.jsx, be careful to change the form configuration; for example, a normal hub uses persistent home, but others use only delhome. To change FormPage docker images data, make a new data folder with formData.js where you define the images that should be used. Also, if the hub has auto-fill with the last form data, please change the gatherFormData script. After completing the interface, make sure to update package.json with scripts for this instance. Update the create_config_maps.sh as well to accommodate the new instance.
+
 
