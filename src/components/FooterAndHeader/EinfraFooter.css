@@ -21,7 +21,6 @@
 .einfra-img {
   width: 290px;
   height: 50px;
-  background-image: url("/static/custom-images/logo-einfra_barvy.svg");
   background-size: contain;
   background-repeat: no-repeat;
 }

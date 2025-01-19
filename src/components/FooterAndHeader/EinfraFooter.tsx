@@ -1,10 +1,11 @@
 import "./EinfraFooter.css";
 import React from "react";
+import einfra_logo from "../../../public/static/custom-images/logo-einfra_barvy.svg"
 
 export const EinfraFooter = () => {
   return (
     <footer className="einfra-footer">
-      <div className="einfra-img" />
+      <img src={einfra_logo} className="einfra-img" />
       <p className="einfra-wrapper">
         <a
           className="einfra-docs"

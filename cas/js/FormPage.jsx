@@ -84,22 +84,11 @@ const StepOne = ({ setFormData }) => {
         title="Persistent Notebook Home"
         infoText="Persistent home means that even when notebook is deleted, the data will persist and can be used again."
       >
-        <DropDownButton
-          key={0}
-          isActive={true}
-          primary={false}
-          title="New"
-        >
-          <SliderCheckBox
-            title="Erase if home exists"
-            onChange={handleErase}
-            id="phCheckId"
-          ></SliderCheckBox>
-          <div>
-            Mounted to
-            <code>/home/jovyan</code>
-          </div>
-        </DropDownButton>
+        <SliderCheckBox
+          title="Erase if home exists"
+          onChange={handleErase}
+          id="phCheckId"
+        > Consider thoroughly checking this option - it removes whole home directory and all data located there (/home/jovyan/). Use only when notebook is broken so it does not start. In other cases, remove data from terminal inside the notebook. </SliderCheckBox>
       </FieldHeader>
     </div>
   );

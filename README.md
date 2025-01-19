@@ -58,7 +58,7 @@ npm run storybook
 To build the project for production, use the following command:
 
 ```bash
-npm run build
+npm run build:{build_target}
 ```
 
 ## Creating ConfigMaps
@@ -73,7 +73,7 @@ You can also modify the script if you only want to generate files locally instea
 Then execute the script:
 
 ```bash
-./create_config_maps.sh
+./create_config_maps.sh {build_target} or {namespace}
 ```
 
 

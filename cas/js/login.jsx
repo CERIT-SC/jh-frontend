@@ -4,6 +4,7 @@ import AnouncmentMessage from "../../src/components/AnouncmentMessage/Anouncment
 import { createRoot } from "react-dom/client";
 import "@fontsource/montserrat/600.css";
 import "./index.css";
+import bio_logo from "../custom-images/bioconductor_logo.svg"
 
 const root = createRoot(document.getElementById("root"));
 root.render(
@@ -19,6 +20,7 @@ root.render(
     {/*</AnouncmentMessage>*/}
     <LoginPage
       buttonText="Sign in with MUNI"
+      imagePath={bio_logo}
       link="/hub/oauth_login?next="
     />
   </div>,

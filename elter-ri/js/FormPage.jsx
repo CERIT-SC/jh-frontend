@@ -46,6 +46,7 @@ const StepOne = ({ setFormData, defaultFormData }) => {
 
           const image = defaultFormData.notebookImage.selectedOption.value.replace("cerit.io/hubs/", "");
           const index = flattenedImages.findIndex((entry) => entry.key === image);
+          console.log(image, index, dindex)
 
           handleSelect(key, image, index, dindex);
         }
@@ -160,7 +161,7 @@ const StepOne = ({ setFormData, defaultFormData }) => {
         id="sshCheckBox"
         init={checkSsh}
       >
-        Connection will be available at jovyan@jupyter-{appConfig.userName}{formattedName}.dyn.cloud.e-infra.cz
+        Connection will be available at jovyan@jupyter&#8209;{appConfig.userName}{formattedName}&#8209;datalabs.dyn.cloud.e&#8209;infra.cz
       </SliderCheckBox>
     </div>
   );
@@ -240,7 +241,7 @@ const StepTwo = ({ setFormData, formData, defaultFormData }) => {
 
             const mountToStorage = metaCentrumHome.mountToStorage;
 
-            if(mountToStorage) {
+            if (mountToStorage) {
               setFormData((prev) => ({
                 ...prev,
                 locationStorageCheck: "yes"
@@ -302,9 +303,9 @@ const StepTwo = ({ setFormData, formData, defaultFormData }) => {
       const updatedFormData = { ...prev };
 
       if (checked) {
-        updatedFormData.phCheck = "yes";
+        updatedFormData.delhome = "delete";
       } else {
-        delete updatedFormData.phCheck;
+        delete updatedFormData.delhome;
       }
 
       return updatedFormData;
@@ -360,24 +361,14 @@ const StepTwo = ({ setFormData, formData, defaultFormData }) => {
         title="Persistent Notebook Home"
         infoText="Persistent home means that even when notebook is deleted, the data will persist and can be used again."
       >
-        <DropDownButton
-          key={0}
-          isActive={activeDropdownIndex === 0}
-          onActivate={() => handlePersistentNewSelect(0)}
-          primary={false}
-          title="New"
+        <SliderCheckBox
+          title="Erase if home exists"
+          onChange={handleErase}
+          id="phCheckId"
+          init={checkedErased}
         >
-          <SliderCheckBox
-            title="Erase if home exists"
-            onChange={handleErase}
-            id="phCheckId"
-            init={checkedErased}
-          ></SliderCheckBox>
-          <div>
-            Mounted to
-            <code>/home/jovyan</code>
-          </div>
-        </DropDownButton>
+          Consider thoroughly checking this option - it removes the contents of whole home directory (located at /home/jovyan/).
+        </SliderCheckBox>
       </FieldHeader>
     </div>
   );
@@ -404,7 +395,7 @@ const StepThree = ({ setFormData, defaultFormData }) => {
         ...prev,
         memselection: mem,
       }));
-      
+
       setFormData((prev) => ({
         ...prev,
         gpuselection: val,
@@ -439,150 +430,82 @@ const StepThree = ({ setFormData, defaultFormData }) => {
 
   return (
     <div className="form-wrap">
-      {defCPU !== null && defMem !== null && defGPU !== null ? ( <>
-      <h2>Resources</h2>
-      <p>
-        The notebook is spawned only when one node fulfills <b>all</b> your
-        requirements.
-      </p>
-      <TileSelector
-        setFormData={handleCPUSelect}
-        title="CPU"
-        selectionText="Select CPU limit:"
-        numberOptions={[1, 4, 6, 8, 10, 16, 24, 32]}
-        defaultSelect={defCPU}
-      ></TileSelector>
-      <TileSelector
-        setFormData={handleMemSelect}
-        title="Memory"
-        selectionText={"Select memory limit (in GB):"}
-        numberOptions={[4, 8, 16, 32, 64, 128, 256]}
-        defaultSelect={defMem}
-      ></TileSelector>
-      <FieldHeader
-        title="GPU"
-        infoText="We strongly advise to request a GPU part instead of whole GPU due to their limited amount. If you use whole GPU inefficiently, you might be banned from requesting it again."
-      >
-        <p>By default, no GPU is assigned.</p>
-        <DropDownMenu
-          formSelect={handleGPUSelect}
-          title="Select an option"
-          menuOptions={gpu_instance}
-          defaultOption={defGPU}
-        ></DropDownMenu>
-        <p>Current GPUs Free: </p>
-        <div>
-          <div className="GPU-wrapper">
-            <iframe
-              className="GPU-stats"
-              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A10&theme=light&panelId=2"
-              width="200"
-              height="200"
-              frameborder="0"
-              align="left"
-            ></iframe>
-            <iframe
-              className="GPU-stats"
-              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A40&theme=light&panelId=2"
-              width="200"
-              height="200"
-              frameborder="0"
-              align="left"
-            ></iframe>
-            <iframe
-              className="GPU-stats"
-              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A100-80GB-PCIe&theme=light&panelId=3"
-              width="200"
-              height="200"
-              frameborder="0"
-              align="left"
-            ></iframe>
-            <iframe
-              className="GPU-stats"
-              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-H100-NVL&theme=light&panelId=2"
-              width="200"
-              height="200"
-              frameborder="0"
-              align="left"
-            ></iframe>
-            <iframe
-              className="GPU-stats"
-              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-H100-PCIe&theme=light&panelId=2"
-              width="200"
-              height="200"
-              frameborder="0"
-              align="left"
-            ></iframe>
-            <iframe
-              className="GPU-stats"
-              src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/H5q_43FVk/jupyterhub?orgId=1&theme=light&panelId=50"
-              width="200"
-              height="200"
-              frameborder="0"
-              align="left"
-            ></iframe>
+      {defCPU !== null && defMem !== null && defGPU !== null ? (<>
+        <h2>Resources</h2>
+        <p>
+          The notebook is spawned only when one node fulfills <b>all</b> your
+          requirements.
+        </p>
+        <TileSelector
+          setFormData={handleCPUSelect}
+          title="CPU"
+          selectionText="Select CPU limit:"
+          numberOptions={[1, 4, 6, 8, 10, 16, 24, 32]}
+          defaultSelect={defCPU}
+        ></TileSelector>
+        <TileSelector
+          setFormData={handleMemSelect}
+          title="Memory"
+          selectionText={"Select memory limit (in GB):"}
+          numberOptions={[4, 8, 16, 32, 64, 128, 256]}
+          defaultSelect={defMem}
+        ></TileSelector>
+        <FieldHeader
+          title="GPU"
+          infoText="We strongly advise to request a GPU part instead of whole GPU due to their limited amount. If you use whole GPU inefficiently, you might be banned from requesting it again."
+        >
+          <p>By default, no GPU is assigned.</p>
+          <DropDownMenu
+            formSelect={handleGPUSelect}
+            title="Select an option"
+            menuOptions={gpu_instance}
+            defaultOption={defGPU}
+          ></DropDownMenu>
+          <p>Current GPUs Free: </p>
+          <div>
+            <div className="GPU-wrapper">
+              <iframe
+                className="GPU-stats"
+                src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A10&theme=light&panelId=2"
+                width="200"
+                height="200"
+                frameborder="0"
+                align="left"
+              ></iframe>
+              <iframe
+                className="GPU-stats"
+                src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A40&theme=light&panelId=2"
+                width="200"
+                height="200"
+                frameborder="0"
+                align="left"
+              ></iframe>
+            </div>
           </div>
-        </div>
-      </FieldHeader>
-      <FieldHeader
-        title="Resource Usage"
-        infoText="This information is for your awareness, showing the estimated cost of running your notebooks, but no payment is required."
-      >
-        <div className="GPU-wrapper">
-          <iframe
-            src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=3&theme=light`}
-            width="300"
-            height="200"
-            frameborder="0"
-          ></iframe>
-          <iframe
-            src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=4&theme=light`}
-            width="300"
-            height="200"
-            frameborder="0"
-          ></iframe>
-        </div>
-      </FieldHeader>
+        </FieldHeader>
       </>) : <></>}
     </div>
   );
 };
 
 function FormPage() {
-  
+
   var defaultFormData = gatherFormData();
   console.log(defaultFormData);
   if (defaultFormData === null) {
     defaultFormData = {
-      "memory": {
-        "value": "256",
-        "text": "256"
-      },
-      "gpu": {
-        "value": "a10",
-        "text": "whole A10"
-      },
+      "memory": { "value": "4", "text": "4" },
+      "gpu": { "value": "mig-1g.10gb", "text": "10GB part A100", "migAmount": { "value": "1", "text": "1" } },
       "cpu": 1,
-      "metaCentrumHome": {
-        "enabled": true,
-        "selectedHome": {
-          "value": "du-cesnet",
-          "text": "du-cesnet"
+      "delhome": true,
+      "notebookImage":
+      {
+        "type": "tfnb", "selectedOption":
+        {
+          "value": "cerit.io/hubs/tensorflowgpu:2.12.1",
+          "text": "TensorFlow 2.12.1 with GPU and TensorBoard"
         },
-        "mountToStorage": false
-      },
-      "projectDirectories": true,
-      "persistentHome": {
-        "type": "new",
-        "eraseIfExists": false
-      },
-      "notebookImage": {
-        "type": "variousnb",
-        "selectedOption": {
-          "value": "cerit.io/hubs/colab:2024-10-17",
-          "text": "Google Colab"
-        },
-        "sshAccess": true
+        "sshAccess": false
       }
     }
   }
@@ -596,22 +519,6 @@ function FormPage() {
   });
 
   const submitForm = () => {
-    const requiredFields = {
-      images: "Image",
-      phselection: "Persistent Notebook Home",
-    };
-
-    const missingFields = Object.keys(requiredFields)
-      .filter((key) => formData[key] === undefined)
-      .map((key) => requiredFields[key]);
-
-    if (missingFields.length > 0) {
-      setError(`Please select the following: ${missingFields.join(", ")}`);
-      return;
-    }
-
-    setError("");
-
     const formDataToSend = new FormData();
 
     Object.entries(formData).forEach(([key, value]) => {

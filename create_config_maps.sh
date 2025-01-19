@@ -1,33 +1,55 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 namespace_of_hub"
+  echo "Usage: $0 namespace_or_build_target"
+  echo "Example: $0 jupyterhub-dev-ns"
   exit 1
 fi
 
-NAMESPACE=$1
+INPUT=$1
 
-npm install
-npm run build
+# Define default namespace and valid build targets
+DEFAULT_NAMESPACE="jupyterhub-dev-ns"
+VALID_BUILD_TARGETS=("cas" "c9088" "hub" "elter")
 
-#NAMESPACE="jupyterhub-dev-ns"
-BASE_DIR="./dist"
+# Determine if the input is a namespace or build target
+if [[ " ${VALID_BUILD_TARGETS[@]} " =~ " $INPUT " ]]; then
+  BUILD_TARGET=$INPUT
+  NAMESPACE=$DEFAULT_NAMESPACE
+else
+  BUILD_TARGET="hub"
+  NAMESPACE=$INPUT
+fi
 
+
+BASE_DIR="./dist_$BUILD_TARGET"
+
+# Run npm commands
+if [ -n "$BUILD_TARGET" ]; then
+  echo "Running build for target: $BUILD_TARGET"
+  npm install
+  npm run build:$BUILD_TARGET
+else
+  echo "Using namespace: $NAMESPACE"
+  npm install
+  npm run build
+fi
+
+# Create ConfigMaps
 create_configmap() {
   local name=$1
   local path=$2
 
-  # don't delete configmaps from cluster automatically! if ns changes, it could lead to catastrophe
-  if [ "$NAMESPACE" = "jupyterhub-dev-ns" ]; then
+  # Don't delete ConfigMaps from the cluster automatically
+  if [ "$NAMESPACE" = "$DEFAULT_NAMESPACE" ]; then
     kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
     kubectl create configmap $name --from-file=$path --namespace $NAMESPACE
   else
-    # creating the ConfigMaps locally
+    # Creating the ConfigMaps locally
     kubectl create configmap $name --from-file=$path --dry-run=client -o json > $name.json
     kubectl patch --local -f $name.json --type=json -p='[{"op": "remove", "path": "/metadata/creationTimestamp"}]' -o yaml > $name.yaml
     rm $name.json
   fi
-
 }
 
 create_configmap "static-files" "$BASE_DIR"

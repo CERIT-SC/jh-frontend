@@ -7,7 +7,7 @@ export default defineConfig({
   root: __dirname,
   base: "/",
   build: {
-    outDir: "../dist_cas",
+    outDir: "../dist_elter",
     rollupOptions: {
       input: {
         spawn: resolve(__dirname, "spawn.html"),

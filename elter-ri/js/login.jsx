@@ -18,7 +18,8 @@ root.render(
     {/*  </p>*/}
     {/*</AnouncmentMessage>*/}
     <LoginPage
-      buttonText="Sign in with MUNI"
+      buttonText="Sign in via unified eLTER AAI login"
+      imagePath="/static/custom-images/elter_logo.svg"
       link="/hub/oauth_login?next="
     />
   </div>,

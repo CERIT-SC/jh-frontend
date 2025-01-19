@@ -84,22 +84,11 @@ const StepOne = ({ setFormData }) => {
         title="Persistent Notebook Home"
         infoText="Persistent home means that even when notebook is deleted, the data will persist and can be used again."
       >
-        <DropDownButton
-          key={0}
-          isActive={true}
-          primary={false}
-          title="New"
-        >
-          <SliderCheckBox
-            title="Erase if home exists"
-            onChange={handleErase}
-            id="phCheckId"
-          ></SliderCheckBox>
-          <div>
-            Mounted to
-            <code>/home/jovyan</code>
-          </div>
-        </DropDownButton>
+        <SliderCheckBox
+          title="Erase if home exists"
+          onChange={handleErase}
+          id="phCheckId"
+        > Take care of checking this button, it removes whole home directory and previous data will be lost. Use in case only when notebook is broken so it does not start, in other cases, remove data from terminal. </SliderCheckBox>
       </FieldHeader>
     </div>
   );
@@ -139,7 +128,7 @@ const StepThree = ({ setFormData }) => {
         setFormData={handleMemSelect}
         title="Memory"
         selectionText={"Select memory limit (in GB):"}
-        numberOptions={[4, 8, 16, 32, 64, 128, 256]}
+        numberOptions={[4, 8, 12, 16, 32, 64]}
       ></TileSelector>
     </div>
   );

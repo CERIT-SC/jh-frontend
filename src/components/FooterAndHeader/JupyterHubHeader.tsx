@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./JupyterHubHeader.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignOut, faBars } from "@fortawesome/free-solid-svg-icons";
+import jh_logo from "../../../public/static/custom-images/logo.png"
 
 interface JupyterHubHeaderProps {
   userName: string;
@@ -30,7 +31,7 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
       <span id="jupyterhub-logo" className="navbar-brand">
         <a href="/hub/home">
           <img
-            src={"/static/custom-images/logo.png"}
+            src={jh_logo}
             height={"28px"}
             alt="JupyterHub logo"
             className="jpy-logo"
