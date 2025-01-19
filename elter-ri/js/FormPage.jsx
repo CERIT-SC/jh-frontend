@@ -53,7 +53,7 @@ const StepOne = ({ setFormData, defaultFormData }) => {
         handleSshCheck(defaultFormData.notebookImage.sshAccess);
         setCheckSsh(defaultFormData.notebookImage.sshAccess);
       }
-
+      
     }
   }, []);
 
@@ -168,135 +168,25 @@ const StepOne = ({ setFormData, defaultFormData }) => {
 };
 
 const StepTwo = ({ setFormData, formData, defaultFormData }) => {
-  const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
-  const [defaultOptionPhname, setDefaultOptionPhname] = useState(null);
   const [checkedErased, setCheckErased] = useState(false);
-  const [checkedDirectories, setCheckedDirectories] = useState(false);
-  const [checkedStorage, setCheckedStorage] = useState(false);
-  const [defaultHome, setDefaultHome] = useState(false);
-  const [checkedMount, setCheckedMount] = useState(false);
 
   useEffect(() => {
     if (defaultFormData) {
-      if (defaultFormData.persistentHome) {
-
-
-        const text = defaultFormData.persistentHome.type;
-        setFormData((prev) => ({
-          ...prev,
-          phselection: text,
-        }));
-        setActiveDropdownIndex(text === "new" ? 0 : 1);
-        const check = defaultFormData.persistentHome.eraseIfExists
-        if (check) {
-          setFormData((prev) => ({
-            ...prev,
-            phCheck: check,
-          }));
-          setCheckErased(check)
+      const checked = defaultFormData.delhome
+      setCheckErased(checked)
+      setFormData((prev) => {
+        const updatedFormData = { ...prev };
+  
+        if (checked) {
+          updatedFormData.delhome = "delete";
+        } else {
+          delete updatedFormData.delhome;
         }
-        const phname = defaultFormData.persistentHome.selectedHome
-        if (phname) {
-          const name = defaultFormData.persistentHome.selectedHome.value;
-          setFormData((prev) => ({
-            ...prev,
-            phname: name,
-          }));
-          setDefaultOptionPhname([name, name]);
-        }
-
-        const projectDirectories = defaultFormData.projectDirectories
-
-        if (projectDirectories) {
-          setFormData((prev) => ({
-            ...prev,
-            projectCheck: "yes"
-          }));
-
-          setCheckedDirectories(projectDirectories)
-        }
-
-        const metaCentrumHome = defaultFormData.metaCentrumHome
-
-        if (metaCentrumHome) {
-
-          const enabled = metaCentrumHome.enabled
-
-          if (enabled) {
-            setFormData((prev) => ({
-              ...prev,
-              storageCheck: "yes"
-            }));
-
-            setCheckedStorage(enabled)
-
-            const selectedHome = metaCentrumHome.selectedHome.value;
-
-            setFormData((prev) => ({
-              ...prev,
-              home: selectedHome
-            }));
-
-            setDefaultHome([selectedHome, selectedHome])
-
-            const mountToStorage = metaCentrumHome.mountToStorage;
-
-            if (mountToStorage) {
-              setFormData((prev) => ({
-                ...prev,
-                locationStorageCheck: "yes"
-              }));
-
-              setCheckedMount(mountToStorage)
-            }
-          }
-        }
-      }
-
+  
+        return updatedFormData;
+      });
     }
   }, []);
-
-  const handleStorage = (storage) => {
-    setFormData((prev) => ({
-      ...prev,
-      home: storage,
-    }));
-  };
-
-  const handlePersistentHome = (val) => {
-    setFormData((prev) => ({
-      ...prev,
-      phname: val,
-    }));
-  };
-
-  const handleStorageCheck = (checked) => {
-    setFormData((prev) => {
-      const updatedFormData = { ...prev };
-
-      if (checked) {
-        updatedFormData.storageCheck = "yes";
-      } else {
-        delete updatedFormData.storageCheck;
-      }
-
-      return updatedFormData;
-    });
-  };
-
-  const handleCheckboxDirectories = (checked) => {
-    setFormData((prev) => {
-      const updatedFormData = { ...prev };
-
-      if (checked) {
-        updatedFormData.projectCheck = "yes";
-      } else {
-        delete updatedFormData.projectCheck;
-      }
-
-      return updatedFormData;
-    });
-  };
 
   const handleErase = (checked) => {
     setFormData((prev) => {
@@ -306,36 +196,6 @@ const StepTwo = ({ setFormData, formData, defaultFormData }) => {
         updatedFormData.delhome = "delete";
       } else {
         delete updatedFormData.delhome;
-      }
-
-      return updatedFormData;
-    });
-  };
-
-  const handlePersistentNewSelect = (index) => {
-    setActiveDropdownIndex(index);
-    setFormData((prev) => ({
-      ...prev,
-      phselection: "new",
-    }));
-  };
-
-  const handleExisting = (index) => {
-    setActiveDropdownIndex(index);
-    setFormData((prev) => ({
-      ...prev,
-      phselection: false,
-    }));
-  };
-
-  const handleLocationStorageCheck = (checked) => {
-    setFormData((prev) => {
-      const updatedFormData = { ...prev };
-
-      if (checked) {
-        updatedFormData.locationStorageCheck = "yes";
-      } else {
-        delete updatedFormData.locationStorageCheck;
       }
 
       return updatedFormData;
@@ -505,7 +365,7 @@ function FormPage() {
           "value": "cerit.io/hubs/tensorflowgpu:2.12.1",
           "text": "TensorFlow 2.12.1 with GPU and TensorBoard"
         },
-        "sshAccess": false
+        "sshAccess": true
       }
     }
   }
