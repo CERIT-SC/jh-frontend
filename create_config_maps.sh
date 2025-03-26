@@ -15,7 +15,7 @@ VALID_BUILD_TARGETS=("cas" "c9088" "hub" "elter")
 # Determine if the input is a namespace or build target
 if [[ " ${VALID_BUILD_TARGETS[@]} " =~ " $INPUT " ]]; then
   BUILD_TARGET=$INPUT
-  NAMESPACE=$DEFAULT_NAMESPACE
+  NAMESPACE=""
 else
   BUILD_TARGET="hub"
   NAMESPACE=$INPUT
@@ -42,7 +42,7 @@ create_configmap() {
 
   # Don't delete ConfigMaps from the cluster automatically
   if [ "$NAMESPACE" = "$DEFAULT_NAMESPACE" ]; then
-    kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
+#    kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
     kubectl create configmap $name --from-file=$path --namespace $NAMESPACE
   else
     # Creating the ConfigMaps locally

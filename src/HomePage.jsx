@@ -142,10 +142,10 @@ function HomePage() {
           </p>
           <div className="start-named-server">
             <input
-              placeholder="Name your server"
+              placeholder="Name Your Server - Required!"
               onChange={(e) => setServerName(e.target.value)}
             />
-            <Button title="Add New Server" onClickFun={handleAddServer} disabled={serverName === ""} />
+            <Button title="Add New Named Server" onClickFun={handleAddServer} disabled={serverName === ""} />
           </div>
           {Object.entries(spawners).map(([name, spawner], dropdownIndex) => (
             <DropDownButton

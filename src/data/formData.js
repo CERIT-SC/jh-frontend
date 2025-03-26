@@ -18,9 +18,8 @@ export const selectOptionsStorage = {
 
 export const images = {
   simple: {
-    "minimalnb:26-09-2024": "Minimal NB",
     "minimalnb:02-01-2025-ai": "Minimal NB with AI",
-    "minimalnb:26-09-2024-ssh": "Minimal NB with SSH access",
+    "minimalnb:01-02-2025": "Minimal NB with SSH access",
     "minimalnb-cs:31-10-2024": "Minimal NB with Integrated VS Code",
     "minimalnb-cs:17-11-2024-ai": "Minimal NB with Integrated VS Code and AI",
     "datasciencenb:26-09-2024": "DataScience NB",
@@ -51,8 +50,9 @@ export const images = {
     "matlab:r2024a": "MATLAB R2024a",
   },
   various: {
-    "colab:2024-10-17": "Google Colab",
+    "colab:2025-01-07": "Google Colab",
     "alphapose:2023-10-26": "Alphapose",
+    "cuda-ubuntu:11.6-22.04": "CUDA 11.6",
     "cuda-ubuntu:11.8-22.04": "CUDA 11.8",
     "cuda-ubuntu:12.0-24.04": "CUDA 12.0",
     "cuda-ubuntu:12.1-22.04": "CUDA 12.1",
@@ -61,7 +61,7 @@ export const images = {
     "cuda-ubuntu:12.4-22.04": "CUDA 12.4",
   },
   folding: {
-    "colabfold:1.5.5": "Colabfold 1.5.5",
+    "colabfold:1.5.5-cu12": "Colabfold 1.5.5",
     "esmfold:2.0.0": "ESM Fold 2.0",
   },
 };
