@@ -21,7 +21,7 @@ import {
   defaultImagesName,
 } from "./data/formData";
 import { gatherFormData } from "./scripts/gatherFormData";
-import { faCodePullRequest } from "@fortawesome/free-solid-svg-icons";
+impimport { faCodePullRequest } from "@fortawesome/free-solid-svg-icons";
 
 const StepOne = ({ setFormData, defaultFormData }) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
@@ -169,12 +169,14 @@ const StepOne = ({ setFormData, defaultFormData }) => {
   );
 };
 
-const StepTwo = ({ setFormData, formData, defaultFormData }) => {
+const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, handleS3Check, s3SelectionType, setS3SelectionType, s3values}) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
+  const [s3activeDropdownIndex, sets3ActiveDropdownIndex] = useState(null);
   const [defaultOptionPhname, setDefaultOptionPhname] = useState(null);
   const [checkedErased, setCheckErased] = useState(false);
   const [checkedDirectories, setCheckedDirectories] = useState(false);
   const [checkedStorage, setCheckedStorage] = useState(false);
+
   const [defaultHome, setDefaultHome] = useState(false);
   const [checkedMount, setCheckedMount] = useState(false);
 
@@ -344,6 +346,58 @@ const StepTwo = ({ setFormData, formData, defaultFormData }) => {
     });
   };
 
+  const handleS3NewSelect = (index) => {
+    sets3ActiveDropdownIndex(index);
+    setS3SelectionType('new');
+    setFormData((prev) => ({
+      ...prev,
+      s3selection: "new",
+    }));
+  };
+  const handleS3Existing = (index) => {
+    sets3ActiveDropdownIndex(index);
+    setS3SelectionType('existing');
+    setFormData((prev) => ({
+      ...prev,
+      s3selection: "existing",
+    }));
+  };
+
+  const handleS3Buckets = (val) => {
+    setFormData((prev) => ({
+      ...prev,
+      s3name: val,
+    }));
+  };
+
+  const setS3Url = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      s3url: value,
+    }));
+  };
+
+  const setS3Bucket = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      s3bucket: value,
+    }));
+  };
+
+  const setS3AccessKey = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      s3accesskey: value,
+    }));
+  };
+
+  const setS3SecretKey = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      s3secretkey: value,
+    }));
+  };
+
   const values = {};
   const selectElement = document.getElementById("phid");
 
@@ -433,6 +487,111 @@ const StepTwo = ({ setFormData, formData, defaultFormData }) => {
             All projects mounted to /home/projects/brno12, specific projects are
             subfolders of that path
           </p>
+        </SliderCheckBox>
+      </FieldHeader>
+      <FieldHeader
+          title="S3 Storage"
+      >
+        <SliderCheckBox
+            title="Mount S3 storage"
+            onChange={handleS3Check}
+            init={checkedS3Storage}
+        >
+          <p>
+            Mounted to <code>/storage/s3</code>{" "}
+          </p>
+          {/* EXISTING S3 BUCKET*/}
+          <DropDownButton
+              key={0}
+              isActive={s3activeDropdownIndex === 0}
+              onActivate={() => {
+                handleS3Existing(0);
+              }}
+              primary={false}
+              title="Existing S3 Bucket"
+          >
+            <DropDownMenu
+                formSelect={handleS3Buckets}
+                title="Select S3 Bucket"
+                menuOptions={s3values}
+            ></DropDownMenu>
+          </DropDownButton>
+
+          {/* NEW S3 BUCKET*/}
+          <DropDownButton
+              key={1}
+              isActive={s3activeDropdownIndex === 1}
+              onActivate={() => handleS3NewSelect(1)}
+              primary={false}
+              title="New S3 Bucket"
+          >
+          </DropDownButton>
+
+
+          {s3SelectionType === 'new' && (
+              <div>
+                <div >
+                  <span>Enter S3 URL: </span>
+                  <input
+                      title="S3 URL"
+                      type="text"
+                      onChange={(e) => setS3Url(e.target.value)}
+                      placeholder="https://s3.cloud.e-infra.cz"
+                      className="custom-option"
+                      style={{
+                        border: '1px solid #ccc', // Solid line border
+                        padding: '8px',           // Add padding for better appearance
+                        borderRadius: '8px',      // Rounded corners
+                      }}
+                  />
+                </div>
+                <div>
+                  <span >Enter S3 Bucket Name: </span>
+                  <input
+                    title="Bucket Name"
+                    type="text"
+                    onChange={(e) => setS3Bucket(e.target.value)}
+                    placeholder="example-bucket"
+                    className="custom-option"
+                    style={{
+                      border: '1px solid #ccc', // Solid line border
+                      padding: '8px',           // Add padding for better appearance
+                      borderRadius: '8px',      // Rounded corners
+                    }}
+                  />
+                </div>
+                <div>
+                  <span>Enter S3 Access Key: </span>
+                  <input
+                    title="Access Key"
+                    type="text"
+                    onChange={(e) => setS3AccessKey(e.target.value)}
+                    placeholder="s3AccessKey"
+                    className="custom-option"
+                    style={{
+                      border: '1px solid #ccc', // Solid line border
+                      padding: '8px',           // Add padding for better appearance
+                      borderRadius: '8px',      // Rounded corners
+                    }}
+                  />
+                </div>
+                <div>
+                  <span>Enter S3 Secret Key: </span>
+                  <input
+                    title="Secret Key"
+                    type="text"
+                    onChange={(e) => setS3SecretKey(e.target.value)}
+                    placeholder="s3SecretKey"
+                    className="custom-option"
+                    style={{
+                      border: '1px solid #ccc', // Solid line border
+                      padding: '8px',           // Add padding for better appearance
+                      borderRadius: '8px',      // Rounded corners
+                    }}
+                  />
+                </div>
+              </div>
+          )}
         </SliderCheckBox>
       </FieldHeader>
     </div>
@@ -605,8 +764,63 @@ const StepThree = ({ setFormData, defaultFormData }) => {
 };
 
 function FormPage() {
-  
-  var defaultFormData = gatherFormData();
+  const [checkedS3Storage, setCheckedS3Storage] = useState(false);
+  const [s3SelectionType, setS3SelectionType] = useState("");
+  const [s3values, setS3Values] = useState({});
+
+  useEffect(() => {
+    const s3selectElement = document.getElementById("s3id");
+    if (s3selectElement !== null) {
+      const options = s3selectElement.getElementsByTagName("option");
+      const values = {};
+      for (let option of options) {
+        values[option.value] = option.value;
+      }
+      setS3Values(values);
+    } else {
+      setS3Values({ "testing": "s3testing" });
+      // setS3Values({});
+
+    }
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  const handleS3Check = (checked) => {
+    setFormData((prev) => {
+      const updatedFormData = { ...prev };
+      if (checked) {
+        updatedFormData.s3check = "yes";
+      } else {
+        delete updatedFormData.s3check;
+        setError('')
+      }
+      return updatedFormData;
+    });
+    setCheckedS3Storage(checked);
+  };
+
+  const validateS3Credentials = async () => {
+    const client = new S3Client({
+      endpoint: formData.s3url,
+      forcePathStyle: true, // Required for some non-AWS S3 providers to make bucket part of path
+      region: "es-east-1",
+      credentials: {
+        accessKeyId: formData.s3accesskey,
+        secretAccessKey: formData.s3secretkey,
+      },
+    });
+
+    const command = new ListObjectsCommand({
+      Bucket: formData.s3bucket,
+    });
+    try {
+      await client.send(command); // Attempt to list objects
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  let defaultFormData = gatherFormData();
   console.log(defaultFormData);
   if (defaultFormData === null) {
     defaultFormData = {
@@ -651,23 +865,58 @@ function FormPage() {
     migamount: 1,
   });
 
-  const submitForm = () => {
+  const submitForm = async () => {
     const requiredFields = {
       images: "Image",
       phselection: "Persistent Notebook Home",
+      s3url: "S3 URL",
+      s3bucket: "S3 bucket",
+      s3accesskey: "S3 Access Key",
+      s3secretkey: "S3 Secret Key"
     };
 
-    const missingFields = Object.keys(requiredFields)
-      .filter((key) => formData[key] === undefined)
-      .map((key) => requiredFields[key]);
-
-    if (missingFields.length > 0) {
-      setError(`Please select the following: ${missingFields.join(", ")}`);
+    if (checkedS3Storage && !s3SelectionType) {
+      setError("Please choose either 'New' or 'Existing' S3 bucket option or deselect S3 choice.");
       return;
     }
 
-    setError("");
+    if (s3SelectionType === "existing") {
+      if (Object.keys(s3values).length === 0) {
+        setError(`No existing S3 bucket was found, please choose option 'New'`);
+        return;
+      }
+      if (!formData.s3name) {
+        setError(`Existing S3 bucket was not selected, please choose some`);
+        return;
+      }
 
+    }
+
+    const filteredRequiredFields = Object.fromEntries(
+        Object.entries(requiredFields).filter(([key]) =>
+            (key !== 's3url' && key !== 's3bucket' && key !== 's3accesskey' && key !== 's3secretkey')
+            || (checkedS3Storage && s3SelectionType === "new")
+        )
+    );
+
+    const missingFields = Object.keys(filteredRequiredFields)
+        .filter((key) => formData[key] === undefined || (key === 's3url' && !formData[key].startsWith('https://')))
+        .map((key) => filteredRequiredFields[key]);
+
+    if (missingFields.length > 0) {
+      setError(`Please select or fill in the following: ${missingFields.join(", ")}. S3url must be https://`);
+      return;
+    }
+
+    if (checkedS3Storage && s3SelectionType === "new") {
+      const response = await validateS3Credentials();
+      if (!response) {
+        setError("Invalid S3 credentials/bucket/S3 url. Check if inputs are correct.");
+        return;
+      }
+    }
+
+    setError("");
     const formDataToSend = new FormData();
 
     Object.entries(formData).forEach(([key, value]) => {
@@ -678,61 +927,40 @@ function FormPage() {
       method: "POST",
       body: formDataToSend,
     })
-      .then((response) => {
-        if (response.ok) {
-          const pendingUrl = appConfig.postUrl.replace(
-            "/spawn/",
-            "/spawn-pending/",
-          );
-          window.location.href = pendingUrl;
-        } else {
-          console.error("Error submitting form:", response.statusText);
-        }
-      })
-      .catch((error) => {
-        console.error("Network error:", error);
-      });
+        .then((response) => {
+          if (response.ok) {
+            const pendingUrl = appConfig.postUrl.replace(
+                "/spawn/",
+                "/spawn-pending/",
+            );
+            window.location.href = pendingUrl;
+          } else {
+            console.error("Error submitting form:", response.statusText);
+          }
+        })
+        .catch((error) => {
+          console.error("Network error:", error);
+        });
   };
 
   const steps = [
     <StepOne key={0} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData} />,
-    <StepTwo key={1} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData} />,
+    <StepTwo key={1} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData}
+             checkedS3Storage={checkedS3Storage} handleS3Check={handleS3Check} s3SelectionType={s3SelectionType}
+             setS3SelectionType={setS3SelectionType} s3values={s3values}/>,
     <StepThree key={2} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData} />,
   ];
 
   return (
     <>
-      <AnouncmentMessage style="new">
-        <ul>
-          <li>
-            We added GPT support into the Minimal notebook, for more info see{" "}
-            <a href="https://docs-ng.cerit.io/en/web-apps/jupyterhub#ai-gpt-support">
-              our documentation.
-            </a>
-          </li>
-          <li>
-            It is possible to connect to the running notebook via SSH, for more
-            info see{" "}
-            <a href="https://docs.cerit.io/en/web-apps/jupyterhub#notebook-ssh-access">
-              our documentation.
-            </a>
-          </li>
-          <li>
-            We integrated VS Code into Minimal notebook. Choose below{" "}
-            <b>Simple Jupyter images</b> and{" "}
-            <b>Minimal NB with Integrated VS Code</b> to try it. After startup,
-            click on VS Code icon. It is possible to upload/download files using
-            this option.
-          </li>
-          <li>
-            Checkout resource utilisation (GPU, CPU, Memory) in{" "}
-            <a href="https://grafana.hub.cloud.e-infra.cz/d/H5q_43FVk/jupyterhub">
-              grafana
-            </a>
-            . Click on <b>Sign in with e-INFRA CZ</b> to log in.
-          </li>
-        </ul>
-      </AnouncmentMessage>
+      {/*<AnouncmentMessage style="warning">*/}
+      {/*  <ul>*/}
+      {/*    <li>*/}
+      {/*      On Monday, March 31st, from 8:00 to 20:00, nodes kub-c&#123;1-8&#125; equipped with NVIDIA H100 (94GB) cards will undergo technical maintenance.*/}
+      {/*      All notebooks running on these nodes will be restarted and these GPU cards won't be available for allocation.*/}
+      {/*    </li>*/}
+      {/*  </ul>*/}
+      {/*</AnouncmentMessage>*/}
       {/*<AnouncmentMessage style="warning">*/}
       {/*  <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>*/}
       {/*  <p>*/}
