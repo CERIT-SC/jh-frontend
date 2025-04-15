@@ -9,7 +9,7 @@ export const EinfraFooter = () => {
       <p className="einfra-wrapper">
         <a
           className="einfra-docs"
-          href="https://docs.cerit.io/en/web-apps/jupyterhub"
+          href="https://docs.cerit-sc.cz/en/docs/web-apps/jupyterhub"
         >
           <u>Documentation</u>
         </a>
