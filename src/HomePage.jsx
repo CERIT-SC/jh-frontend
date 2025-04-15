@@ -7,6 +7,8 @@ import { Button } from "./components/Button/Button";
 import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
 import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
 import { FieldHeader } from "./components/FieldHeader/FieldHeader";
+import AnouncmentMessage from "./components/AnouncmentMessage/AnouncmentMessage";
+
 
 function HomePage() {
   // for testing with npm run dev please uncomment this block
@@ -24,7 +26,7 @@ function HomePage() {
   //       active: false,
   //       ready: false,
   //     },
-  //     ...Array.from({ length: 50 }, (_, i) => `spawner${i + 1}`).reduce((acc, spawner) => {
+  //     ...Array.from({ length: 5 }, (_, i) => `spawner${i + 1}`).reduce((acc, spawner) => {
   //       acc[spawner] = {
   //         last_activity: new Date().toISOString(),
   //         url: `/user/${spawner}`,
@@ -109,6 +111,15 @@ function HomePage() {
 
   return (
     <div>
+      {/*<AnouncmentMessage style="warning">*/}
+      {/*  <ul>*/}
+      {/*    <li>*/}
+      {/*      On Monday, March 31st, from 8:00 to 20:00, nodes kub-c&#123;1-8&#125; equipped with NVIDIA H100 (94GB) cards will undergo technical maintenance.*/}
+      {/*      All notebooks running on these nodes will be restarted and these GPU cards won't be available for allocation.*/}
+      {/*    </li>*/}
+
+      {/*  </ul>*/}
+      {/*</AnouncmentMessage>*/}
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="wrapper">
         <div className="default-server-btns">
