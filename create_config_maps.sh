@@ -42,7 +42,7 @@ create_configmap() {
 
   # Don't delete ConfigMaps from the cluster automatically
   if [ "$NAMESPACE" = "$DEFAULT_NAMESPACE" ]; then
-#    kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
+    kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
     kubectl create configmap $name --from-file=$path --namespace $NAMESPACE
   else
     # Creating the ConfigMaps locally
