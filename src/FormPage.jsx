@@ -802,7 +802,7 @@ function FormPage() {
     const client = new S3Client({
       endpoint: formData.s3url,
       forcePathStyle: true, // Required for some non-AWS S3 providers to make bucket part of path
-      region: "es-east-1",
+      region: "us-east-1", // can be anything but empty ("" not ok)
       credentials: {
         accessKeyId: formData.s3accesskey,
         secretAccessKey: formData.s3secretkey,
@@ -813,7 +813,7 @@ function FormPage() {
       Bucket: formData.s3bucket,
     });
     try {
-      await client.send(command); // Attempt to list objects
+      await client.send(command);
       return true;
     } catch (error) {
       return false;
