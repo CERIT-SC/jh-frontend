@@ -21,7 +21,8 @@ import {
   defaultImagesName,
 } from "./data/formData";
 import { gatherFormData } from "./scripts/gatherFormData";
-impimport { faCodePullRequest } from "@fortawesome/free-solid-svg-icons";
+import { faCodePullRequest } from "@fortawesome/free-solid-svg-icons";
+import {ListObjectsCommand, S3Client} from "@aws-sdk/client-s3";
 
 const StepOne = ({ setFormData, defaultFormData }) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
@@ -30,8 +31,8 @@ const StepOne = ({ setFormData, defaultFormData }) => {
   const [activeDropdownOptionIndex, setActiveDropdownOptionIndex] = useState(null);
 
   useEffect(() => {
-    if (defaultFormData) {
-      if (defaultFormData.notebookImage) {
+    if (defaultFormData && defaultFormData.notebookImage) {
+
         const text = defaultFormData.notebookImage.type;
         if (text === "customnb") {
           handleInputChange({
@@ -39,6 +40,8 @@ const StepOne = ({ setFormData, defaultFormData }) => {
               value: defaultFormData.notebookImage.selectedOption,
             },
           }, Object.entries(images).length + 1)
+        } else if (text === null){
+          return
         } else {
           const key = Object.keys(defaultImagesName).find((key) => defaultImagesName[key] === text);
           const dindex = Object.keys(images).indexOf(key);
@@ -55,8 +58,6 @@ const StepOne = ({ setFormData, defaultFormData }) => {
         handleSshCheck(defaultFormData.notebookImage.sshAccess);
         setCheckSsh(defaultFormData.notebookImage.sshAccess);
       }
-
-    }
   }, []);
 
   const handleSelect = (key, image, index, dindex) => {
@@ -169,21 +170,22 @@ const StepOne = ({ setFormData, defaultFormData }) => {
   );
 };
 
-const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, handleS3Check, s3SelectionType, setS3SelectionType, s3values}) => {
+const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, setCheckedS3Storage, handleS3Check, s3SelectionType, setS3SelectionType, s3values}) => {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
   const [s3activeDropdownIndex, sets3ActiveDropdownIndex] = useState(null);
   const [defaultOptionPhname, setDefaultOptionPhname] = useState(null);
   const [checkedErased, setCheckErased] = useState(false);
   const [checkedDirectories, setCheckedDirectories] = useState(false);
   const [checkedStorage, setCheckedStorage] = useState(false);
+  const [defaultOptionS3name, setDefaultOptionS3name] = useState(false);
 
   const [defaultHome, setDefaultHome] = useState(false);
   const [checkedMount, setCheckedMount] = useState(false);
 
+
   useEffect(() => {
     if (defaultFormData) {
       if (defaultFormData.persistentHome) {
-
 
         const text = defaultFormData.persistentHome.type;
         setFormData((prev) => ({
@@ -257,6 +259,43 @@ const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, han
         }
       }
 
+      const s3enabled = defaultFormData.s3Storage;
+
+      if (s3enabled) {
+        const enabled = s3enabled.enabled
+        if (enabled) {
+          setFormData((prev) => ({
+            ...prev,
+            s3check: "yes"
+          }));
+        }
+        setCheckedS3Storage(enabled);
+
+        const s3TypeText = defaultFormData.s3Storage.type;
+        setFormData((prev) => ({
+          ...prev,
+          s3selection: s3TypeText,
+        }));
+        sets3ActiveDropdownIndex(s3TypeText === "new" ? 1 : 0);
+        const existingS3 = defaultFormData.s3Storage.existings3;
+        if (existingS3) {
+          setS3SelectionType('existing');
+          const name = defaultFormData.s3Storage.existings3.value;
+          setFormData((prev) => ({
+            ...prev,
+            s3name: name,
+          }));
+          setDefaultOptionS3name([name, name]);
+        }
+        const newS3 = defaultFormData.s3Storage.news3;
+        if (newS3) {
+          setS3SelectionType('new');
+          setS3Url(newS3.s3Url);
+          setS3Bucket(newS3.s3Bucket);
+          setS3AccessKey(newS3.s3AccessKey);
+          setS3SecretKey(newS3.s3SecretKey);
+        }
+      }
     }
   }, []);
 
@@ -514,6 +553,7 @@ const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, han
                 formSelect={handleS3Buckets}
                 title="Select S3 Bucket"
                 menuOptions={s3values}
+                defaultOption={defaultOptionS3name}
             ></DropDownMenu>
           </DropDownButton>
 
@@ -535,8 +575,10 @@ const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, han
                   <input
                       title="S3 URL"
                       type="text"
-                      onChange={(e) => setS3Url(e.target.value)}
+                      value={formData.s3url}
+                      // value = ""https://s3.cloud.e-infra.cz"
                       placeholder="https://s3.cloud.e-infra.cz"
+                      onChange={(e) => setS3Url(e.target.value)}
                       className="custom-option"
                       style={{
                         border: '1px solid #ccc', // Solid line border
@@ -550,6 +592,7 @@ const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, han
                   <input
                     title="Bucket Name"
                     type="text"
+                    value={formData.s3bucket}
                     onChange={(e) => setS3Bucket(e.target.value)}
                     placeholder="example-bucket"
                     className="custom-option"
@@ -566,6 +609,7 @@ const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, han
                     title="Access Key"
                     type="text"
                     onChange={(e) => setS3AccessKey(e.target.value)}
+                    value={formData.s3accesskey}
                     placeholder="s3AccessKey"
                     className="custom-option"
                     style={{
@@ -580,6 +624,7 @@ const StepTwo = ({ setFormData, formData, defaultFormData, checkedS3Storage, han
                   <input
                     title="Secret Key"
                     type="text"
+                    value={formData.s3secretkey}
                     onChange={(e) => setS3SecretKey(e.target.value)}
                     placeholder="s3SecretKey"
                     className="custom-option"
@@ -863,6 +908,10 @@ function FormPage() {
     cpuselection: 1,
     gpuselection: "none",
     migamount: 1,
+    s3url: "https://s3.cloud.e-infra.cz",
+    s3bucket: "",
+    s3accesskey: "",
+    s3secretkey: "",
   });
 
   const submitForm = async () => {
@@ -911,7 +960,7 @@ function FormPage() {
     if (checkedS3Storage && s3SelectionType === "new") {
       const response = await validateS3Credentials();
       if (!response) {
-        setError("Invalid S3 credentials/bucket/S3 url. Check if inputs are correct.");
+        setError("Invalid S3 credentials/bucket/S3 url - cannot connect to the bucket.\n\nCheck inputs are correct.");
         return;
       }
     }
@@ -946,7 +995,7 @@ function FormPage() {
   const steps = [
     <StepOne key={0} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData} />,
     <StepTwo key={1} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData}
-             checkedS3Storage={checkedS3Storage} handleS3Check={handleS3Check} s3SelectionType={s3SelectionType}
+             checkedS3Storage={checkedS3Storage} setCheckedS3Storage={setCheckedS3Storage} handleS3Check={handleS3Check} s3SelectionType={s3SelectionType}
              setS3SelectionType={setS3SelectionType} s3values={s3values}/>,
     <StepThree key={2} formData={formData} setFormData={setFormData} defaultFormData={defaultFormData} />,
   ];

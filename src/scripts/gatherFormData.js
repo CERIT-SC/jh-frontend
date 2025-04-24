@@ -91,6 +91,41 @@ function getPersistentHomeSelection() {
     return null;
 }
 
+function getS3StorageSelection() {
+    const checkedS3 = document.getElementById('s3check')
+
+    const s3data = {
+        enabled: checkedS3 && checkedS3.checked
+    }
+
+    if (checkedS3 && checkedS3.checked) {
+        const s3TypeField = document.getElementById('ss3id')
+        // const s3TypeField = document.querySelector('input[name="s3selection"]:checked');
+        if (s3TypeField) {
+            s3data.type = s3TypeField.value;
+            if (s3TypeField.value === "new") {
+                s3data.news3 = {
+                    s3Url : document.getElementById('s3url').value,
+                    s3Bucket : document.getElementById('s3bucket').value,
+                    s3AccessKey : document.getElementById('s3accesskey').value,
+                    s3SecretKey : document.getElementById('s3secretkey').value,
+                }
+            } else if (s3TypeField.value === "existing") {
+                const s3ExistingPvcField = document.getElementById("s3id")
+                if (s3ExistingPvcField) {
+                    s3data.existings3 = {
+                        value: s3ExistingPvcField.value,
+                        text: s3ExistingPvcField.options[s3ExistingPvcField.selectedIndex].text
+                    }
+                }
+            }
+        }
+        return s3data;
+    }
+
+    return null;
+}
+
 function getNotebookImageSelection() {
     const checkedRadio = document.querySelector('input[name="images"]:checked');
     const notebookImageData = { type: null, selectedOption: null, sshAccess: null };
@@ -147,8 +182,10 @@ export function gatherFormData() {
         metaCentrumHome: getMetaCentrumHomeSelection(),
         projectDirectories: getProjectSelection(),
         persistentHome: getPersistentHomeSelection(),
+        s3Storage: getS3StorageSelection(),
         notebookImage: getNotebookImageSelection()
     };
+    console.log('defaultFormData:', formData);
 
     const allEmpty = Object.values(formData).every(isEmpty);
 
