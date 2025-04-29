@@ -929,7 +929,7 @@ function FormPage() {
       return;
     }
 
-    if (s3SelectionType === "existing") {
+    if (checkedS3Storage && s3SelectionType === "existing") {
       if (Object.keys(s3values).length === 0) {
         setError(`No existing S3 bucket was found, please choose option 'New'`);
         return;
