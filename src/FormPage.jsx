@@ -29,18 +29,23 @@ const StepOne = ({ setFormData, defaultFormData }) => {
   const [checkSsh, setCheckSsh] = useState(null);
   const [selectedDropdownIndex, setSelectedDropdownIndex] = useState(null);
   const [activeDropdownOptionIndex, setActiveDropdownOptionIndex] = useState(null);
+  const [customImageValue, setCustomImageValue] = useState(""); // New state for input field value
+
 
   useEffect(() => {
     if (defaultFormData && defaultFormData.notebookImage) {
 
-        const text = defaultFormData.notebookImage.type;
-        if (text === "customnb") {
-          handleInputChange({
-            target: {
-              value: defaultFormData.notebookImage.selectedOption,
-            },
-          }, Object.entries(images).length + 1)
-        } else if (text === null){
+      const text = defaultFormData.notebookImage.type;
+      if (text === "customnb") {
+        setCustomImageValue(defaultFormData.notebookImage.selectedOption); // Set initial value for input
+        setActiveDropdownOptionIndex(null);
+        setSelectedDropdownIndex(Object.entries(images).length + 1);
+        setFormData((prev) => ({
+          ...prev,
+          images: "custom",
+          customimage: defaultFormData.notebookImage.selectedOption,
+        }));
+      }  else if (text === null){
           return
         } else {
           const key = Object.keys(defaultImagesName).find((key) => defaultImagesName[key] === text);
@@ -71,12 +76,14 @@ const StepOne = ({ setFormData, defaultFormData }) => {
   };
 
   const handleInputChange = (e, index) => {
+    setCustomImageValue(e.target.value); // Update state on input change
     setActiveDropdownOptionIndex(null);
     setSelectedDropdownIndex(index);
+
     setFormData((prev) => ({
       ...prev,
       images: "custom",
-      customimage: e.target.value,
+      customimage: e.target.value, // Use the current input value
     }));
   };
 
@@ -151,9 +158,8 @@ const StepOne = ({ setFormData, defaultFormData }) => {
       >
         <input
           type="text"
-          onChange={(e) =>
-            handleInputChange(e, Object.entries(images).length + 1)
-          }
+          value={customImageValue} // Bind input to state
+          onChange={(e) => handleInputChange(e, Object.entries(images).length + 1)}
           placeholder="Write image name here"
           className="custom-option"
         />
