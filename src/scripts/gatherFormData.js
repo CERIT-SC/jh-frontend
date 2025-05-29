@@ -183,7 +183,8 @@ export function gatherFormData() {
         projectDirectories: getProjectSelection(),
         persistentHome: getPersistentHomeSelection(),
         s3Storage: getS3StorageSelection(),
-        notebookImage: getNotebookImageSelection()
+        notebookImage: getNotebookImageSelection(),
+        sshName: document.getElementById('sshname').value,
     };
     console.log('defaultFormData:', formData);
 

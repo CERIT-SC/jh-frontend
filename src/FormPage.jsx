@@ -117,8 +117,9 @@ const StepOne = ({ setFormData, defaultFormData }) => {
     return match ? match[1] : null;
   }
 
-  const extractedName = extractName(appConfig.postUrl);
-  const formattedName = extractedName ? `--${extractedName}` : "";
+  // const extractedName = extractName(appConfig.postUrl);
+  // const formattedName = extractedName ? `--${extractedName}` : "";
+  const formattedName = defaultFormData.sshName;
 
   return (
     <div className="form-wrap">
@@ -170,7 +171,9 @@ const StepOne = ({ setFormData, defaultFormData }) => {
         id="sshCheckBox"
         init={checkSsh}
       >
-        Connection will be available at jovyan@jupyter-{appConfig.userName}{formattedName}.dyn.cloud.e-infra.cz
+        <div>Connection will be available at {formattedName}</div>
+        <div style={{ fontSize: '12px' }}>In the notebooks, the name is stored as environment variable SSH_ADDRESS</div>
+
       </SliderCheckBox>
     </div>
   );
