@@ -25,6 +25,7 @@ export const images = {
     "minimalnb-cs:17-11-2024-ai": "Minimal NB with Integrated VS Code and AI",
     "datasciencenb:26-09-2024": "DataScience NB",
     "datasciencenb:31-10-2024-ssh": "DataScience NB with SSH access",
+    "datasciencenb:2025-05-30-nrp": "DataScience NB for NRP",
   },
   r: {
     "jupyterhubronly:05-02-2024": "Python 3.11 and R 4.3.1 kernels",
