@@ -725,7 +725,7 @@ const StepThree = ({ setFormData, defaultFormData }) => {
         setFormData={handleMemSelect}
         title="Memory"
         selectionText={"Select memory limit (in GB):"}
-        numberOptions={[4, 8, 16, 32, 64, 128, 256]}
+        numberOptions={[4, 8, 16, 32, 64, 128, 256, 512]}
         defaultSelect={defMem}
       ></TileSelector>
       <FieldHeader
