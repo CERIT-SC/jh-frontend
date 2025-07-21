@@ -718,7 +718,7 @@ const StepThree = ({ setFormData, defaultFormData }) => {
         setFormData={handleCPUSelect}
         title="CPU"
         selectionText="Select CPU limit:"
-        numberOptions={[1, 4, 6, 8, 10, 16, 24, 32]}
+        numberOptions={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
         defaultSelect={defCPU}
       ></TileSelector>
       <TileSelector
