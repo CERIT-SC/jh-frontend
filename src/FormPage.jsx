@@ -725,7 +725,7 @@ const StepThree = ({ setFormData, defaultFormData }) => {
         setFormData={handleMemSelect}
         title="Memory"
         selectionText={"Select memory limit (in GB):"}
-        numberOptions={[4, 8, 16, 32, 64, 128, 256, 512]}
+        numberOptions={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
         defaultSelect={defMem}
       ></TileSelector>
       <FieldHeader
@@ -863,9 +863,29 @@ function FormPage() {
       },
     });
 
+    let bucketName = formData.s3bucket;
+    let prefix = undefined;
+
+    // Check if bucket string contains ':' or '/'
+    const separatorIndex = Math.min(
+        bucketName.indexOf(':') !== -1 ? bucketName.indexOf(':') : Infinity,
+        bucketName.indexOf('/') !== -1 ? bucketName.indexOf('/') : Infinity
+    );
+
+    if (separatorIndex !== Infinity) {
+      // Split into bucket and prefix (key)
+      bucketName = formData.s3bucket.substring(0, separatorIndex);
+      prefix = formData.s3bucket.substring(separatorIndex + 1);
+
+      // Remove leading slash if present in prefix
+      prefix = prefix.replace(/^\//, '');
+    }
+
     const command = new ListObjectsCommand({
-      Bucket: formData.s3bucket,
+      Bucket: bucketName,
+      ...(prefix && { Prefix: prefix })  // Conditionally add Prefix if exists
     });
+
     try {
       await client.send(command);
       return true;
