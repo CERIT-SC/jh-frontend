@@ -120,6 +120,14 @@ function HomePage() {
 
       {/*  </ul>*/}
       {/*</AnouncmentMessage>*/}
+      {/*<AnouncmentMessage style="warning">*/}
+      {/*  <h2> Scheduled maintenance and reboot on 25 August 2025 </h2>*/}
+      {/*  <p>*/}
+      {/*    {" "}*/}
+      {/*    We will have scheduled maintenance and cluster reboot on 25 August 2025.*/}
+      {/*    All running notebooks will be restarted. We recommend to finish your work before to avoid losing progress. {" "}*/}
+      {/*  </p>*/}
+      {/*</AnouncmentMessage>*/}
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="wrapper">
         <div className="default-server-btns">

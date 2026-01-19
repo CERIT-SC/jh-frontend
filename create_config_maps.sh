@@ -46,9 +46,10 @@ create_configmap() {
     kubectl create configmap $name --from-file=$path --namespace $NAMESPACE
   else
     # Creating the ConfigMaps locally
-    kubectl create configmap $name --from-file=$path --dry-run=client -o json > $name.json
-    kubectl patch --local -f $name.json --type=json -p='[{"op": "remove", "path": "/metadata/creationTimestamp"}]' -o yaml > $name.yaml
-    rm $name.json
+    kubectl create configmap $name --from-file=$path --namespace jupyterhub-ns
+#    --dry-run=client -o json > $name.json
+#    kubectl patch --local -f $name.json --type=json -p='[{"op": "remove", "path": "/metadata/creationTimestamp"}]' -o yaml > $name.yaml
+#    rm $name.json
   fi
 }
 

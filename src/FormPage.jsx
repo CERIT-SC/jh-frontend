@@ -49,6 +49,7 @@ const StepOne = ({ setFormData, defaultFormData }) => {
           return
         } else {
           const key = Object.keys(defaultImagesName).find((key) => defaultImagesName[key] === text);
+
           const dindex = Object.keys(images).indexOf(key);
 
           const flattenedImages = Object.entries(images).flatMap(([category, options]) =>
@@ -56,9 +57,12 @@ const StepOne = ({ setFormData, defaultFormData }) => {
           );
 
           const image = defaultFormData.notebookImage.selectedOption.value.replace("cerit.io/hubs/", "");
-          const index = flattenedImages.findIndex((entry) => entry.key === image);
 
-          handleSelect(key, image, index, dindex);
+          const index = flattenedImages.findIndex((entry) => entry.key === image);
+          console.log('index:', index);
+
+
+        handleSelect(key, image, index, dindex);
         }
         handleSshCheck(defaultFormData.notebookImage.sshAccess);
         setCheckSsh(defaultFormData.notebookImage.sshAccess);
@@ -793,25 +797,25 @@ const StepThree = ({ setFormData, defaultFormData }) => {
           </div>
         </div>
       </FieldHeader>
-      <FieldHeader
-        title="Resource Usage"
-        infoText="This information is for your awareness, showing the estimated cost of running your notebooks, but no payment is required."
-      >
-        <div className="GPU-wrapper">
-          <iframe
-            src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=3&theme=light`}
-            width="300"
-            height="200"
-            frameborder="0"
-          ></iframe>
-          <iframe
-            src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=4&theme=light`}
-            width="300"
-            height="200"
-            frameborder="0"
-          ></iframe>
-        </div>
-      </FieldHeader>
+      {/*<FieldHeader*/}
+      {/*  title="Resource Usage"*/}
+      {/*  infoText="This information is for your awareness, showing the estimated cost of running your notebooks, but no payment is required."*/}
+      {/*>*/}
+      {/*  <div className="GPU-wrapper">*/}
+      {/*    <iframe*/}
+      {/*      src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=3&theme=light`}*/}
+      {/*      width="300"*/}
+      {/*      height="200"*/}
+      {/*      frameborder="0"*/}
+      {/*    ></iframe>*/}
+      {/*    <iframe*/}
+      {/*      src={`https://kuba-mon-int.cloud.e-infra.cz/d-solo/dhl1ujXSz/jupyterhub-personal?orgId=1&from=now-90d&to=now&var-name=${appConfig.userName}&panelId=4&theme=light`}*/}
+      {/*      width="300"*/}
+      {/*      height="200"*/}
+      {/*      frameborder="0"*/}
+      {/*    ></iframe>*/}
+      {/*  </div>*/}
+      {/*</FieldHeader>*/}
       </>) : <></>}
     </div>
   );
@@ -1038,15 +1042,6 @@ function FormPage() {
       {/*      All notebooks running on these nodes will be restarted and these GPU cards won't be available for allocation.*/}
       {/*    </li>*/}
       {/*  </ul>*/}
-      {/*</AnouncmentMessage>*/}
-      {/*<AnouncmentMessage style="warning">*/}
-      {/*  <h2> Scheduled maintenance and reboot on 16th - 18th Dec 2024 </h2>*/}
-      {/*  <p>*/}
-      {/*    {" "}*/}
-      {/*    We will have scheduled maintenance and cluster reboot between 16th and*/}
-      {/*    17th of December 2024. All running notebooks will be interrupted and*/}
-      {/*    have to be started again.{" "}*/}
-      {/*  </p>*/}
       {/*</AnouncmentMessage>*/}
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="wrapper">

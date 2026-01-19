@@ -75,8 +75,9 @@ function getPersistentHomeSelection() {
         const persistentHomeData = { type: checkedHomeRadio.value };
 
         if (checkedHomeRadio.value === 'new') {
-            const phomeCheck = document.getElementById('phomecheck');
-            persistentHomeData.eraseIfExists = phomeCheck && phomeCheck.checked;
+            // const phomeCheck = document.getElementById('phomecheck');
+            // persistentHomeData.eraseIfExists = phomeCheck && phomeCheck.checked;
+            persistentHomeData.eraseIfExists = false
         } else if (checkedHomeRadio.value === 'existing') {
             const persistentHomeSelect = document.getElementById('phid');
             if (persistentHomeSelect) {
