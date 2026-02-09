@@ -21,7 +21,7 @@ export const images = {
     "minimalnb:28-01-2026-ai": "Minimal NB with AI",
     "minimalnb:01-02-2025": "Minimal NB with SSH access",
     "minimalnb-cs:31-10-2024": "Minimal NB with Integrated VS Code",
-    "minimalnb-cs:17-11-2024-ai": "Minimal NB with Integrated VS Code and AI",
+    "minimalnb-cs:06-02-2026-ai": "Minimal NB with Integrated VS Code and AI",
     "datasciencenb:26-09-2024": "DataScience NB",
     "datasciencenb:31-10-2024-ssh": "DataScience NB with SSH access",
     "datasciencenb:2025-05-30-nrp": "DataScience NB for NRP",
@@ -33,7 +33,7 @@ export const images = {
     "rstudio:4.3.1": "RStudio with R 4.3.1",
     "rstudio:4.4.0": "RStudio with R 4.4.0",
     "rstudio:4.4.1": "RStudio with R 4.4.1",
-    "rstudio:4.4.1-ai": "RStudio with R 4.4.1 and AI",
+    "rstudio:4.5.2-ai": "RStudio with R 4.5.2 and AI"
   },
   tf: {
     "tensorflownb:31-08-2023": "TensorFlow 2.10 (CPU only)",
