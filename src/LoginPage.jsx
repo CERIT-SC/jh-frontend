@@ -12,12 +12,12 @@ function LoginPage({ buttonText, imagePath, link }) {
           JupyterHub, you can check membership status{" "}
           <a href="https://profile.e-infra.cz/profile/organizations">here</a> or
           consult{" "}
-          <a href="https://docs.cerit.io/en/web-apps/jupyterhub#metacentrum-membership">
+          <a href="https://docs.cerit.io/en/docs/platform/access#account">
             documentation
           </a>{" "}
-          for more information. You can also check resources utilization in{" "}
-          <a href="https://grafana.hub.cloud.e-infra.cz/d/H5q_43FVk/jupyterhub">
-            grafana
+          for more information. More information on the JupyterHub instance can be found in{" "}
+          <a href="https://docs.cerit.io/en/docs/web-apps/jupyterhub">
+            JupyterHub documentation
           </a>
           .{" "}
         </p>
