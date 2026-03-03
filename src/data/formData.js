@@ -23,7 +23,7 @@ export const images = {
     "minimalnb-cs:31-10-2024": "Minimal NB with Integrated VS Code",
     "minimalnb-cs:06-02-2026-ai": "Minimal NB with Integrated VS Code and AI",
     "datasciencenb:26-09-2024": "DataScience NB",
-    "datasciencenb:31-10-2024-ssh": "DataScience NB with SSH access",
+    "datasciencenb:31-10-2024-ssh": "DataScience NB (SSH access)",
     "datasciencenb:2025-05-30-nrp": "DataScience NB for NRP",
   },
   r: {
@@ -42,8 +42,8 @@ export const images = {
     "tensorflowgpu:2.15.0": "TensorFlow 2.15.1 with GPU and TensorBoard",
     "tensorflowgpu:2.17.0": "TensorFlow 2.17.0 with GPU and TensorBoard",
     "pytorchgpu:2.4.1": "Pytorch 2.4.1",
-    "nvidia-pytorch:2.5.0": "NVIDIA Pytorch 2.5.0",
-    "nvidia-tensorflow:2.16.1": "NVIDIA Tensorflow 2.16.1",
+    "nvidia-pytorch:2.5.0": "NVIDIA Pytorch 2.5.0 (SSH access)",
+    "nvidia-tensorflow:2.16.1": "NVIDIA Tensorflow 2.16.1 (SSH access)",
   },
   matlab: {
     "matlab:r2022b": "MATLAB R2022b",
