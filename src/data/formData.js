@@ -23,6 +23,7 @@ export const images = {
     "minimalnb-cs:31-10-2024": "Minimal NB with Integrated VS Code",
     "minimalnb-cs:06-02-2026-ai": "Minimal NB with Integrated VS Code and AI",
     "datasciencenb:26-09-2024": "DataScience NB",
+    "datasciencenb:2026-01-23-ai": "DataScience NB with AI",
     "datasciencenb:31-10-2024-ssh": "DataScience NB (SSH access)",
     "datasciencenb:2025-05-30-nrp": "DataScience NB for NRP",
   },
