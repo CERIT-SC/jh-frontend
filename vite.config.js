@@ -28,6 +28,9 @@ export default defineConfig({
           return "static/[ext]/[name]-[hash][extname]";
         },
       },
+      rollupOptions: {
+        external: ["@e-infra/design-system", "lucide-react"],
+      },
     },
   },
   // html: {
@@ -44,5 +47,12 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     open: process.env.ENTRY,
+    proxy: {
+      "/api": {
+        target: "https://kuba-mon-int.cloud.e-infra.cz",
+        changeOrigin: true,
+        rewrite: (path) => path,
+      },
+    },
   },
 });

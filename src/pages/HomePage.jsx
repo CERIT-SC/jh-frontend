@@ -23,7 +23,7 @@ import {
   PanelHeader,
 } from "@e-infra/design-system";
 import { LayoutGrid, LayoutList, Server, Plus, Play } from "lucide-react";
-
+import { fetchGrafanaData } from "../api/GrafanaAPI";
 function HomePage() {
   if (import.meta.env.DEV) {
     initDev();
@@ -37,6 +37,15 @@ function HomePage() {
   const [serverName, setServerName] = useState("");
 
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
+
+  const fetchUsage = async () => {
+    try {
+      const data = await fetchGrafanaData("xbencs00", "test-server");
+      console.log("Fetched Grafana data:", data);
+    } catch (error) {
+      console.error("Error fetching Grafana data:", error);
+    }
+  };
 
   const handleStopServer = async (name) => {
     console.log(`Stopping server: ${name}`);
@@ -105,6 +114,9 @@ function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
+      {/* <Button onClick={fetchUsage} className="mx-4 my-2">
+        Fetch CPU Usage (Grafana)
+      </Button> */}
       <div className="container grow mx-auto px-4 py-8 space-y-8 flex flex-col lg:flex-row gap-4">
         {/* Default Server Button */}
 

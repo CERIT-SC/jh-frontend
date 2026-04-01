@@ -2,8 +2,17 @@ import React, { useState, useEffect } from "react";
 // import "./JupyterHubHeader.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignOut, faBars } from "@fortawesome/free-solid-svg-icons";
-// import jh_logo from "../../../public/static/custom-images/logo.png";
-import { Header, Button } from "@e-infra/design-system";
+import {
+  Header,
+  Button,
+  HeaderContent,
+  HeaderLeft,
+  HeaderRight,
+  NavigationMenuLink,
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+} from "@e-infra/design-system";
 import { HomeIcon, LogOut } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@e-infra/design-system";
 
@@ -35,25 +44,46 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
 
   return (
     <>
-      <Header
-        variant="navigation"
-        navigationItems={[
-          { label: "Home", href: "/hub/home" },
-          { label: "Token", href: "/hub/token" },
-        ]}
-      >
-        <Avatar>
-          <AvatarImage
-            src={`https://ui-avatars.com/api/?name=${userName}`}
-            alt={userName}
-          />
-          <AvatarFallback>{userName[0].toUpperCase()}</AvatarFallback>
-        </Avatar>
-        <span className="ml-2">{userName}</span>
-        <Button variant="ghost" size="icon" onClick={handleLogout}>
-          <LogOut className="h-5 w-5" />
-          <span className="sr-only">Logout</span>
-        </Button>
+      <Header>
+        <HeaderContent>
+          <HeaderLeft>
+            {/* Logo */}
+            <div className="flex h-10 items-center justify-center">
+              <img
+                className="h-8 w-auto object-contain"
+                src="/static/custom-images/logo.png"
+                alt="Logo"
+              />
+            </div>
+            {/* Nav */}
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink href="/hub/home">Home</NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink href="/hub/token">
+                    Token
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </HeaderLeft>
+          <HeaderRight>
+            <span className="ml-2">{userName}</span>
+            <Avatar>
+              <AvatarImage
+                src={`https://ui-avatars.com/api/?name=${userName}`}
+                alt={userName}
+              />
+              <AvatarFallback>{userName[0].toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <Button variant="ghost" size="icon" onClick={handleLogout}>
+              <LogOut className="h-5 w-5" />
+              <span className="sr-only">Logout</span>
+            </Button>
+          </HeaderRight>
+        </HeaderContent>
       </Header>
     </>
     // <nav className="navbar">
