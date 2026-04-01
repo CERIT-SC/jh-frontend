@@ -1,9 +1,9 @@
-import "./index.css";
-import "./NotRunning.css";
+import "../styles/index.css";
+import "../styles/NotRunning.css";
 import React from "react";
-import { Button } from "./components/Button/Button";
-import { EinfraFooter } from "./components/FooterAndHeader/EinfraFooter";
-import JupyterHubHeader from "./components/FooterAndHeader/JupyterHubHeader";
+import { Button } from "@e-infra/design-system";
+import { EinfraFooter } from "../components/FooterAndHeader/EinfraFooter";
+import JupyterHubHeader from "../components/FooterAndHeader/JupyterHubHeader";
 
 function NotRunning() {
   return (
@@ -15,10 +15,9 @@ function NotRunning() {
         <p> Your server is not running. Would you like to start it? </p>
         <div className="default-server-btns">
           <div className="btn-wrapper">
-            <Button
-              title={`Launch Server ${appConfig.serverName}`}
-              link={appConfig.spawnUrl}
-            ></Button>
+            <Button onClick={() => (window.location.href = appConfig.spawnUrl)}>
+              Launch Server {appConfig.serverName}
+            </Button>
           </div>
         </div>
         <EinfraFooter />

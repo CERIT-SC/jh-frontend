@@ -1,31 +1,61 @@
-.tiles-container {
+.tabs-container {
   display: flex;
+  gap: 0;
+  margin-top: 1rem;
+  border-bottom: 2px solid #e0e0e0;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 0;
 }
 
-.tile {
-  background-color: var(--primary-color);
-  color: white;
-  text-align: center;
-  font-size: 1em;
-  width: 40px;
-  height: 40px;
-  border-radius: 0.25rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.tab-label {
+  position: relative;
   cursor: pointer;
-  margin: 0.25rem;
+  padding: 12px 20px;
+  font-size: 1em;
+  color: #666;
+  background: transparent;
+  border: none;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  user-select: none;
 }
 
-.tile:hover {
-  background-color: var(--hover-color);
+.tab-radio {
+  display: none;
 }
 
-.tile.active {
-  background-color: var(--secondary-color);
+.tab-content {
+  position: relative;
+  z-index: 1;
+  display: block;
+  transition: color 0.3s ease;
+}
+
+.tab-label:hover .tab-content {
+  color: var(--primary-color);
+}
+
+.tab-label::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tab-radio:checked + .tab-content {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.tab-label:has(> input:checked)::after {
+  width: 100%;
 }
 
 .field-title {

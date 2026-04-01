@@ -8,14 +8,15 @@
   </head>
   <body>
     <div id="root"></div>
-    <div style="display: none">{{spawner_options_form | safe}}</div>
+    <div style="display: none"></div>
     <script>
       const appConfig = {
         postUrl: "{{ url | safe }}",
         userName: "{{ for_user.name }}",
-        spawner: "{{ self.user_options }}",
+        spawner: "{{ spawner.user_options }}",
       };
     </script>
+    {{spawner_options_form | safe}}
     <script type="module" src="/src/form.jsx"></script>
   </body>
 </html>

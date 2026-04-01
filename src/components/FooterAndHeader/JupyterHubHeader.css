@@ -1,8 +1,7 @@
-.navbar {
+/* .navbar {
   display: grid;
   align-items: center;
   grid-template-areas: "logo home token . . . . . . . . . . . . . . . . . . name logout";
-  /*background: rgba(174, 173, 173, 0.5);*/
   padding: 0.25rem;
   border-radius: 8px;
   margin-bottom: 5px;
@@ -123,4 +122,4 @@ a {
     text-align: left;
     padding: 10px;
   }
-}
+} */

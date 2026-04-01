@@ -12,7 +12,7 @@ interface FieldHeaderProps {
 export const FieldHeader: React.FC<FieldHeaderProps> = ({
   title = "",
   infoText = "",
-  activeText= "",
+  activeText = "",
   children,
 }) => {
   const info = <InfoBox infoText={infoText}></InfoBox>;
@@ -20,11 +20,15 @@ export const FieldHeader: React.FC<FieldHeaderProps> = ({
   return (
     <div>
       <div className="field-header">
-      <div className="title"><p>{title}</p></div>
-      <div className="activeText"><p>{activeText}</p></div>
-      <div className="infoText"><p>{infoText !== "" && info}</p></div>
+        <div className="title">
+          <p>{title}</p>
+        </div>
+        <div className="activeText">
+          <p>{activeText}</p>
+        </div>
+        <div className="infoText">{infoText !== "" && info}</div>
 
-          {/*{activeText}*/}
+        {/*{activeText}*/}
       </div>
       <div className="field-children">{children}</div>
     </div>

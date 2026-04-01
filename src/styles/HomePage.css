@@ -1,4 +1,8 @@
-.default-server-btns {
+@import "tailwindcss";
+@import "@e-infra/design-system/setup.css";
+@source "../node_modules/@e-infra/design-system/dist";
+
+/* .default-server-btns {
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
@@ -99,4 +103,4 @@ input {
 
 p {
   font-size: 12px;
-}
+} */

@@ -6,14 +6,45 @@ export default {
   parameters: {
     layout: "centered",
   },
-  argTypes: {
-    backgroundColor: { control: "color" },
+};
+
+// Numeric options story
+export const NumericOptions = {
+  args: {
+    selectionText: "Select your lucky number",
+    options: [1, 2, 3, 6, 8, 99, 0, 67],
+    onChange: (value) => console.log("Selected:", value),
   },
 };
 
-export const Primary = {
+// String options story
+export const StringOptions = {
   args: {
-    title: "Select your lucky number",
-    numberOptions: [1, 2, 3, 6, 8, 99, 0, 67],
+    selectionText: "Select type",
+    options: [
+      { value: "new", label: "New" },
+      { value: "existing", label: "Existing" },
+    ],
+    onChange: (value) => console.log("Selected:", value),
+  },
+};
+
+// With custom render story
+export const WithCustomRender = {
+  args: {
+    options: [1, 2],
+    defaultValue: 1,
+    className: "w-24 h-10",
+    renderOptionLabel: (value) =>
+      value === 1 ? (
+        <span className="inline-flex justify-center" aria-label="Grid view">
+          ⊞
+        </span>
+      ) : (
+        <span className="inline-flex justify-center" aria-label="List view">
+          ☰
+        </span>
+      ),
+    onChange: (value) => console.log("Selected:", value),
   },
 };

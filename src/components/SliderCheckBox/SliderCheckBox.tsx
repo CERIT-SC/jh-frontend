@@ -4,7 +4,7 @@ import "./SliderCheckBox.css";
 interface TileSelectorProps {
   title: string;
   children: React.ReactNode;
-  onChange: (checked) => void;
+  onChange: (checked: boolean) => void;
   id: string;
   init: boolean;
 }
@@ -22,7 +22,7 @@ export const SliderCheckBox: React.FC<TileSelectorProps> = ({
     setIsChecked(init);
   }, [init]);
 
-  const handleCheck = (checked) => {
+  const handleCheck = (checked: boolean) => {
     setIsChecked(checked);
     if (onChange !== undefined) {
       onChange(checked);

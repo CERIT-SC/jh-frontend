@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from "react";
 import "./DropDownMenu.css";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Label,
+} from "@e-infra/design-system";
 
 interface DropDownMenuProps {
   menuOptions: { [key: string]: string };
   title: string;
-  formSelect: (value) => void;
+  formSelect: (value: string) => void;
   defaultOption?: [string, string];
 }
 
@@ -14,50 +22,38 @@ export const DropDownMenu: React.FC<DropDownMenuProps> = ({
   formSelect,
   defaultOption,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(
-    defaultOption ? defaultOption[1] : title,
+  const [selectedValue, setSelectedValue] = useState<string>(
+    defaultOption ? defaultOption[0] : "",
   );
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const handleOptionClick = (optionValue, name) => {
-    setSelectedOption(name);
-    setIsOpen(false);
-    formSelect(optionValue);
+  const handleValueChange = (value: string) => {
+    setSelectedValue(value);
+    formSelect(value);
   };
 
   useEffect(() => {
     if (defaultOption) {
+      setSelectedValue(defaultOption[0]);
       formSelect(defaultOption[0]);
     }
-  }, []);
+  }, [defaultOption]);
 
   return (
-    <div className="dropdownmenu">
-      <div
-        className={`select-header ${selectedOption !== title ? "selected" : ""}`}
-        onClick={toggleDropdown}
-      >
-        {selectedOption}
-      </div>
-
-      {isOpen && (
-        <div className="select-options">
+    <>
+      <Label>{title}</Label>
+      <Select value={selectedValue} onValueChange={handleValueChange}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent side="bottom" align="start">
           {Object.entries(menuOptions).map(([key, name]) => (
-            <div
-              key={key}
-              className="select-option"
-              onClick={() => handleOptionClick(key, name)}
-            >
+            <SelectItem key={key} value={key}>
               {name as string}
-            </div>
+            </SelectItem>
           ))}
-        </div>
-      )}
-    </div>
+        </SelectContent>
+      </Select>
+    </>
   );
 };
 

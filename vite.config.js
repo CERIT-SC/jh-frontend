@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -29,7 +30,18 @@ export default defineConfig({
       },
     },
   },
-  plugins: [react()],
+  // html: {
+  //   transformIndexHtml(html) {
+  //     if (process.env.NODE_ENV === "development") {
+  //       return html.replace(
+  //         "</head>",
+  //         '</head><script "src="/dev-mode.js"></script>',
+  //       );
+  //     }
+  //     return html;
+  //   },
+  // },
+  plugins: [react(), tailwindcss()],
   server: {
     open: process.env.ENTRY,
   },

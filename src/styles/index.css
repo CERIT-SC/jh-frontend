@@ -1,0 +1,74 @@
+@import "tailwindcss";
+@import "@e-infra/design-system/setup.css";
+@source "../../node_modules/@e-infra/design-system/dist";
+
+:root {
+  --bg-image: url("/static/custom-images/e-INFRA_background.svg");
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@utility no-scrollbar {
+  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+body {
+  /* background: #e5e7eb; */
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  font-size: 16px;
+  position: relative;
+
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  font-family: var(--font-sans);
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+}
+
+@keyframes slideInFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOutFade {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.alert-enter {
+  animation: slideInFade 300ms ease-out;
+}
+
+.alert-exit {
+  animation: slideOutFade 300ms ease-out forwards;
+}

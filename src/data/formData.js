@@ -33,7 +33,7 @@ export const images = {
     "rstudio:4.3.1": "RStudio with R 4.3.1",
     "rstudio:4.4.0": "RStudio with R 4.4.0",
     "rstudio:4.4.1": "RStudio with R 4.4.1",
-    "rstudio:4.5.2-ai": "RStudio with R 4.5.2 and AI"
+    "rstudio:4.5.2-ai": "RStudio with R 4.5.2 and AI",
   },
   tf: {
     "tensorflownb:31-08-2023": "TensorFlow 2.10 (CPU only)",
@@ -105,3 +105,7 @@ export const gpu_instance = {
   "h100-94": "whole H100 (94GB)",
   any: "any whole gpu",
 };
+
+export const cpuOptions = [1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96];
+
+export const memOptions = [4, 8, 16, 32, 64, 128, 256, 512, 768, 1024];

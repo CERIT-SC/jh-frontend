@@ -1,40 +1,65 @@
 import React, { MouseEventHandler } from "react";
-import "./Button.css";
+import { Button as EinfraButton } from "@e-infra/design-system";
+
+type ButtonVariant =
+  | "default"
+  | "error"
+  | "outline"
+  | "secondary"
+  | "ghost"
+  | "link"
+  | "tertiary"
+  | "info"
+  | "success"
+  | "warning";
+type ButtonSize = "default" | "sm" | "lg" | "icon";
 
 interface ButtonProps {
-  primary?: boolean;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   title: string;
   link?: string;
   onClickFun?: MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
+  className?: string;
+  [key: string]: any;
 }
 
 export const Button: React.FC<ButtonProps> = ({
+  variant = "default",
+  size = "default",
   title = "",
   link,
-  primary = true,
   onClickFun = () => {},
   disabled = false,
+  className = "w-full",
+  ...props
 }) => {
+  const handleClick: MouseEventHandler<HTMLButtonElement> = (e) => {
+    if (disabled) {
+      e.preventDefault();
+      return;
+    }
+
+    if (link) {
+      window.location.href = link;
+    } else if (onClickFun) {
+      onClickFun(e);
+    }
+  };
+
   return (
-    <div className="btn">
-      {link ? (
-        <button
-          className={`btn--${primary ? "primary" : "secondary"} ${disabled ? "btn--disabled" : ""}`}
-          onClick={() => !disabled && (window.location.href = link)}
-          disabled={disabled}
-        >
-          {title}
-        </button>
-      ) : (
-        <button
-          className={`btn--${primary ? "primary" : "secondary"} ${disabled ? "btn--disabled" : ""}`}
-          onClick={(e) => !disabled && onClickFun(e)}
-          disabled={disabled}
-        >
-          {title}
-        </button>
-      )}
-    </div>
+    <EinfraButton
+      variant={variant}
+      size={size}
+      onClick={handleClick}
+      disabled={disabled}
+      className={className}
+      {...props}
+    >
+      {title} {props.children}
+    </EinfraButton>
   );
 };
+
+export type { ButtonVariant, ButtonSize };
