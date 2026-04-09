@@ -382,7 +382,7 @@ export const EmptyServerCard: React.FC<EmptyCardProps> = ({
   const errorMessage = isNameDuplicate ? (
     <div
       id="server-name-error"
-      className="flex items-center gap-2 text-sm text-red-600 absolute mt-[60px]"
+      className="flex items-center gap-2 text-sm text-red-600 "
       role="alert"
     >
       <AlertCircle size={16} />
@@ -420,7 +420,7 @@ export const EmptyServerCard: React.FC<EmptyCardProps> = ({
           </div>
           <div className="flex items-center gap-4 basis-full">
             <div className="flex-1">{serverNameInput}</div>
-            {isNameDuplicate && errorMessage}
+            <div className="absolute mt-[60px]">{errorMessage}</div>
           </div>
           {addButton("basis-24")}
         </div>
@@ -444,16 +444,21 @@ export const EmptyServerCard: React.FC<EmptyCardProps> = ({
 
   // Default variant: full card with centered content
   return (
-    <Card className="w-full flex items-center justify-center border-dashed bg-transparent hover:bg-muted/50 transition-colors">
+    <Card
+      className={`w-full flex items-center justify-center border-2 border-dashed bg-transparent ${
+        isFocused ? "" : serverName ? "" : "opacity-50 hover:opacity-100"
+      } `}
+    >
       <CardContent className="flex flex-col items-center justify-center gap-2 w-full h-full text-center py-8 px-4">
         <div className="flex w-full flex-col gap-2 lg:flex-row lg:flex-wrap lg:space-x-2 lg:items-center lg:justify-center">
           <div className="w-full lg:w-40">{serverNameInput}</div>
-          {isNameDuplicate && errorMessage}
+          {/* {isNameDuplicate && errorMessage} */}
           {addButton("w-full justify-center lg:w-40")}
         </div>
         {description && !isNameDuplicate && (
           <span className="text-sm text-muted-foreground">{description}</span>
         )}
+        {errorMessage}
       </CardContent>
     </Card>
   );

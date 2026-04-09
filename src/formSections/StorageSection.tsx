@@ -1,11 +1,18 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { DropDownMenu } from "../components/DropDownMenu/DropDownMenu";
 import {
   getPersistentHomeOptions,
   getMetaCentrumHomeOptions,
 } from "../scripts/gatherFormData";
 import { Switch, Alert, Label, Input } from "@e-infra/design-system";
-import { AlertTriangle, HardDrive, Cloud, Server } from "lucide-react";
+import {
+  AlertTriangle,
+  HardDrive,
+  Cloud,
+  Server,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { TileSelector } from "../components/TileSelector/TileSelector";
 import { ToggleCard } from "../components/ToggleCard/ToggleCard";
 
@@ -61,6 +68,7 @@ interface StorageSelectionSectionProps {
   s3SelectionType: string;
   setS3SelectionType: (selectionType: string) => void;
   s3values: Record<string, string>;
+  pushAlert: (message: string, variant?: "success" | "error" | "info") => void;
 }
 
 declare const appConfig: { userName?: string };
@@ -107,7 +115,8 @@ export default function StorageSelectionSection({
   s3SelectionType,
   setS3SelectionType,
   s3values,
-}: StorageSelectionSectionProps): JSX.Element {
+  pushAlert,
+}: StorageSelectionSectionProps): React.ReactElement {
   // State management
   const [phSelectionType, setPhSelectionType] = useState<"new" | "existing">(
     "new",
@@ -116,6 +125,8 @@ export default function StorageSelectionSection({
   const [checkedDirectories, setCheckedDirectories] = useState(false);
   const [checkedStorage, setCheckedStorage] = useState(false);
   const [checkedMount, setCheckedMount] = useState(false);
+  const [showAccessKey, setShowAccessKey] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
 
   const [defaultOptionPhname, setDefaultOptionPhname] = useState<
     [string, string] | undefined
@@ -253,6 +264,9 @@ export default function StorageSelectionSection({
   }, []);
 
   // Sync Persistent Home selection to formData
+  // Note: We don't clear phname here because initialization happens first,
+  // and we want to preserve the default value from previous session.
+  // The DropDownMenu will handle setting phname when user makes a selection.
   useEffect(() => {
     onPersistentHomeChange((prev) => ({
       ...prev,
@@ -402,7 +416,7 @@ export default function StorageSelectionSection({
   return (
     <div className="form-wrap max-w-4xl mx-auto flex flex-col gap-4">
       {/* Header */}
-      <div className="mb-6">
+      <div className="">
         <h2 className="text-xl font-bold text-gray-900 mb-2">
           Configure Storage
         </h2>
@@ -436,7 +450,7 @@ export default function StorageSelectionSection({
         {/* Tile Selector for New/Existing */}
         <div className="mb-4">
           <TileSelector
-            selectionText="Select Type"
+            selectionText="Create new or use existing?"
             options={PERSISTENT_HOME_OPTIONS}
             value={phSelectionType}
             onChange={(val: string) =>
@@ -448,7 +462,7 @@ export default function StorageSelectionSection({
 
         {/* New Home Configuration */}
         {phSelectionType === "new" && (
-          <div className="space-y-4 pl-4 border-l-2 border-blue-200">
+          <div className="space-y-4 pl-4 border-l-2 border-info">
             {/* Inline Warning with Checkbox */}
             <div className="flex items-start gap-3">
               <Switch
@@ -463,17 +477,17 @@ export default function StorageSelectionSection({
                 >
                   Erase if home exists
                 </label>
-                {checkedErased && (
-                  <Alert variant="warning" className="mt-2">
-                    <AlertTriangle className="h-4 w-4" />
-                    <span className="text-xs">
-                      Warning: This will erase all existing data in your
-                      persistent home directory!
-                    </span>
-                  </Alert>
-                )}
               </div>
             </div>
+            {checkedErased && (
+              <Alert variant="warning" className="mt-2">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-xs">
+                  Warning: This will erase all existing data in your persistent
+                  home directory!
+                </span>
+              </Alert>
+            )}
           </div>
         )}
 
@@ -491,12 +505,12 @@ export default function StorageSelectionSection({
       </section>
       {/* Top Layer: Toggle Cards Overview */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+        <h3 className="text-sm font-semibold text-gray-700 tracking-wide">
           Storage Options
         </h3>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Persistent Home Toggle - Always enabled, shows as configured */}
+          {/* Persistent Home Toggle */}
           {/* <ToggleCard
             id="persistent-home"
             title="Persistent Home"
@@ -565,9 +579,9 @@ export default function StorageSelectionSection({
             <div className="space-y-4 pl-4 border-l-2 border-blue-200 animate-in fade-in-0 duration-300">
               {/* Storage Selection */}
               <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                {/* <Label className="text-sm font-medium text-gray-700 mb-2 block">
                   Select Storage
-                </Label>
+                </Label> */}
                 <DropDownMenu
                   formSelect={handleStorage}
                   title="Select MetaCentrum Storage"
@@ -672,9 +686,6 @@ export default function StorageSelectionSection({
               {/* Existing S3 Bucket */}
               {s3SelectionType === "existing" && (
                 <div className="pl-4 border-l-2 border-blue-200 animate-in fade-in-0 duration-200">
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Select Existing Bucket
-                  </Label>
                   <DropDownMenu
                     formSelect={handleS3Buckets}
                     title="Select S3 Bucket"
@@ -728,14 +739,29 @@ export default function StorageSelectionSection({
                     >
                       Access Key
                     </Label>
-                    <Input
-                      id="s3-access-key"
-                      type="text"
-                      value={formData.s3accesskey ?? ""}
-                      placeholder="s3AccessKey"
-                      onChange={(e) => handleS3AccessKeyChange(e.target.value)}
-                      className="w-full"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="s3-access-key"
+                        type={showAccessKey ? "text" : "password"}
+                        value={formData.s3accesskey ?? ""}
+                        placeholder="s3AccessKey"
+                        onChange={(e) =>
+                          handleS3AccessKeyChange(e.target.value)
+                        }
+                        className="w-full pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAccessKey(!showAccessKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showAccessKey ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
@@ -745,14 +771,29 @@ export default function StorageSelectionSection({
                     >
                       Secret Key
                     </Label>
-                    <Input
-                      id="s3-secret-key"
-                      type="password"
-                      value={formData.s3secretkey ?? ""}
-                      placeholder="s3SecretKey"
-                      onChange={(e) => handleS3SecretKeyChange(e.target.value)}
-                      className="w-full"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="s3-secret-key"
+                        type={showSecretKey ? "text" : "password"}
+                        value={formData.s3secretkey ?? ""}
+                        placeholder="s3SecretKey"
+                        onChange={(e) =>
+                          handleS3SecretKeyChange(e.target.value)
+                        }
+                        className="w-full pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSecretKey(!showSecretKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showSecretKey ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

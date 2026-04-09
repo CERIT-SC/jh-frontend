@@ -27,12 +27,12 @@ BASE_DIR="./dist_$BUILD_TARGET"
 # Run npm commands
 if [ -n "$BUILD_TARGET" ]; then
   echo "Running build for target: $BUILD_TARGET"
-  npm install
-  npm run build:$BUILD_TARGET
+  bun install
+  bun run build:$BUILD_TARGET
 else
   echo "Using namespace: $NAMESPACE"
-  npm install
-  npm run build
+  bun install
+  bun run build
 fi
 
 # Create ConfigMaps

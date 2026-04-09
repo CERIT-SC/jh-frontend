@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, JSX } from "react";
 import { formImagesName } from "../data/formData";
 import { SelectingCardsTabs } from "../components/ServerCard/selectingCardsTabs";
 import { Separator, Switch, Label } from "@e-infra/design-system";
@@ -44,7 +44,6 @@ function findImage(
   }
   return [null, null];
 }
-
 export function ImageSelectionSectionTabs({
   defaultFormData,
   onImageChange,

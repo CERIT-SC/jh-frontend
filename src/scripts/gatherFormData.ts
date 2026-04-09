@@ -73,7 +73,9 @@ export function gatherFormData() {
           opts.phome === "new" || opts.phome === "remain" ? "new" : "existing",
         eraseIfExists: false,
         selectedHome:
-          opts.phome !== "new" && opts.phome !== "remain" ? opts.phome : null,
+          opts.phome !== "new" && opts.phome !== "remain"
+            ? { value: opts.phome, text: opts.phome }
+            : null,
       },
 
       // Map other storages as needed or set to null if not in user_options yet

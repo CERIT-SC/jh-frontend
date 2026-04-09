@@ -26,20 +26,25 @@ export const DropDownMenu: React.FC<DropDownMenuProps> = ({
     defaultOption ? defaultOption[0] : "",
   );
 
+  // Track if we've already initialized from defaultOption
+  const [initialized, setInitialized] = useState(false);
+
   const handleValueChange = (value: string) => {
     setSelectedValue(value);
     formSelect(value);
   };
 
+  // Initialize from defaultOption only once on mount
   useEffect(() => {
-    if (defaultOption) {
+    if (defaultOption && !initialized) {
       setSelectedValue(defaultOption[0]);
       formSelect(defaultOption[0]);
+      setInitialized(true);
     }
-  }, [defaultOption]);
+  }, [defaultOption, initialized, formSelect]);
 
   return (
-    <>
+    <div className="flex flex-col gap-2 mt-2">
       <Label>{title}</Label>
       <Select value={selectedValue} onValueChange={handleValueChange}>
         <SelectTrigger className="w-full">
@@ -53,7 +58,7 @@ export const DropDownMenu: React.FC<DropDownMenuProps> = ({
           ))}
         </SelectContent>
       </Select>
-    </>
+    </div>
   );
 };
 

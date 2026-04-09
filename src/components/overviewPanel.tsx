@@ -8,16 +8,21 @@ import {
   Small,
   Strong,
   Badge,
+  Button,
 } from "@e-infra/design-system";
-import React from "react";
+import React, { JSX } from "react";
 import {
   ShieldCheck,
   ShieldX,
+  Cpu,
+  Gpu,
   HardDrive,
   Server,
   Cloud,
   Check,
   X,
+  MemoryStick,
+  Pencil,
 } from "lucide-react";
 import { getGpuOptions, getImageOptions } from "../scripts/gatherFormData";
 
@@ -29,6 +34,30 @@ interface OverviewPanelProps {
   formData?: any;
   selectedImage: string | null;
   categoryImage: string | null;
+}
+
+/**
+ * Edit button component that scrolls to a section
+ */
+function EditButton({ sectionId }: { sectionId: string }): JSX.Element {
+  const handleClick = () => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      onClick={handleClick}
+      className="p-1 hover:bg-gray-100 rounded transition-colors"
+      title="Edit this section"
+    >
+      <Pencil className="w-3.5 h-3.5 text-gray-500" />
+      Edit
+    </Button>
+  );
 }
 
 /**
@@ -67,12 +96,13 @@ export function OverviewPanel({
   >;
   const gpuOptions = getGpuOptions() as Record<string, string>;
 
-  const selectedImageName =
-    selectedImage && categoryImage
-      ? (imageOptions[categoryImage] || []).find(
-          (option) => option.value === selectedImage,
-        )?.name
-      : undefined;
+  const selectedImageName = selectedImage
+    ? Object.values(imageOptions)
+        .flat()
+        .find((option) => option.value === selectedImage)?.name
+    : undefined;
+
+  const sshAccessEnabled = formData?.sshAccess === true;
 
   const selectedGpu = String(formData?.gpuselection ?? "");
   const selectedGpuLabel = gpuOptions[selectedGpu] || selectedGpu || "None";
@@ -88,22 +118,31 @@ export function OverviewPanel({
       <PanelTitle>Overview</PanelTitle>
       <PanelDescription>Configuration summary before starting</PanelDescription>
 
-      <PanelContent>
+      <PanelContent className="flex flex-col gap-2 pt-4">
         {/* Image Section */}
         {selectedImage && (
           <>
             <div>
-              <H4>Image:</H4>
-              <Strong>{selectedImageName || selectedImage}</Strong>
-              <Small className="block truncate">{selectedImage}</Small>
-            </div>
-            <div className="flex items-center justify-between">
-              <Strong>SSH Access</Strong>
-              {formData?.sshAccess ? (
-                <ShieldCheck className="w-4 h-4 text-green-500" />
-              ) : (
-                <ShieldX className="w-4 h-4 text-red-500" />
-              )}
+              <div className="flex items-center justify-between">
+                <H4>Image</H4>
+                <EditButton sectionId="image-section" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between">
+                  <span>Name</span>
+                  <Strong className="text-right">
+                    {selectedImageName || selectedImage}
+                  </Strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tag</span>
+                  <Small className="truncate text-right">{selectedImage}</Small>
+                </div>
+                <div className="flex justify-between">
+                  <Strong>SSH Access</Strong>
+                  <StatusIndicator enabled={sshAccessEnabled} />
+                </div>
+              </div>
             </div>
             <Separator />
           </>
@@ -111,18 +150,35 @@ export function OverviewPanel({
 
         {/* Resources Section */}
         <div>
-          <H4>Resources:</H4>
-          <div className="grid grid-cols-3 gap-2">
-            <Strong>CPU:</Strong>{" "}
-            <Small className="col-span-2 text-right">
-              {formData?.cpuselection}
-            </Small>
-            <Strong>Memory:</Strong>{" "}
-            <Small className="col-span-2 text-right">
-              {formData?.memselection} GB
-            </Small>
-            <Strong>GPU:</Strong>{" "}
-            <Small className="col-span-2 text-right">{selectedGpuLabel}</Small>
+          <div className="flex items-center justify-between">
+            <H4>Resources</H4>
+            <EditButton sectionId="resources-section" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="flex justify-between">
+              <span className="inline-flex items-center gap-1">
+                <Cpu className="w-4 h-4" />
+                CPU
+              </span>
+              <Strong>
+                {formData?.cpuselection}{" "}
+                {formData?.cpuselection === 1 ? "Core" : "Cores"}
+              </Strong>
+            </div>
+            <div className="flex justify-between">
+              <span className="inline-flex items-center gap-1">
+                <MemoryStick className="w-4 h-4" />
+                Memory
+              </span>
+              <Strong>{formData?.memselection} GB</Strong>
+            </div>
+            <div className="flex justify-between">
+              <span className="inline-flex items-center gap-1">
+                <Gpu className="w-4 h-4" />
+                GPU
+              </span>
+              <Strong>{selectedGpuLabel}</Strong>
+            </div>
           </div>
         </div>
 
@@ -130,10 +186,13 @@ export function OverviewPanel({
 
         {/* Storage Section */}
         <div>
-          <H4 className="flex items-center gap-2 mb-3">
-            <HardDrive className="w-4 h-4" />
-            Storage Configuration
-          </H4>
+          <div className="flex items-center justify-between">
+            <H4 className="flex items-center gap-2">
+              {/* <HardDrive className="w-4 h-4" /> */}
+              Storage Configuration
+            </H4>
+            <EditButton sectionId="storage-section" />
+          </div>
 
           <div className="space-y-3">
             {/* Persistent Home */}
@@ -141,14 +200,8 @@ export function OverviewPanel({
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <Strong className="text-sm">Persistent Home</Strong>
-                  <Badge
-                    variant="outline"
-                    className="text-xs bg-blue-50 text-blue-700 border-blue-200"
-                  >
-                    Required
-                  </Badge>
                 </div>
-                <Small className="block mt-1">
+                <Small className="block mt-1 line-clamp-1">
                   {phSelection === "new"
                     ? "New directory"
                     : formData?.phname || "Existing directory"}
@@ -159,7 +212,13 @@ export function OverviewPanel({
                   </Small>
                 )}
               </div>
-              <StatusIndicator enabled={true} />
+              {/* <Badge
+                variant="outline"
+                className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+              >
+                Required
+              </Badge> */}
+              {/* <StatusIndicator enabled={true} /> */}
             </div>
 
             {/* MetaCentrum Storage */}
@@ -193,23 +252,23 @@ export function OverviewPanel({
             </div>
 
             {/* S3 Storage */}
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2">
                   <Strong className="text-sm">S3 Object Storage</Strong>
                   <Cloud className="w-3 h-3 text-gray-400" />
                 </div>
                 {s3Enabled && (
                   <>
-                    <Small className="block mt-1">
+                    <Small className="block mt-1 truncate">
                       {s3SelectionType === "new"
                         ? formData?.s3bucket || "New bucket"
                         : formData?.s3name || "Existing bucket"}
                     </Small>
                     {s3SelectionType === "new" && formData?.s3url && (
-                      <Small className="block text-gray-500 mt-0.5 truncate">
+                      <span className="block text-xs text-gray-500 mt-0.5 truncate">
                         {formData.s3url}
-                      </Small>
+                      </span>
                     )}
                   </>
                 )}

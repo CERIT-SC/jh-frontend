@@ -117,10 +117,10 @@ function HomePage() {
       {/* <Button onClick={fetchUsage} className="mx-4 my-2">
         Fetch CPU Usage (Grafana)
       </Button> */}
-      <div className="container grow mx-auto px-4 py-8 space-y-8 flex flex-col lg:flex-row gap-4">
+      <div className="container grow  mx-auto px-4 py-8 space-y-8">
         {/* Default Server Button */}
 
-        <div className="add-server basis-1/3 flex flex-col gap-4">
+        {/* <div className="add-server basis-1/3 flex flex-col gap-4">
           <div className="default-server-btns">
             <Panel className="itmes-center justify-center text-center flex flex-col gap-4">
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -154,8 +154,8 @@ function HomePage() {
               </div>
             </Panel>
           </div>
-        </div>
-        <div className="named-servers basis-2/3">
+        </div> */}
+        <div className="named-servers">
           <Panel>
             <div className="flex items-center">
               <H4 className="grow">My servers</H4>
@@ -188,7 +188,7 @@ function HomePage() {
                 className={
                   "mt-4 grid gap-3 " +
                   (gridType === 1
-                    ? "grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center"
+                    ? "grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center"
                     : "grid-cols-1")
                 }
               >

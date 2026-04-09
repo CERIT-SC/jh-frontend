@@ -12,6 +12,7 @@ import ResourceSelectionSection from "../formSections/ResourceSection";
 import { ImageSelectionSectionTabs } from "../formSections/ImageSection";
 import { Alert } from "../components/Alert";
 import { useAlerts } from "../hooks/useAlerts";
+import { EinfraFooter } from "../components/FooterAndHeader/EinfraFooter";
 
 // Initialize dev mode synchronously at module load time
 // This must run before gatherFormData() is called in useMemo
@@ -332,10 +333,10 @@ function FormPage() {
     <>
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
-      <div className="flex flex-row gap-12 w-full h-full px-4 relative max-w-7xl mx-auto">
+      <div className="flex flex-row gap-12 w-full h-full px-4 mb-8 relative max-w-7xl mx-auto">
         {/* Left side: Scrollable content taking 2/3 */}
         <div className="w-2/3 no-scrollbar pt-4 flex flex-col gap-8">
-          <Panel>
+          <Panel id="image-section" className="scroll-mt-20">
             <ImageSelectionSectionTabs
               defaultFormData={defaultFormData}
               selectedImage={selectedImage}
@@ -357,7 +358,7 @@ function FormPage() {
             />
           </Panel>
 
-          <Panel>
+          <Panel id="storage-section" className="scroll-mt-20">
             <StorageSelectionSection
               defaultFormData={defaultFormData}
               formData={formData}
@@ -379,7 +380,7 @@ function FormPage() {
             />
           </Panel>
 
-          <Panel>
+          <Panel id="resources-section" className="scroll-mt-20">
             <ResourceSelectionSection
               formData={formData}
               defaultFormData={defaultFormData}
@@ -403,6 +404,7 @@ function FormPage() {
           </div>
         </div>
       </div>
+      <EinfraFooter />
     </>
   );
 }

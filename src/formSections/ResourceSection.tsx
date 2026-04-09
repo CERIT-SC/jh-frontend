@@ -33,7 +33,6 @@ export default function ResourceSelectionSection({
   const [defMem, setDefMem] = useState<number | null>(null);
   const [defCPU, setDefCPU] = useState<number | null>(null);
   const [defGPU, setDefGPU] = useState<[string, string] | null>(null);
-  console.log("GPU options:", gpuOptions);
 
   useEffect(() => {
     if (defaultFormData) {
@@ -49,7 +48,6 @@ export default function ResourceSelectionSection({
           ? ([requestedGpu, gpuMap[requestedGpu]] as [string, string])
           : (["none", gpuMap.none || "None"] as [string, string]);
 
-      console.log("Default gpu:", defaultFormData);
 
       setFormData((prev) => ({
         ...prev,

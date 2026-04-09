@@ -99,11 +99,19 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
   const [selectedValue, setSelectedValue] = useState<string | number>(() => {
     if (numericMode) {
       const numericProps = props as NumericTileSelectorProps;
-      return numericProps.defaultValue ?? numericProps.options[0];
+      return (
+        numericProps.value ??
+        numericProps.defaultValue ??
+        numericProps.options[0]
+      );
     }
     if (stringMode) {
       const stringProps = props as StringTileSelectorProps;
-      return stringProps.defaultValue ?? stringProps.options[0]?.value;
+      return (
+        stringProps.value ??
+        stringProps.defaultValue ??
+        stringProps.options[0]?.value
+      );
     }
     return "";
   });
