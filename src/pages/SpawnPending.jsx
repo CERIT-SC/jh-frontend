@@ -14,6 +14,7 @@ import {
   AccordionTrigger,
   AccordionContent,
   AccordionItem,
+  P,
 } from "@e-infra/design-system";
 
 const SpawnPending = () => {
@@ -115,8 +116,8 @@ const SpawnPending = () => {
           </PanelHeader>
           <PanelContent>
             <div className="flex justify-between items-center">
-              <p id="progress-message">Message</p>
-              <p className="text-right">{progress}%</p>
+              <span id="progress-message">Message</span>
+              <P>{progress}%</P>
             </div>
             <Progress value={parseInt(progress)} />
             <Separator />

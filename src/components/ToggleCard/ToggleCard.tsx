@@ -1,4 +1,4 @@
-import { cn } from "@e-infra/design-system";
+import { cn, H3, P, Switch } from "@e-infra/design-system";
 import { Check, X } from "lucide-react";
 
 export interface ToggleCardProps {
@@ -60,10 +60,10 @@ export function ToggleCard({
       onKeyDown={handleKeyDown}
       className={cn(
         "relative flex items-start gap-4 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
         enabled
-          ? "border-blue-500 bg-blue-50 shadow-sm"
-          : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50",
+          ? "border-primary bg-secondary shadow-sm"
+          : "border-border bg-white hover:border-border hover:bg-background/50",
         disabled && "opacity-50 cursor-not-allowed pointer-events-none",
         className,
       )}
@@ -90,47 +90,42 @@ export function ToggleCard({
               {icon}
             </span>
           )}
-          <h3
+          <H3
             id={`${id}-title`}
             className={cn(
               "text-sm font-semibold",
-              enabled ? "text-blue-900" : "text-gray-700",
+              enabled ? "text-primary" : "text-muted-foreground",
             )}
           >
             {title}
-          </h3>
+          </H3>
           {badge && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
               {badge}
             </span>
           )}
         </div>
-        <p
+        <P
           id={`${id}-description`}
           className={cn(
             "mt-1 text-sm",
-            enabled ? "text-blue-700" : "text-gray-500",
+            enabled ? "text-primary" : "text-muted-foreground",
           )}
         >
           {description}
-        </p>
+        </P>
       </div>
 
       {/* Visual toggle switch */}
-      <div
-        className={cn(
-          "flex-shrink-0 w-11 h-6 rounded-full relative transition-colors",
-          enabled ? "bg-blue-500" : "bg-gray-300",
-        )}
-        aria-hidden="true"
-      >
-        <div
-          className={cn(
-            "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform",
-            enabled ? "translate-x-5 left-0.5" : "translate-x-0 left-0.5",
-          )}
-        />
-      </div>
+      <Switch
+        id={`${id}-switch`}
+        checked={enabled}
+        onCheckedChange={onToggle}
+        disabled={disabled}
+        aria-labelledby={`${id}-title`}
+        aria-describedby={`${id}-description`}
+        className="scale-110"
+      />
     </div>
   );
 }

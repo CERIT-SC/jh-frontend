@@ -1,6 +1,7 @@
 import React, { ReactElement, useState } from "react";
 import "./ProgressiveForm.css";
 import { FormButton } from "./FormButton";
+import { P } from "@e-infra/design-system";
 
 interface ProgressTrackerProps {
   step: number;
@@ -95,7 +96,7 @@ export const ProgressiveForm: React.FC<ProgressiveFormProps> = ({
           {stepComponent}
         </div>
       ))}
-      {error !== "" && <p className="error-message"> {error} </p>}
+      {error !== "" && <P className="error-message"> {error} </P>}
       <StepButtons
         currentStep={step}
         totalSteps={steps.length}

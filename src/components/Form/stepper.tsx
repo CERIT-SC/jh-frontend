@@ -15,6 +15,7 @@ import {
 import { Input } from "./input";
 import { Label } from "./label";
 import { Textarea } from "./textarea";
+import { P } from "@e-infra/design-system";
 
 const meta = {
   title: "Components/Stepper",
@@ -215,10 +216,8 @@ function Step2DuplicityCheck() {
       </CardHeader>
       <CardContent>
         <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground">
-            Checking for duplicate publications...
-          </p>
-          <p className="text-sm text-green-600 mt-4">No duplicates found!</p>
+          <P>Checking for duplicate publications...</P>
+          <P className="mt-4">No duplicates found!</P>
         </div>
       </CardContent>
     </Card>

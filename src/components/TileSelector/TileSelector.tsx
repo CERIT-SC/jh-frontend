@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useId } from "react";
+import { P } from "@e-infra/design-system";
 
 // ============================================================================
 // Type Definitions
@@ -190,15 +191,11 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
 
   return (
     <div>
-      {selectionText ? (
-        <p className="m-0 mb-2 text-sm font-medium text-gray-700">
-          {selectionText}
-        </p>
-      ) : null}
+      {selectionText ? <P className="m-0 mb-2">{selectionText}</P> : null}
       <div
         role="radiogroup"
         aria-label={ariaLabel || selectionText || "Tile selector"}
-        className={`bg-transparent text-white rounded-lg shadow-md text-left ${
+        className={`bg-surface-raised text-muted rounded-lg shadow-md text-left ${
           className || "w-full h-12"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
@@ -209,7 +206,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
           >
             {/* Animated highlight background */}
             <div
-              className="absolute top-0 h-full bg-background rounded-lg transition-all duration-500 ease-out"
+              className="absolute top-0 h-full bg-surface rounded-lg transition-all duration-500 ease-out"
               style={{
                 left: `${highlightStyle.left}px`,
                 width: `${highlightStyle.width}px`,
@@ -230,7 +227,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
                   role="radio"
                   aria-checked={isSelected}
                   tabIndex={disabled ? -1 : isSelected ? 0 : -1}
-                  className={`flex-1 h-full text-center relative cursor-pointer px-3 bg-transparent border-none font-medium select-none group z-10 flex items-center justify-center ${
+                  className={`flex-1 h-full text-center relative cursor-pointer px-3 bg-transparent border-none select-none group z-10 flex items-center justify-center ${
                     disabled ? "cursor-not-allowed" : ""
                   }`}
                   onClick={() => handleSelection(option.value)}
@@ -248,8 +245,8 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
                   <span
                     className={`relative z-10 block transition-all duration-300 ${
                       isSelected
-                        ? "text-infra-primary font-bold"
-                        : "text-gray-600 group-hover:text-infra-primary"
+                        ? "text-primary font-bold"
+                        : "text-gray-600 group-hover:text-primary"
                     }`}
                   >
                     {option.label}
@@ -257,7 +254,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
 
                   {isSelected && (
                     <span
-                      className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-infra-primary to-infra-accent animate-in duration-500"
+                      className="absolute bottom-0 left-0 h-1 animate-in duration-500"
                       style={{
                         width: "100%",
                         animation:

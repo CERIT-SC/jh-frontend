@@ -1,4 +1,4 @@
-import { cn } from "@e-infra/design-system";
+import { cn, H4, P } from "@e-infra/design-system";
 import { X, Check } from "lucide-react";
 
 export interface SummaryChipItem {
@@ -33,11 +33,11 @@ export function SummaryChips({
   items,
   onRemove,
   className,
-}: SummaryChipsProps): JSX.Element {
+}: SummaryChipsProps): React.ReactElement {
   if (items.length === 0) {
     return (
       <div className={cn("text-sm text-gray-500 italic", className)}>
-        No storage options selected
+        <P>No storage options selected</P>
       </div>
     );
   }
@@ -56,10 +56,10 @@ export function SummaryChips({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+      <H4 className="flex items-center gap-2">
         <Check className="w-4 h-4 text-green-500" aria-hidden="true" />
         Configuration Summary
-      </h4>
+      </H4>
 
       <div className="flex flex-wrap gap-2">
         {Object.entries(groupedItems).map(([category, categoryItems]) => (

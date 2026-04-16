@@ -2,9 +2,10 @@
 @import "@e-infra/design-system/setup.css";
 @source "../../node_modules/@e-infra/design-system/dist";
 
-:root {
+/* :root {
   --bg-image: url("/static/custom-images/e-INFRA_background.svg");
-}
+} */
+@custom-variant dark (&:is(.dark *));
 
 html {
   scroll-behavior: smooth;
@@ -71,4 +72,20 @@ body {
 
 .alert-exit {
   animation: slideOutFade 300ms ease-out forwards;
+}
+
+/* Ring pulse animation - only affects box-shadow (ring), not content */
+@keyframes ringPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--tw-ring-color, #3b82f6);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--tw-ring-color, #3b82f6);
+  }
+}
+
+.shine-ring {
+  --tw-ring-color: var(--shine-color, #3b82f6);
+  animation: ringPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1);
 }

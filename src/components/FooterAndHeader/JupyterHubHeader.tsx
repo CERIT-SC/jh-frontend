@@ -15,32 +15,16 @@ import {
 } from "@e-infra/design-system";
 import { HomeIcon, LogOut } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@e-infra/design-system";
+import { ModeToggle } from "../ModeToggle";
 
 interface JupyterHubHeaderProps {
   userName: string;
 }
 
 const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
   const handleLogout = () => {
     window.location.href = "/hub/logout";
   };
-
-  const toggleMenu = () => {
-    setMenuOpen((prev) => !prev);
-  };
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
-    setIsMobile(mediaQuery.matches);
-
-    const handleResize = () => setIsMobile(mediaQuery.matches);
-    mediaQuery.addEventListener("change", handleResize);
-
-    return () => mediaQuery.removeEventListener("change", handleResize);
-  }, []);
 
   return (
     <>
@@ -70,13 +54,16 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
             </NavigationMenu>
           </HeaderLeft>
           <HeaderRight>
+            <ModeToggle />
             <span className="ml-2">{userName}</span>
             <Avatar>
               <AvatarImage
-                src={`https://ui-avatars.com/api/?name=${userName}`}
-                alt={userName}
+                src={`https://ui-avatars.com/api/?name=${userName || "User"}`}
+                alt={userName || "User"}
               />
-              <AvatarFallback>{userName[0].toUpperCase()}</AvatarFallback>
+              <AvatarFallback>
+                {(userName?.[0] || "U").toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />

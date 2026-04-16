@@ -1,3 +1,5 @@
+//depraceted
+
 import { useEffect, useState } from "react";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -46,9 +48,8 @@ export function SelectableCard({
         "transform transition-all duration-300 ease-in-out",
         "border-2 transition-colors",
         isSelected
-          ? "border-infra-primary shadow-primary/20 via-infra-primary to-infra-accent bg-linear-45 from-white from-85% shadow-md"
-          : "border-infra-border hover:border-infra-primary/30",
-        "active:scale-95",
+          ? "border-primary shadow-primary/20 bg-linear-45 shadow-md"
+          : "border hover:border-primary/30",
       )}
     >
       {icon && (
@@ -58,8 +59,8 @@ export function SelectableCard({
         className={cn(
           "size-7 transition-all duration-200 ease-in-out absolute top-2 right-2",
           isSelected
-            ? "text-infra-primary"
-            : "text-transparent group-hover:text-infra-primary/50",
+            ? "text-primary"
+            : "text-transparent group-hover:text-primary/50",
         )}
       />
       <CardHeader>

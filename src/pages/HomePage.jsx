@@ -23,7 +23,7 @@ import {
   PanelHeader,
 } from "@e-infra/design-system";
 import { LayoutGrid, LayoutList, Server, Plus, Play } from "lucide-react";
-import { fetchGrafanaData } from "../api/GrafanaAPI";
+import { GrafanaQuery } from "../api/GrafanaAPI";
 function HomePage() {
   if (import.meta.env.DEV) {
     initDev();
@@ -40,7 +40,11 @@ function HomePage() {
 
   const fetchUsage = async () => {
     try {
-      const data = await fetchGrafanaData("xbencs00", "test-server");
+      // const data = await fetchGrafanaData("xbencs00", "test-server");
+      const data = await new GrafanaQuery()
+        .freeGPUs("NVIDIA-A10")
+        .totalGPUs("NVIDIA-A10")
+        .execute();
       console.log("Fetched Grafana data:", data);
     } catch (error) {
       console.error("Error fetching Grafana data:", error);

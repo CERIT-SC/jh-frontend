@@ -1,13 +1,22 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { TileSelector } from "../components/TileSelector/TileSelector";
 import { FieldHeader } from "../components/FieldHeader/FieldHeader";
 import { DropDownMenu } from "../components/DropDownMenu/DropDownMenu";
 import { getGpuOptions } from "../scripts/gatherFormData";
 import {
+  GPUStatusIndicator,
+  GPUSquare,
+} from "../components/GPUStatusIndicator/GPUStatusIndicator";
+import { useGPUStatus } from "../hooks/useGPUStatus";
+import {
+  Panel,
   PanelTitle,
   PanelDescription,
   PanelContent,
+  Muted,
+  Separator,
 } from "@e-infra/design-system";
+import { Loader2, RefreshCw } from "lucide-react";
 
 type FormState = Record<string, unknown>;
 type FormUpdater = (prev: FormState) => FormState;
@@ -34,6 +43,9 @@ export default function ResourceSelectionSection({
   const [defCPU, setDefCPU] = useState<number | null>(null);
   const [defGPU, setDefGPU] = useState<[string, string] | null>(null);
 
+  // Fetch GPU status from Grafana
+  const { gpuStatuses, loading, error, refetch } = useGPUStatus();
+
   useEffect(() => {
     if (defaultFormData) {
       const mem = Number(defaultFormData.memory);
@@ -47,7 +59,6 @@ export default function ResourceSelectionSection({
         requestedGpu && gpuMap[requestedGpu]
           ? ([requestedGpu, gpuMap[requestedGpu]] as [string, string])
           : (["none", gpuMap.none || "None"] as [string, string]);
-
 
       setFormData((prev) => ({
         ...prev,
@@ -94,45 +105,104 @@ export default function ResourceSelectionSection({
   };
 
   return (
-    <div className="form-wrap">
+    <>
       {defCPU !== null && defMem !== null && defGPU !== null ? (
-        <>
-          <PanelTitle>Choosing resources</PanelTitle>
-          <PanelDescription>
-            The notebook is spawned only when one node fulfills <b>all</b> your
-            requirements.
-          </PanelDescription>
-          <PanelContent className="flex flex-col gap-4">
-            <TileSelector
-              selectionText="Select CPU limit:"
-              options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
-              defaultValue={defCPU ?? undefined}
-              onChange={handleCPUSelect}
-            />
-            <TileSelector
-              selectionText="Select memory limit (in GB):"
-              options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
-              defaultValue={defMem ?? undefined}
-              onChange={handleMemSelect}
-            />
-            <FieldHeader
+        <div className="flex flex-col gap-4">
+          <TileSelector
+            selectionText="Select CPU limit:"
+            options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
+            defaultValue={defCPU ?? undefined}
+            onChange={handleCPUSelect}
+          />
+          <TileSelector
+            selectionText="Select memory limit (in GB):"
+            options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
+            defaultValue={defMem ?? undefined}
+            onChange={handleMemSelect}
+          />
+          {/* <FieldHeader
               title="GPU"
               infoText="We strongly advise to request a GPU part instead of whole GPU due to their limited amount. If you use whole GPU inefficiently, you might be banned from requesting it again."
             >
-              <p>By default, no GPU is assigned.</p>
-              <DropDownMenu
-                formSelect={handleGPUSelect}
-                title="Select an option"
-                menuOptions={gpuOptions}
-                defaultOption={defGPU}
-              ></DropDownMenu>
-              <p>Current GPUs Free: </p>
-            </FieldHeader>
-          </PanelContent>
-        </>
+            </FieldHeader> */}
+          {/* <p>By default, no GPU is assigned.</p> */}
+          <DropDownMenu
+            formSelect={handleGPUSelect}
+            title="Select an option"
+            menuOptions={gpuOptions}
+            defaultOption={defGPU}
+          ></DropDownMenu>
+
+          {/* GPU Status Section */}
+          <Panel className="bg-surface-raised">
+            <PanelTitle>
+              <div className="flex justify-between">
+                GPU Availability
+                <button
+                  onClick={() => refetch()}
+                  disabled={loading}
+                  className="p-1 hover:bg-surface-raised rounded transition-colors disabled:opacity-50"
+                  aria-label="Refresh GPU status"
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 text-text-muted ${loading ? "animate-spin" : ""}`}
+                  />
+                </button>
+              </div>
+            </PanelTitle>
+            <PanelContent className="flex flex-col gap-4 border-t">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-text-heading">
+                    Current GPUs Available:
+                  </span>
+                  {/* Legend */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <GPUSquare status="free" size="sm" />
+                      <span className="text-xs text-text-muted">Free</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <GPUSquare status="used" size="sm" />
+                      <span className="text-xs text-text-muted">Used</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {loading && gpuStatuses.length === 0 ? (
+                <div className="flex items-center gap-2 py-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
+                  <span className="text-sm text-text-muted">
+                    Loading GPU status...
+                  </span>
+                </div>
+              ) : error ? (
+                <div className="text-sm text-error">{error}</div>
+              ) : gpuStatuses.length === 0 ? (
+                <Muted className="text-sm">No GPUs available in cluster</Muted>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {gpuStatuses.map((gpu, index) => (
+                    <Fragment key={gpu.model}>
+                      <GPUStatusIndicator
+                        label={gpu.label}
+                        free={gpu.free}
+                        total={gpu.total}
+                        size="md"
+                        gap="md"
+                      />
+                      {index < gpuStatuses.length - 1 && <Separator />}
+                    </Fragment>
+                  ))}
+                </div>
+              )}
+            </PanelContent>
+          </Panel>
+        </div>
       ) : (
         <></>
       )}
-    </div>
+    </>
   );
 }

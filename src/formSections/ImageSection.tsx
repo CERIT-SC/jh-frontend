@@ -1,7 +1,7 @@
 import { useState, useEffect, JSX } from "react";
 import { formImagesName } from "../data/formData";
 import { SelectingCardsTabs } from "../components/ServerCard/selectingCardsTabs";
-import { Separator, Switch, Label } from "@e-infra/design-system";
+import { Separator, Switch, Label, Input } from "@e-infra/design-system";
 import { getImageOptions } from "../scripts/gatherFormData";
 
 type ImageOption = { value: string; name: string };
@@ -11,10 +11,7 @@ interface DefaultNotebookImage {
   type?: string;
   sshAccess?: boolean;
   containerImage?: string;
-  selectedOption?: {
-    value?: string;
-    text?: string;
-  };
+  selectedOption?: string;
 }
 
 type ImageFormDataUpdate = Record<string, string> & { images: string };
@@ -54,11 +51,27 @@ export function ImageSelectionSectionTabs({
   setSelectedCategory,
 }: ImageSelectionProps) {
   const [sshChecked, setSshChecked] = useState(false);
+  const [customImageValue, setCustomImageValue] = useState("");
+  const [isCustomImage, setIsCustomImage] = useState(false);
 
   useEffect(() => {
     if (defaultFormData?.notebookImage) {
       setSshChecked(defaultFormData.notebookImage.sshAccess || false);
       onSshChange?.(defaultFormData.notebookImage.sshAccess ?? false);
+
+      // Check if it's a custom image (type === "customnb")
+      if (defaultFormData.notebookImage.type === "customnb") {
+        const customValue = defaultFormData.notebookImage.selectedOption || "";
+        setCustomImageValue(customValue);
+        setIsCustomImage(true);
+        setSelectedCategory("custom");
+        setSelectedImage(null);
+        onImageChange?.({
+          images: "custom",
+          customimage: customValue,
+        });
+        return;
+      }
 
       const images = getImageOptions() as unknown as ImageOptionsByCategory;
       const imgVal = defaultFormData.notebookImage.containerImage;
@@ -74,6 +87,7 @@ export function ImageSelectionSectionTabs({
         const formImageKey = formImagesMap[category] || category;
         setSelectedCategory(category);
         setSelectedImage(image);
+        setIsCustomImage(false);
         onImageChange?.({
           images: category,
           [formImageKey]: `cerit.io/hubs/${image}`,
@@ -86,6 +100,20 @@ export function ImageSelectionSectionTabs({
     imageValue: string | null,
     categoryKey: string,
   ) => {
+    // Handle custom category - no image value needed
+    if (categoryKey === "custom") {
+      setSelectedImage(null);
+      setSelectedCategory("custom");
+      setIsCustomImage(true);
+      if (customImageValue) {
+        onImageChange?.({
+          images: "custom",
+          customimage: customImageValue,
+        });
+      }
+      return;
+    }
+
     if (!imageValue) {
       return;
     }
@@ -94,10 +122,24 @@ export function ImageSelectionSectionTabs({
     const formImageKey = formImagesMap[categoryKey] || categoryKey;
     setSelectedImage(imageValue);
     setSelectedCategory(categoryKey);
+    setIsCustomImage(false);
     onImageChange?.({
       images: categoryKey,
       [formImageKey]: `cerit.io/hubs/${imageValue}`,
     });
+  };
+
+  const handleCustomImageChange = (value: string) => {
+    setCustomImageValue(value);
+    setIsCustomImage(true);
+    setSelectedCategory("custom");
+    setSelectedImage(null);
+    if (value) {
+      onImageChange?.({
+        images: "custom",
+        customimage: value,
+      });
+    }
   };
 
   const handleSshToggle = (checked: boolean) => {
@@ -108,22 +150,25 @@ export function ImageSelectionSectionTabs({
   return (
     <div className="flex flex-col gap-4 w-full max-w-screen">
       <div>
-        <h2 className="text-xl font-bold mb-4">1. Choose Environment Type</h2>
         <SelectingCardsTabs
           selectedImageId={selectedImage}
           onSelectImage={handleImageSelect}
           selectedCategory={selectedCategory || undefined}
           setSelectCategory={setSelectedCategory}
+          customImageValue={customImageValue}
+          onCustomImageChange={handleCustomImageChange}
         />
       </div>
 
       <Separator />
+
       {/* SSH Option */}
       <div className="flex items-center space-x-3">
         <Switch
           id="sshCheckBox"
           checked={sshChecked}
           onCheckedChange={handleSshToggle}
+          className="data-[state=unchecked]:bg-surface-raised"
         />
         <Label
           htmlFor="sshCheckBox"

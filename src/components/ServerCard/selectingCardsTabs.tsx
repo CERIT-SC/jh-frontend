@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Search, X } from "lucide-react";
 
 import { cn } from "../../utils/utils";
 
@@ -9,15 +9,12 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   Badge,
-  CardContent,
+  Input,
+  P,
 } from "@e-infra/design-system";
 import { sectionTitles } from "../../data/formData";
 import { getImageOptions } from "../../scripts/gatherFormData";
@@ -29,6 +26,8 @@ interface SelectingCardTabsProps {
   onSelectImage: (imageId: string | null, category: string) => void;
   selectedCategory?: string;
   setSelectCategory?: (category: string) => void;
+  customImageValue?: string;
+  onCustomImageChange?: (value: string) => void;
 }
 
 // Feature configuration: abbreviation -> { fullName, style }
@@ -38,42 +37,42 @@ const FEATURE_CONFIG: Record<
 > = {
   AI: {
     fullName: "Artificial Intelligence",
-    style: "bg-chart-2 text-muted",
+    style: "bg-chart-2/50 text-text",
     keywords: ["ai"],
   },
   SSH: {
     fullName: "SSH Access",
-    style: "bg-success/50 text-success-foreground",
+    style: "bg-chart-4/50 text-text",
     keywords: ["ssh", "ssh access"],
   },
   GPU: {
     fullName: "GPU Support",
-    style: "bg-orange-100 text-orange-800",
+    style: "bg-chart-3/50 text-text",
     keywords: ["gpu"],
   },
   CPU: {
     fullName: "CPU Only",
-    style: "bg-yellow-100 text-yellow-800",
+    style: "bg-chart-2/50 text-text",
     keywords: ["cpu only"],
   },
   TB: {
     fullName: "TensorBoard",
-    style: "bg-indigo-100 text-indigo-800",
+    style: "bg-chart-5/50 text-text",
     keywords: ["tensorboard"],
   },
   RSAT: {
     fullName: "RSAT Tools",
-    style: "bg-teal-100 text-teal-800",
+    style: "bg-chart-1/50 text-text",
     keywords: ["rsat"],
   },
   VSC: {
     fullName: "Integrated VS Code",
-    style: "bg-info/50 text-info-foreground",
+    style: "bg-chart-3/50 text-text",
     keywords: ["vs code", "integrated vs code"],
   },
   NI: {
     fullName: "Notebook Intelligence",
-    style: "bg-pink-100 text-pink-800",
+    style: "bg-chart-2/50 text-text",
     keywords: ["notebook-intelligence", "intelligence"],
   },
 };
@@ -165,7 +164,7 @@ function extractImageBadge(
       foundFeatures.push({
         abbr: dateVersion,
         fullName: `Version ${dateVersion}`,
-        style: "bg-secondary text-gray-800",
+        style: "bg-surface text-text ring-1 ring-border",
       });
     }
   }
@@ -209,89 +208,204 @@ export function SelectingCardsTabs({
   onSelectImage,
   selectedCategory,
   setSelectCategory,
+  customImageValue = "",
+  onCustomImageChange,
 }: SelectingCardTabsProps) {
   const images = useMemo(() => getImageOptions() as ImageOptions, []);
-  const categories = Object.keys(images);
-  const [activeTab, setActiveTab] = useState<string>(
+  const categories = [...Object.keys(images), "custom"];
+  const [activeCategory, setActiveCategory] = useState<string>(
     selectedCategory || categories[0] || "simple",
   );
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const handleCategoryChange = (category: string): void => {
+    setActiveCategory(category);
+    setSelectCategory?.(category);
+    setSearchQuery(""); // Reset search when changing category
+
+    // If switching to custom category, notify parent
+    if (category === "custom") {
+      onSelectImage(null, "custom");
+    }
+  };
+
+  // Filter images based on search query
+  const filteredImages = useMemo(() => {
+    // Don't show images for custom category
+    if (activeCategory === "custom") {
+      return [];
+    }
+    const categoryImages = images[activeCategory] || [];
+    if (!searchQuery.trim()) {
+      return categoryImages;
+    }
+    const query = searchQuery.toLowerCase();
+    return categoryImages.filter(({ name, value }) => {
+      const baseName = extractBaseName(name).toLowerCase();
+      const fullName = name.toLowerCase();
+      const imageValue = value.toLowerCase();
+      return (
+        baseName.includes(query) ||
+        fullName.includes(query) ||
+        imageValue.includes(query)
+      );
+    });
+  }, [images, activeCategory, searchQuery]);
+
+  const clearSearch = (): void => {
+    setSearchQuery("");
+  };
+
+  const handleCustomImageInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ): void => {
+    onCustomImageChange?.(e.target.value);
+  };
 
   return (
-    <div className="w-full">
-      <Tabs
-        className="animation"
-        defaultValue={selectedCategory || ""}
-        value={activeTab}
-        onValueChange={(value) => {
-          setActiveTab(value);
-          //   onSelectImage(null); // Reset image selection when switching tabs
-          setSelectCategory && setSelectCategory(value);
-        }}
-      >
-        <TabsList
-          className="grid w-full gap-2 animate-fade-in"
-          style={{
-            gridTemplateColumns: `repeat(auto-fit, minmax(100px, 1fr))`,
-          }}
-        >
-          {categories.map((category) => (
-            <TabsTrigger
-              key={category}
-              value={category}
-              className="transition-all duration-300 line-clamp-1 text-sm truncate-multi"
-            >
-              {sectionTitles[category as keyof typeof sectionTitles] ||
-                category}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+    <div className="w-full space-y-4">
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+        <Input
+          type="text"
+          placeholder="Search images..."
+          value={searchQuery}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchQuery(e.target.value)
+          }
+          className="pl-10 pr-10 bg-surface-raised"
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={clearSearch}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="size-4 text-muted-foreground" />
+          </button>
+        )}
+      </div>
 
-        {categories.map((category) => (
-          <TabsContent key={category} value={category}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-              {(images[category] || []).map(({ value, name }) => (
-                <Card
-                  key={value}
+      {/* Category Badge Triggers */}
+      <div className="flex flex-wrap gap-2 animate-fade-in">
+        {categories.map((category) => {
+          const isActive = activeCategory === category;
+          const isCustomCategory = category === "custom";
+          return (
+            <Badge
+              key={category}
+              variant={isActive ? "default" : "outline"}
+              className={cn(
+                "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                "bg-surface-raised border-surface-raised text-text",
+                "hover:bg-primary/10 hover:border-primary",
+                isActive &&
+                  "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+              )}
+              onClick={() => handleCategoryChange(category)}
+            >
+              {isCustomCategory
+                ? "Custom Image"
+                : sectionTitles[category as keyof typeof sectionTitles] ||
+                  category}
+            </Badge>
+          );
+        })}
+      </div>
+
+      {/* Custom Image Input */}
+      {activeCategory === "custom" && (
+        <div className="space-y-3">
+          <div className="flex flex-col gap-2">
+            <P className="text-sm text-muted-foreground">
+              Provide image name in format repo/image_name:tag or
+              repo/image_name
+            </P>
+            <Input
+              type="text"
+              placeholder="e.g., cerit.io/hubs/custom-image:latest"
+              value={customImageValue}
+              onChange={handleCustomImageInput}
+              className="w-full bg-surface-raised"
+            />
+          </div>
+          {customImageValue && (
+            <Card
+              className={cn(
+                "bg-surface-raised",
+                "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-all duration-300",
+                "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% shadow-md",
+              )}
+            >
+              <div className="absolute top-2 right-2 z-10">
+                <Check className="size-5 text-primary-foreground" />
+              </div>
+              <CardHeader>
+                <CardTitle className="flex-shrink-0">Custom Image</CardTitle>
+                <CardDescription className="truncate max-w-md">
+                  {customImageValue}
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Results count */}
+      {searchQuery && activeCategory !== "custom" && (
+        <P>
+          Found {filteredImages.length} image
+          {filteredImages.length !== 1 ? "s" : ""}
+        </P>
+      )}
+
+      {/* Image Cards Grid */}
+      {activeCategory !== "custom" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {filteredImages.map(({ value, name }) => (
+            <Card
+              key={value}
+              className={cn(
+                "bg-surface-raised",
+                "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-all duration-300",
+                selectedImageId === value
+                  ? "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% shadow-md"
+                  : "hover:text-text hover:border-primary/30",
+              )}
+              onClick={() => onSelectImage(value, activeCategory)}
+            >
+              {/* Check indicator in corner - visible on hover when not selected */}
+              <div
+                className={cn(
+                  "absolute top-2 right-2 z-10 transition-opacity duration-200",
+                  selectedImageId === value
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-50",
+                )}
+              >
+                <Check
                   className={cn(
-                    "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-all duration-300",
+                    "size-5",
                     selectedImageId === value
-                      ? "border-primary via-primary to-primary bg-linear-45 from-white from-85% shadow-md"
-                      : "hover:text-primary hover:border-primary/30",
+                      ? "text-primary-foreground"
+                      : "text-primary",
                   )}
-                  onClick={() => onSelectImage(value, category)}
-                >
-                  {/* Check indicator in corner - visible on hover when not selected */}
-                  <div
-                    className={cn(
-                      "absolute top-2 right-2 z-10 transition-opacity duration-200",
-                      selectedImageId === value
-                        ? "opacity-100"
-                        : "opacity-0 group-hover:opacity-50",
-                    )}
-                  >
-                    <Check
-                      className={cn(
-                        "size-5",
-                        selectedImageId === value
-                          ? "text-primary-foreground"
-                          : "text-primary",
-                      )}
-                    />
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="flex-shrink-0">
-                      {extractBaseName(name)}
-                    </CardTitle>
-                    <CardDescription>
-                      {extractImageBadge(name, value)}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+                />
+              </div>
+              <CardHeader>
+                <CardTitle className="flex-shrink-0">
+                  {extractBaseName(name)}
+                </CardTitle>
+                <CardDescription>
+                  {extractImageBadge(name, value)}
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

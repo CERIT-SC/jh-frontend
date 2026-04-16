@@ -4,7 +4,17 @@ import {
   getPersistentHomeOptions,
   getMetaCentrumHomeOptions,
 } from "../scripts/gatherFormData";
-import { Switch, Alert, Label, Input } from "@e-infra/design-system";
+import {
+  Switch,
+  Alert,
+  Label,
+  Input,
+  Badge,
+  H3,
+  H2,
+  Code,
+  P,
+} from "@e-infra/design-system";
 import {
   AlertTriangle,
   HardDrive,
@@ -13,8 +23,8 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { TileSelector } from "../components/TileSelector/TileSelector";
 import { ToggleCard } from "../components/ToggleCard/ToggleCard";
+import { cn } from "../utils/utils";
 
 // ============================================================================
 // Type Definitions
@@ -72,6 +82,168 @@ interface StorageSelectionSectionProps {
 }
 
 declare const appConfig: { userName?: string };
+
+// ============================================================================
+// Reusable Section Container Component (Compound Pattern)
+// ============================================================================
+
+import { createContext, useContext } from "react";
+
+interface SectionContainerContextValue {
+  enabled: boolean;
+  onToggle?: (enabled: boolean) => void;
+}
+
+const SectionContainerContext = createContext<SectionContainerContextValue>({
+  enabled: true,
+});
+
+interface SectionContainerProps {
+  children?: React.ReactNode;
+  className?: string;
+  /** Whether the section is enabled (content visible) */
+  enabled?: boolean;
+  /** Callback when toggle switch is clicked */
+  onToggle?: (enabled: boolean) => void;
+  /** ID for the section */
+  id?: string;
+}
+
+interface SectionHeaderProps {
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
+  className?: string;
+  /** Whether to show toggle switch in header */
+  showToggle?: boolean;
+}
+
+interface SectionContentProps {
+  children?: React.ReactNode;
+  className?: string;
+}
+
+/**
+ * SectionContainer.Header - Header section with optional icon and toggle
+ */
+function SectionHeader({
+  children,
+  icon,
+  className,
+  showToggle = false,
+}: SectionHeaderProps): React.ReactElement {
+  const { enabled, onToggle } = useContext(SectionContainerContext);
+
+  const handleToggle = (checked: boolean) => {
+    if (onToggle) {
+      onToggle(checked);
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-3 p-4",
+        !enabled && "opacity-60",
+        className,
+      )}
+    >
+      {icon && (
+        <span
+          className={cn(
+            "flex-shrink-0 mt-0.5 transition-colors",
+            enabled ? "text-primary" : "text-muted-foreground",
+          )}
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+      )}
+      <div className={cn("flex-1", !enabled && "text-muted-foreground")}>
+        {children}
+      </div>
+      {showToggle && (
+        <Switch
+          checked={enabled}
+          onCheckedChange={handleToggle}
+          className="scale-120 data-[state=unchecked]:bg-surface-raised"
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * SectionContainer.Content - Content section that collapses when disabled
+ */
+function SectionContent({
+  children,
+  className,
+}: SectionContentProps): React.ReactElement | null {
+  const { enabled } = useContext(SectionContainerContext);
+
+  if (!enabled) {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        "p-4 rounded-b-lg border-t border-border bg-secondary dark:bg-secondary/80",
+        "animate-[slideInFade_300ms_ease-out]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Collapsible section container with header and content areas.
+ * Uses compound component pattern: SectionContainer.Header and SectionContainer.Content
+ *
+ * @example
+ * ```tsx
+ * <SectionContainer
+ *   enabled={storageEnabled}
+ *   onToggle={setStorageEnabled}
+ *   id="storage-section"
+ * >
+ *   <SectionContainer.Header icon={<Server />} showToggle>
+ *     <H3>Storage</H3>
+ *     <P>Description</P>
+ *   </SectionContainer.Header>
+ *   <SectionContainer.Content emptyContent={<div>Enable to configure</div>}>
+ *     {/* Form content *\/}
+ *   </SectionContainer.Content>
+ * </SectionContainer>
+ * ```
+ */
+function SectionContainer({
+  children,
+  className,
+  enabled = true,
+  onToggle,
+  id,
+}: SectionContainerProps): React.ReactElement {
+  return (
+    <SectionContainerContext.Provider value={{ enabled, onToggle }}>
+      <section
+        id={id}
+        className={cn(
+          "rounded-lg ring shadow-sm bg-surface transition-all duration-300",
+          enabled ? "" : "ring-border",
+          className,
+        )}
+      >
+        {children}
+      </section>
+    </SectionContainerContext.Provider>
+  );
+}
+
+SectionContainer.Header = SectionHeader;
+SectionContainer.Content = SectionContent;
 
 // ============================================================================
 // Constants
@@ -415,396 +587,289 @@ export default function StorageSelectionSection({
 
   return (
     <div className="form-wrap max-w-4xl mx-auto flex flex-col gap-4">
-      {/* Header */}
-      <div className="">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">
-          Configure Storage
-        </h2>
-        <p className="text-sm text-gray-600">
-          Select and configure storage options for your Jupyter notebook
-          environment.
-        </p>
-      </div>
-
       {/* Persistent Home Configuration */}
-      <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-        <div className="flex items-start gap-3 ">
-          <HardDrive
-            className="w-5 h-5 text-gray-600 mt-0.5"
-            aria-hidden="true"
-          />
-          <div className="flex-1">
-            <h3 className="text-base font-semibold text-gray-900">
-              Persistent Notebook Home
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Persistent home ensures your data persists even when the notebook
-              is deleted. Mounted to{" "}
-              <code className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                /home/jovyan
-              </code>
-            </p>
+      <SectionContainer>
+        <SectionContainer.Header
+          icon={<HardDrive className="w-5 h-5 mt-0.5" aria-hidden="true" />}
+        >
+          <H3>PersistentNotebook Home</H3>
+          <P>
+            Persistent home ensures your data persists even when the notebook is
+            deleted. Mounted to <Code>/home/jovyan</Code>
+          </P>
+        </SectionContainer.Header>
+        <SectionContainer.Content>
+          {/* Badge Selector for New/Existing */}
+          <div className="mb-4 space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {PERSISTENT_HOME_OPTIONS.map((option) => {
+                const isActive = phSelectionType === option.value;
+                return (
+                  <Badge
+                    key={option.value}
+                    variant={isActive ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                      "bg-surface",
+                      "hover:bg-primary/10 hover:border-primary",
+                      isActive &&
+                        "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                    )}
+                    onClick={() =>
+                      setPhSelectionType(option.value as "new" | "existing")
+                    }
+                  >
+                    {option.label}
+                  </Badge>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* Tile Selector for New/Existing */}
-        <div className="mb-4">
-          <TileSelector
-            selectionText="Create new or use existing?"
-            options={PERSISTENT_HOME_OPTIONS}
-            value={phSelectionType}
-            onChange={(val: string) =>
-              setPhSelectionType(val as "new" | "existing")
-            }
-            ariaLabel="Persistent home type selection"
-          />
-        </div>
-
-        {/* New Home Configuration */}
-        {phSelectionType === "new" && (
-          <div className="space-y-4 pl-4 border-l-2 border-info">
-            {/* Inline Warning with Checkbox */}
-            <div className="flex items-start gap-3">
-              <Switch
-                id="phCheckId"
-                checked={checkedErased}
-                onCheckedChange={handleErase}
+          {/* New Home Configuration */}
+          {phSelectionType === "new" && (
+            <div className="space-y-4 pl-4">
+              {/* Inline Warning with Checkbox */}
+              <div className="flex items-start gap-3">
+                <Switch
+                  id="phCheckId"
+                  checked={checkedErased}
+                  onCheckedChange={handleErase}
+                  className="scale-120 data-[state=unchecked]:bg-surface"
+                />
+                <div className="flex-1">
+                  <Label htmlFor="phCheckId" className="cursor-pointer">
+                    Erase if home exists
+                  </Label>
+                </div>
+              </div>
+              {checkedErased && (
+                <Alert variant="warning" className="mt-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-xs">
+                    Warning: This will erase all existing data in your
+                    persistent home directory!
+                  </span>
+                </Alert>
+              )}
+            </div>
+          )}
+          {/* Existing Home Configuration */}
+          {phSelectionType === "existing" && (
+            <div className="">
+              <DropDownMenu
+                formSelect={handlePersistentHome}
+                title="Select Persistent Home"
+                menuOptions={persistentHomeOptions}
+                defaultOption={defaultOptionPhname}
+                className="bg-surface"
               />
-              <div className="flex-1">
-                <label
-                  htmlFor="phCheckId"
-                  className="text-sm font-medium text-gray-900 cursor-pointer"
+            </div>
+          )}
+        </SectionContainer.Content>
+      </SectionContainer>
+      {/* MetaCentrum Storage Configuration */}
+      <SectionContainer
+        enabled={checkedStorage}
+        onToggle={handleStorageCheck}
+        id="metacentrum-storage"
+      >
+        <SectionContainer.Header
+          icon={<Server className="w-5 h-5 mt-0.5" aria-hidden="true" />}
+          showToggle
+        >
+          <H3>MetaCentrum Storage</H3>
+          <P>
+            Mount MetaCentrum home directory and project folders. Mounted to{" "}
+            <Code>/home/meta/{appConfig.userName}</Code>
+          </P>
+        </SectionContainer.Header>
+        <SectionContainer.Content>
+          <div className="space-y-4 pl-4 animate-in fade-in-0 duration-300">
+            {/* Storage Selection */}
+            <div>
+              <DropDownMenu
+                formSelect={handleStorage}
+                title="Select MetaCentrum Storage"
+                menuOptions={storageOptions}
+                defaultOption={defaultHome}
+                className="bg-surface"
+              />
+            </div>
+
+            {/* Mount Options */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="locationStorageCheckId"
+                  checked={checkedMount}
+                  onCheckedChange={handleLocationStorageCheck}
+                  className="scale-120 "
+                />
+                <Label
+                  htmlFor="locationStorageCheckId"
+                  className="cursor-pointer"
                 >
-                  Erase if home exists
-                </label>
+                  Mount selected home to{" "}
+                  <Code>
+                    /storage/{formData["home"] ?? "chosen_storage"}/home/
+                    {appConfig.userName}
+                  </Code>
+                </Label>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Switch
+                  id="projectCheckId"
+                  checked={checkedDirectories}
+                  onCheckedChange={handleCheckboxDirectories}
+                  className="scale-120"
+                />
+                <div className="flex-1">
+                  <Label htmlFor="projectCheckId" className="cursor-pointer">
+                    Mount project directories
+                  </Label>
+                  <P>
+                    All projects mounted to <Code>/home/projects/brno12</Code>,
+                    specific projects are subfolders
+                  </P>
+                </div>
               </div>
             </div>
-            {checkedErased && (
-              <Alert variant="warning" className="mt-2">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="text-xs">
-                  Warning: This will erase all existing data in your persistent
-                  home directory!
-                </span>
-              </Alert>
+          </div>
+        </SectionContainer.Content>
+      </SectionContainer>
+
+      {/* S3 Storage Configuration */}
+      <SectionContainer
+        enabled={checkedS3Storage}
+        onToggle={onS3Check}
+        id="s3-storage"
+      >
+        <SectionContainer.Header
+          icon={<Cloud className="w-5 h-5 mt-0.5" aria-hidden="true" />}
+          showToggle
+        >
+          <H3>S3 Object Storage</H3>
+          <P>
+            Mount S3-compatible object storage bucket. Mounted to{" "}
+            <Code>/storage/s3</Code>
+          </P>
+        </SectionContainer.Header>
+        <SectionContainer.Content>
+          <div className="space-y-4">
+            {/* S3 Type Selection */}
+            <div className="pl-4 space-y-2">
+              <P>Select Bucket Type</P>
+              <div className="flex flex-wrap gap-2">
+                {S3_OPTIONS.map((option) => {
+                  const isActive = s3SelectionType === option.value;
+                  return (
+                    <Badge
+                      key={option.value}
+                      variant={isActive ? "default" : "outline"}
+                      className={cn(
+                        "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                        "bg-surface",
+                        "hover:bg-primary/10 hover:border-primary",
+                        isActive &&
+                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                      )}
+                      onClick={() => setS3SelectionType(option.value)}
+                    >
+                      {option.label}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Existing S3 Bucket */}
+            {s3SelectionType === "existing" && (
+              <div className="pl-4 animate-in fade-in-0 duration-200">
+                <DropDownMenu
+                  formSelect={handleS3Buckets}
+                  title="Select S3 Bucket"
+                  menuOptions={s3values}
+                  defaultOption={defaultOptionS3name}
+                  className="bg-surface"
+                />
+              </div>
+            )}
+
+            {/* New S3 Bucket */}
+            {s3SelectionType === "new" && (
+              <div className="space-y-4 pl-4 animate-in fade-in-0 duration-200">
+                <div className="space-y-2">
+                  <Label htmlFor="s3-url">S3 URL</Label>
+                  <Input
+                    id="s3-url"
+                    type="text"
+                    value={formData.s3url ?? ""}
+                    placeholder="https://s3.cloud.e-infra.cz"
+                    onChange={(e) => handleS3UrlChange(e.target.value)}
+                    className="w-full bg-surface"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="s3-bucket">Bucket Name</Label>
+                  <Input
+                    id="s3-bucket"
+                    type="text"
+                    value={formData.s3bucket ?? ""}
+                    placeholder="example-bucket"
+                    onChange={(e) => handleS3BucketChange(e.target.value)}
+                    className="w-full bg-surface"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="s3-access-key">Access Key</Label>
+                  <div className="relative">
+                    <Input
+                      id="s3-access-key"
+                      type={showAccessKey ? "text" : "password"}
+                      value={formData.s3accesskey ?? ""}
+                      placeholder="s3AccessKey"
+                      onChange={(e) => handleS3AccessKeyChange(e.target.value)}
+                      className="w-full pr-10 bg-surface"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAccessKey(!showAccessKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
+                    >
+                      {showAccessKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="s3-secret-key">Secret Key</Label>
+                  <div className="relative">
+                    <Input
+                      id="s3-secret-key"
+                      type={showSecretKey ? "text" : "password"}
+                      value={formData.s3secretkey ?? ""}
+                      placeholder="s3SecretKey"
+                      onChange={(e) => handleS3SecretKeyChange(e.target.value)}
+                      className="w-full pr-10 bg-surface"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSecretKey(!showSecretKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
+                    >
+                      {showSecretKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
-        )}
-
-        {/* Existing Home Configuration */}
-        {phSelectionType === "existing" && (
-          <div className="pl-4 border-l-2 border-blue-200">
-            <DropDownMenu
-              formSelect={handlePersistentHome}
-              title="Select Persistent Home"
-              menuOptions={persistentHomeOptions}
-              defaultOption={defaultOptionPhname}
-            />
-          </div>
-        )}
-      </section>
-      {/* Top Layer: Toggle Cards Overview */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-gray-700 tracking-wide">
-          Storage Options
-        </h3>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {/* Persistent Home Toggle */}
-          {/* <ToggleCard
-            id="persistent-home"
-            title="Persistent Home"
-            description="Persistent notebook home directory"
-            icon={<HardDrive className="w-5 h-5" />}
-            enabled={true}
-            onToggle={() => {}}
-            disabled={true}
-            badge="Required"
-          /> */}
-
-          {/* MetaCentrum Storage Toggle */}
-          <ToggleCard
-            id="metacentrum-storage"
-            title="MetaCentrum Storage"
-            description="Mount MetaCentrum home directory and project folders"
-            icon={<Server className="w-5 h-5" />}
-            enabled={checkedStorage}
-            onToggle={handleStorageCheck}
-          />
-
-          {/* S3 Storage Toggle */}
-          <ToggleCard
-            id="s3-storage"
-            title="S3 Object Storage"
-            description="Mount S3-compatible object storage bucket"
-            icon={<Cloud className="w-5 h-5" />}
-            enabled={checkedS3Storage}
-            onToggle={onS3Check}
-          />
-        </div>
-      </div>
-
-      {/* Bottom Layer: Expanded Configurators */}
-      <div className="space-y-6">
-        {/* MetaCentrum Storage Configuration */}
-        <section
-          className={`bg-white rounded-lg border p-6 shadow-sm transition-all duration-300 ${
-            checkedStorage ? "border-blue-200" : "border-gray-200 opacity-60"
-          }`}
-          aria-disabled={!checkedStorage}
-        >
-          <div className="flex items-start gap-3">
-            <Server
-              className={`w-5 h-5 mt-0.5 ${checkedStorage ? "text-blue-500" : "text-gray-400"}`}
-              aria-hidden="true"
-            />
-            <div className="flex-1">
-              <h3
-                className={`text-base font-semibold ${checkedStorage ? "text-gray-900" : "text-gray-500"}`}
-              >
-                MetaCentrum Storage Configuration
-              </h3>
-              <p
-                className={`text-sm mt-1 ${checkedStorage ? "text-gray-600" : "text-gray-400"}`}
-              >
-                Mounted to{" "}
-                <code className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                  /home/meta/{appConfig.userName}
-                </code>
-              </p>
-            </div>
-          </div>
-
-          {checkedStorage ? (
-            <div className="space-y-4 pl-4 border-l-2 border-blue-200 animate-in fade-in-0 duration-300">
-              {/* Storage Selection */}
-              <div>
-                {/* <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Select Storage
-                </Label> */}
-                <DropDownMenu
-                  formSelect={handleStorage}
-                  title="Select MetaCentrum Storage"
-                  menuOptions={storageOptions}
-                  defaultOption={defaultHome}
-                />
-              </div>
-
-              {/* Mount Options */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Switch
-                    id="locationStorageCheckId"
-                    checked={checkedMount}
-                    onCheckedChange={handleLocationStorageCheck}
-                  />
-                  <label
-                    htmlFor="locationStorageCheckId"
-                    className="text-sm font-medium text-gray-900 cursor-pointer"
-                  >
-                    Mount selected home to{" "}
-                    <code className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                      /storage/{formData["home"] ?? "chosen_storage"}/home/
-                      {appConfig.userName}
-                    </code>
-                  </label>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Switch
-                    id="projectCheckId"
-                    checked={checkedDirectories}
-                    onCheckedChange={handleCheckboxDirectories}
-                  />
-                  <div className="flex-1">
-                    <label
-                      htmlFor="projectCheckId"
-                      className="text-sm font-medium text-gray-900 cursor-pointer"
-                    >
-                      Mount project directories
-                    </label>
-                    <p className="text-xs text-gray-500 mt-1">
-                      All projects mounted to{" "}
-                      <code className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                        /home/projects/brno12
-                      </code>
-                      , specific projects are subfolders
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-gray-400 italic">
-              Enable MetaCentrum storage above to configure mount options
-            </div>
-          )}
-        </section>
-
-        {/* S3 Storage Configuration */}
-        <section
-          className={`bg-white rounded-lg border p-6 shadow-sm transition-all duration-300 ${
-            checkedS3Storage ? "border-blue-200" : "border-gray-200 opacity-60"
-          }`}
-          aria-disabled={!checkedS3Storage}
-        >
-          <div className="flex items-start gap-3 mb-4">
-            <Cloud
-              className={`w-5 h-5 mt-0.5 ${checkedS3Storage ? "text-blue-500" : "text-gray-400"}`}
-              aria-hidden="true"
-            />
-            <div className="flex-1">
-              <h3
-                className={`text-base font-semibold ${checkedS3Storage ? "text-gray-900" : "text-gray-500"}`}
-              >
-                S3 Object Storage Configuration
-              </h3>
-              <p
-                className={`text-sm mt-1 ${checkedS3Storage ? "text-gray-600" : "text-gray-400"}`}
-              >
-                Mounted to{" "}
-                <code className="px-1 py-0.5 bg-gray-100 rounded text-xs font-mono">
-                  /storage/s3
-                </code>
-              </p>
-            </div>
-          </div>
-
-          {checkedS3Storage ? (
-            <div className="space-y-4 animate-in fade-in-0 slide-in-from-top-2 duration-300">
-              {/* S3 Type Selection */}
-              <div className="pl-4 border-l-2 border-blue-200">
-                <TileSelector
-                  selectionText="Select Bucket Type"
-                  options={S3_OPTIONS}
-                  value={s3SelectionType}
-                  onChange={setS3SelectionType}
-                  ariaLabel="S3 bucket type selection"
-                />
-              </div>
-
-              {/* Existing S3 Bucket */}
-              {s3SelectionType === "existing" && (
-                <div className="pl-4 border-l-2 border-blue-200 animate-in fade-in-0 duration-200">
-                  <DropDownMenu
-                    formSelect={handleS3Buckets}
-                    title="Select S3 Bucket"
-                    menuOptions={s3values}
-                    defaultOption={defaultOptionS3name}
-                  />
-                </div>
-              )}
-
-              {/* New S3 Bucket */}
-              {s3SelectionType === "new" && (
-                <div className="space-y-4 pl-4 border-l-2 border-blue-200 animate-in fade-in-0 duration-200">
-                  <div>
-                    <Label
-                      htmlFor="s3-url"
-                      className="text-sm font-medium text-gray-700 mb-2 block"
-                    >
-                      S3 URL
-                    </Label>
-                    <Input
-                      id="s3-url"
-                      type="text"
-                      value={formData.s3url ?? ""}
-                      placeholder="https://s3.cloud.e-infra.cz"
-                      onChange={(e) => handleS3UrlChange(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div>
-                    <Label
-                      htmlFor="s3-bucket"
-                      className="text-sm font-medium text-gray-700 mb-2 block"
-                    >
-                      Bucket Name
-                    </Label>
-                    <Input
-                      id="s3-bucket"
-                      type="text"
-                      value={formData.s3bucket ?? ""}
-                      placeholder="example-bucket"
-                      onChange={(e) => handleS3BucketChange(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div>
-                    <Label
-                      htmlFor="s3-access-key"
-                      className="text-sm font-medium text-gray-700 mb-2 block"
-                    >
-                      Access Key
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="s3-access-key"
-                        type={showAccessKey ? "text" : "password"}
-                        value={formData.s3accesskey ?? ""}
-                        placeholder="s3AccessKey"
-                        onChange={(e) =>
-                          handleS3AccessKeyChange(e.target.value)
-                        }
-                        className="w-full pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowAccessKey(!showAccessKey)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showAccessKey ? (
-                          <EyeOff size={18} />
-                        ) : (
-                          <Eye size={18} />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label
-                      htmlFor="s3-secret-key"
-                      className="text-sm font-medium text-gray-700 mb-2 block"
-                    >
-                      Secret Key
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="s3-secret-key"
-                        type={showSecretKey ? "text" : "password"}
-                        value={formData.s3secretkey ?? ""}
-                        placeholder="s3SecretKey"
-                        onChange={(e) =>
-                          handleS3SecretKeyChange(e.target.value)
-                        }
-                        className="w-full pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowSecretKey(!showSecretKey)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showSecretKey ? (
-                          <EyeOff size={18} />
-                        ) : (
-                          <Eye size={18} />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-sm text-gray-400 italic">
-              Enable S3 storage above to configure bucket settings
-            </div>
-          )}
-        </section>
-      </div>
+        </SectionContainer.Content>
+      </SectionContainer>
     </div>
   );
 }

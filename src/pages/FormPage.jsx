@@ -4,7 +4,15 @@ import JupyterHubHeader from "../components/FooterAndHeader/JupyterHubHeader";
 
 import { gatherFormData, getS3BucketOptions } from "../scripts/gatherFormData";
 import { ListObjectsCommand, S3Client } from "@aws-sdk/client-s3";
-import { Panel, Button } from "@e-infra/design-system";
+import {
+  Panel,
+  PanelTitle,
+  Button,
+  PanelDescription,
+  PanelContent,
+  Separator,
+  P,
+} from "@e-infra/design-system";
 import { OverviewPanel } from "../components/overviewPanel";
 import initDev from "../dev-setup";
 import StorageSelectionSection from "../formSections/StorageSection";
@@ -330,82 +338,111 @@ function FormPage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
-      <div className="flex flex-row gap-12 w-full h-full px-4 mb-8 relative max-w-7xl mx-auto">
-        {/* Left side: Scrollable content taking 2/3 */}
-        <div className="w-2/3 no-scrollbar pt-4 flex flex-col gap-8">
-          <Panel id="image-section" className="scroll-mt-20">
-            <ImageSelectionSectionTabs
-              defaultFormData={defaultFormData}
-              selectedImage={selectedImage}
-              setSelectedImage={setSelectedImage}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              onImageChange={(data) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  ...data,
-                }));
-              }}
-              onSshChange={(sshAccess) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  sshAccess,
-                }));
-              }}
-            />
-          </Panel>
+      <div className="container grow mx-auto px-4">
+        <div className="flex flex-row gap-12 w-full h-full relative">
+          {/* Left side: Scrollable content taking 2/3 */}
+          <div className="w-2/3 no-scrollbar pt-4 flex flex-col gap-8">
+            <Panel id="image-section" className="scroll-mt-20 p-0">
+              <PanelTitle className="mb-2 px-6 pt-6">
+                Choose Environment Type
+              </PanelTitle>
+              <PanelDescription className="px-6">
+                Select a image for your notebook.
+              </PanelDescription>
+              <Separator className="mt-2" />
+              <PanelContent className="p-6">
+                <ImageSelectionSectionTabs
+                  defaultFormData={defaultFormData}
+                  selectedImage={selectedImage}
+                  setSelectedImage={setSelectedImage}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  onImageChange={(data) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      ...data,
+                    }));
+                  }}
+                  onSshChange={(sshAccess) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      sshAccess,
+                    }));
+                  }}
+                />
+              </PanelContent>
+            </Panel>
 
-          <Panel id="storage-section" className="scroll-mt-20">
-            <StorageSelectionSection
-              defaultFormData={defaultFormData}
-              formData={formData}
-              onPersistentHomeChange={(updater) => {
-                setFormData((prev) => updater(prev));
-              }}
-              onMetaCentrumChange={(updater) => {
-                setFormData((prev) => updater(prev));
-              }}
-              onS3Change={(updater) => {
-                setFormData((prev) => updater(prev));
-              }}
-              onS3Check={handleS3Check}
-              checkedS3Storage={checkedS3Storage}
-              setCheckedS3Storage={setCheckedS3Storage}
-              s3SelectionType={s3SelectionType}
-              setS3SelectionType={setS3SelectionType}
-              s3values={s3values}
-            />
-          </Panel>
+            <Panel id="storage-section" className="scroll-mt-20 p-0">
+              <PanelTitle className="mb-2 px-6 pt-6">
+                Storage Options
+              </PanelTitle>
+              <PanelDescription className="px-6">
+                Choose if you want to use storage and its type.
+              </PanelDescription>
+              <Separator className="mt-2" />
+              <PanelContent className="p-6">
+                <StorageSelectionSection
+                  defaultFormData={defaultFormData}
+                  formData={formData}
+                  onPersistentHomeChange={(updater) => {
+                    setFormData((prev) => updater(prev));
+                  }}
+                  onMetaCentrumChange={(updater) => {
+                    setFormData((prev) => updater(prev));
+                  }}
+                  onS3Change={(updater) => {
+                    setFormData((prev) => updater(prev));
+                  }}
+                  onS3Check={handleS3Check}
+                  checkedS3Storage={checkedS3Storage}
+                  setCheckedS3Storage={setCheckedS3Storage}
+                  s3SelectionType={s3SelectionType}
+                  setS3SelectionType={setS3SelectionType}
+                  s3values={s3values}
+                />
+              </PanelContent>
+            </Panel>
 
-          <Panel id="resources-section" className="scroll-mt-20">
-            <ResourceSelectionSection
-              formData={formData}
-              defaultFormData={defaultFormData}
-              setFormData={setFormData}
-            />
-          </Panel>
-        </div>
+            <Panel id="resources-section" className="scroll-mt-20 p-0">
+              <PanelTitle className="mb-2 px-6 pt-6">
+                Resource Options
+              </PanelTitle>
+              <PanelDescription className="px-6">
+                Select computational resources for your notebook.
+              </PanelDescription>
+              <Separator className="mt-2" />
+              <PanelContent className="p-6">
+                <ResourceSelectionSection
+                  formData={formData}
+                  defaultFormData={defaultFormData}
+                  setFormData={setFormData}
+                />
+              </PanelContent>
+            </Panel>
+          </div>
 
-        {/* Right side:Sticky 1/3 */}
-        <div className="w-1/3 relative">
-          <div className="sticky top-20">
-            <OverviewPanel
-              formData={formData}
-              selectedImage={selectedImage}
-              categoryImage={selectedCategory}
-            >
-              <Button className="w-full" onClick={submitForm}>
-                Start
-              </Button>
-            </OverviewPanel>
+          {/* Right side:Sticky 1/3 */}
+          <div className="w-1/3 relative">
+            <div className="sticky top-20">
+              <OverviewPanel
+                formData={formData}
+                selectedImage={selectedImage}
+                categoryImage={selectedCategory}
+              >
+                <Button className="w-full" onClick={submitForm}>
+                  Start
+                </Button>
+              </OverviewPanel>
+            </div>
           </div>
         </div>
       </div>
       <EinfraFooter />
-    </>
+    </div>
   );
 }
 

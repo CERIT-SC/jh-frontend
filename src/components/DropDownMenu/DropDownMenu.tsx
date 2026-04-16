@@ -14,6 +14,7 @@ interface DropDownMenuProps {
   title: string;
   formSelect: (value: string) => void;
   defaultOption?: [string, string];
+  className?: string;
 }
 
 export const DropDownMenu: React.FC<DropDownMenuProps> = ({
@@ -21,6 +22,7 @@ export const DropDownMenu: React.FC<DropDownMenuProps> = ({
   title,
   formSelect,
   defaultOption,
+  className,
 }) => {
   const [selectedValue, setSelectedValue] = useState<string>(
     defaultOption ? defaultOption[0] : "",
@@ -47,7 +49,7 @@ export const DropDownMenu: React.FC<DropDownMenuProps> = ({
     <div className="flex flex-col gap-2 mt-2">
       <Label>{title}</Label>
       <Select value={selectedValue} onValueChange={handleValueChange}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className={`w-full ${className}`}>
           <SelectValue placeholder="Select an option" />
         </SelectTrigger>
         <SelectContent side="bottom" align="start">

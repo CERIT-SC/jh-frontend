@@ -5,6 +5,7 @@ import {
   EmptyServerCard,
 } from "./ServerCard";
 import React from "react";
+import { H3, P } from "@e-infra/design-system";
 
 export default {
   title: "Components/ServerCard",
@@ -117,36 +118,36 @@ export const AllVariants = {
   render: () => (
     <div className="flex flex-col gap-6">
       <div>
-        <h3 className="text-lg font-semibold mb-3">ServerCard Variants</h3>
+        <H3 className="mb-3">ServerCard Variants</H3>
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Default</p>
+            <P className="mb-2">Default</P>
             <ServerCard {...defaultArgs} />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Inline</p>
+            <P className="mb-2">Inline</P>
             <ServerCardInline {...defaultArgs} />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Compact</p>
+            <P className="mb-2">Compact</P>
             <ServerCardCompact {...defaultArgs} />
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-3">EmptyServerCard Variants</h3>
+        <H3 className="mb-3">EmptyServerCard Variants</H3>
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Default</p>
+            <P className="mb-2">Default</P>
             <EmptyServerCard handleAdd={() => alert("Add")} variant="default" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Inline</p>
+            <P className="mb-2">Inline</P>
             <EmptyServerCard handleAdd={() => alert("Add")} variant="inline" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Compact</p>
+            <P className="mb-2">Compact</P>
             <EmptyServerCard handleAdd={() => alert("Add")} variant="compact" />
           </div>
         </div>

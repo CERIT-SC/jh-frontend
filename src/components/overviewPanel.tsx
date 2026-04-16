@@ -23,8 +23,10 @@ import {
   X,
   MemoryStick,
   Pencil,
+  LayoutDashboard,
 } from "lucide-react";
 import { getGpuOptions, getImageOptions } from "../scripts/gatherFormData";
+import { triggerShineById } from "../utils/shine";
 
 declare const appConfig: { userName?: string };
 
@@ -37,13 +39,18 @@ interface OverviewPanelProps {
 }
 
 /**
- * Edit button component that scrolls to a section
+ * Edit button component that scrolls to a section and triggers shine effect
  */
 function EditButton({ sectionId }: { sectionId: string }): JSX.Element {
   const handleClick = () => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Trigger shine effect after scroll animation starts
+      triggerShineById(sectionId, {
+        duration: 1500,
+        delay: 300,
+      });
     }
   };
 
@@ -67,16 +74,13 @@ function StatusIndicator({ enabled }: { enabled: boolean }): JSX.Element {
   return enabled ? (
     <Badge
       variant="outline"
-      className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1"
+      className="bg-[var(--color-success-100)] text-[var(--color-success-700)] border-[var(--color-success-200)] flex items-center gap-1"
     >
       <Check className="w-3 h-3" />
       <span className="text-xs">Enabled</span>
     </Badge>
   ) : (
-    <Badge
-      variant="outline"
-      className="bg-gray-50 text-gray-500 border-gray-200 flex items-center gap-1"
-    >
+    <Badge variant="secondary" className=" flex items-center gap-1">
       <X className="w-3 h-3" />
       <span className="text-xs">Disabled</span>
     </Badge>
@@ -115,10 +119,14 @@ export function OverviewPanel({
 
   return (
     <Panel title={"overview"} className={className}>
-      <PanelTitle>Overview</PanelTitle>
-      <PanelDescription>Configuration summary before starting</PanelDescription>
+      <PanelTitle className="flex gap-1 items-center">
+        <LayoutDashboard />
+        Configuration Overview
+      </PanelTitle>
+      {/* <PanelDescription>Configuration summary before starting</PanelDescription> */}
 
       <PanelContent className="flex flex-col gap-2 pt-4">
+        <Separator />
         {/* Image Section */}
         {selectedImage && (
           <>
@@ -277,6 +285,7 @@ export function OverviewPanel({
             </div>
           </div>
         </div>
+        <Separator />
       </PanelContent>
 
       <PanelContent>{children}</PanelContent>

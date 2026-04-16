@@ -15,6 +15,7 @@ export default defineConfig({
         spawn_pending: resolve(__dirname, "spawn_pending.html"),
         home: resolve(__dirname, "home.html"),
         not_running: resolve(__dirname, "not_running.html"),
+        token: resolve(__dirname, "token.html"),
       },
       output: {
         entryFileNames: "static/custom-js/[name]-[hash].js",
