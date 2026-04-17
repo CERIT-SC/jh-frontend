@@ -711,7 +711,7 @@ export default function StorageSelectionSection({
                   className="cursor-pointer"
                 >
                   Mount selected home to{" "}
-                  <Code>
+                  <Code className="bg-secondary dark:bg-surface">
                     /storage/{formData["home"] ?? "chosen_storage"}/home/
                     {appConfig.userName}
                   </Code>
@@ -730,8 +730,11 @@ export default function StorageSelectionSection({
                     Mount project directories
                   </Label>
                   <P>
-                    All projects mounted to <Code>/home/projects/brno12</Code>,
-                    specific projects are subfolders
+                    All projects mounted to{" "}
+                    <Code className="bg-secondary dark:bg-surface">
+                      /home/projects/brno12
+                    </Code>
+                    , specific projects are subfolders
                   </P>
                 </div>
               </div>

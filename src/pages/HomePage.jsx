@@ -190,13 +190,24 @@ function HomePage() {
             <PanelContent className="pt-2">
               <div
                 className={
-                  "mt-4 grid gap-3 " +
+                  "mt-4 grid gap-8 " +
                   (gridType === 1
                     ? "grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center"
                     : "grid-cols-1")
                 }
               >
-                {console.log(spawners)}
+                <ServerCardType
+                  title="Default Server"
+                  key="default-server"
+                  spawnerUrl={appConfig.url}
+                  isActive={defaultServerActive}
+                  handleOpen={() => (window.location.href = appConfig.url)}
+                  handleStop={handleStopDefaultServer}
+                  handleStart={() =>
+                    (window.location.href = `/spawn/${appConfig.userName}`)
+                  }
+                  showDeleteButton={false}
+                />
                 {Object.entries(spawners).map(([name, spawner]) => (
                   <ServerCardType
                     title={name}

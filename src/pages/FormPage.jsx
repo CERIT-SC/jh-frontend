@@ -346,7 +346,7 @@ function FormPage() {
     <div className="min-h-screen flex flex-col">
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
-      <div className="container grow mx-auto px-4">
+      <div className="container grow mx-auto px-4 pb-6">
         <div className="flex flex-row gap-12 w-full h-full relative">
           {/* Left side: Scrollable content taking 2/3 */}
           <div className="w-2/3 no-scrollbar pt-4 flex flex-col gap-8">

@@ -39,8 +39,7 @@ function AlertCard({
   return (
     <EInfraAlert
       variant={alert.variant ?? "default"}
-      className="w-[400px] top-0 shadow-lg shadow-secondary/20 backdrop-blur-md cursor-pointer alert-enter transition-all duration-300"
-      // className="w-[400px] top-0 border-error bg-error/25 text-error-foreground shadow-lg shadow-secondary/20 backdrop-blur-md supports-backdrop-filter:bg-error/20 cursor-pointer alert-enter transition-all duration-300"
+      className="w-[400px] top-0 bg-background/60 shadow-lg shadow-secondary/20 backdrop-blur-md supports-backdrop-filter:backdrop-blur-md cursor-pointer alert-enter transition-all duration-300"
       onClick={handleDismiss}
       role="button"
       tabIndex={0}

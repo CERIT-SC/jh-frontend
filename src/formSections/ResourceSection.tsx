@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useCallback } from "react";
 import { TileSelector } from "../components/TileSelector/TileSelector";
 import { FieldHeader } from "../components/FieldHeader/FieldHeader";
 import { DropDownMenu } from "../components/DropDownMenu/DropDownMenu";
@@ -7,7 +7,7 @@ import {
   GPUStatusIndicator,
   GPUSquare,
 } from "../components/GPUStatusIndicator/GPUStatusIndicator";
-import { useGPUStatus } from "../hooks/useGPUStatus";
+import { fetchGPUIndicators, GPUIndicatorsData } from "../api/GPUIndicatorsAPI";
 import {
   Panel,
   PanelTitle,
@@ -43,8 +43,40 @@ export default function ResourceSelectionSection({
   const [defCPU, setDefCPU] = useState<number | null>(null);
   const [defGPU, setDefGPU] = useState<[string, string] | null>(null);
 
-  // Fetch GPU status from Grafana
-  const { gpuStatuses, loading, error, refetch } = useGPUStatus();
+  // GPU status state
+  const [gpuStatuses, setGpuStatuses] = useState<
+    Array<{ model: string; label: string; total: number; free: number }>
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch GPU indicators
+  const fetchGPUStatus = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data: GPUIndicatorsData = await fetchGPUIndicators();
+      // Parse the data into the format expected by GPUStatusIndicator
+      const statuses = Object.entries(data).map(([model, { total, free }]) => ({
+        model,
+        label: model.replace("NVIDIA-", ""),
+        total,
+        free,
+      }));
+      setGpuStatuses(statuses);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch GPU status";
+      console.error("GPU status fetch error:", err);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchGPUStatus();
+  }, [fetchGPUStatus]);
 
   useEffect(() => {
     if (defaultFormData) {
@@ -134,12 +166,12 @@ export default function ResourceSelectionSection({
           ></DropDownMenu>
 
           {/* GPU Status Section */}
-          <Panel className="bg-surface-raised">
-            <PanelTitle>
+          <Panel className="bg-surface-raised p-0 py-6">
+            <PanelTitle className="px-6 pb-4">
               <div className="flex justify-between">
                 GPU Availability
                 <button
-                  onClick={() => refetch()}
+                  onClick={fetchGPUStatus}
                   disabled={loading}
                   className="p-1 hover:bg-surface-raised rounded transition-colors disabled:opacity-50"
                   aria-label="Refresh GPU status"
@@ -150,7 +182,7 @@ export default function ResourceSelectionSection({
                 </button>
               </div>
             </PanelTitle>
-            <PanelContent className="flex flex-col gap-4 border-t">
+            <PanelContent className="flex flex-col px-6 gap-4 border-t">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-text-heading">

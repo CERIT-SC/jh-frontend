@@ -349,14 +349,14 @@ function TokenPage() {
                                   {token.scopes.map((scope, idx) => (
                                     <Code
                                       key={idx}
-                                      className="block text-xs bg-gray-100 p-1 m-1 rounded"
+                                      className="block text-xs bg-surface-raised p-1 m-1 rounded"
                                     >
                                       {scope}
                                     </Code>
                                   ))}
                                 </details>
                               ) : (
-                                <span className="text-gray-400">No scopes</span>
+                                <span className="text-text">No scopes</span>
                               )}
                             </TableCell>
                             <TableCell>
