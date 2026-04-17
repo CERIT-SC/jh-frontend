@@ -92,6 +92,15 @@ export function ImageSelectionSectionTabs({
           images: category,
           [formImageKey]: `cerit.io/hubs/${image}`,
         });
+      } else {
+        setCustomImageValue(imgVal || "");
+        setIsCustomImage(true);
+        setSelectedCategory("custom");
+        setSelectedImage(null);
+        onImageChange?.({
+          images: "custom",
+          customimage: imgVal || "",
+        });
       }
     }
   }, []);
@@ -100,11 +109,11 @@ export function ImageSelectionSectionTabs({
     imageValue: string | null,
     categoryKey: string,
   ) => {
-    // Handle custom category - no image value needed
     if (categoryKey === "custom") {
       setSelectedImage(null);
       setSelectedCategory("custom");
       setIsCustomImage(true);
+
       if (customImageValue) {
         onImageChange?.({
           images: "custom",
@@ -123,9 +132,11 @@ export function ImageSelectionSectionTabs({
     setSelectedImage(imageValue);
     setSelectedCategory(categoryKey);
     setIsCustomImage(false);
+
     onImageChange?.({
       images: categoryKey,
       [formImageKey]: `cerit.io/hubs/${imageValue}`,
+      customimage: "",
     });
   };
 
@@ -134,12 +145,10 @@ export function ImageSelectionSectionTabs({
     setIsCustomImage(true);
     setSelectedCategory("custom");
     setSelectedImage(null);
-    if (value) {
-      onImageChange?.({
-        images: "custom",
-        customimage: value,
-      });
-    }
+    onImageChange?.({
+      images: "custom",
+      customimage: value,
+    });
   };
 
   const handleSshToggle = (checked: boolean) => {

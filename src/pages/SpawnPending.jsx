@@ -127,12 +127,12 @@ const SpawnPending = () => {
                 {/* Progress log content */}
               </div>
             </details>
-            <Accordion type="single" collapsible className="transition">
+            {/* <Accordion type="single" collapsible className="transition">
               <AccordionItem value="event-log">
                 <AccordionTrigger>Event log</AccordionTrigger>
                 <AccordionContent></AccordionContent>
               </AccordionItem>
-            </Accordion>
+            </Accordion> */}
           </PanelContent>
         </Panel>
         <EinfraFooter className="flex-none"></EinfraFooter>

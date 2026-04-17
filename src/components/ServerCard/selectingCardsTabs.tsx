@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Check, Search, X } from "lucide-react";
 
 import { cn } from "../../utils/utils";
@@ -218,14 +218,23 @@ export function SelectingCardsTabs({
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Sync activeCategory with selectedCategory prop changes
+  useEffect(() => {
+    if (selectedCategory && selectedCategory !== activeCategory) {
+      setActiveCategory(selectedCategory);
+    }
+  }, [selectedCategory]);
+
   const handleCategoryChange = (category: string): void => {
     setActiveCategory(category);
     setSelectCategory?.(category);
     setSearchQuery(""); // Reset search when changing category
 
-    // If switching to custom category, notify parent
-    if (category === "custom") {
-      onSelectImage(null, "custom");
+    // Only notify parent for non-custom categories
+    // Custom category should only trigger update when user types in the input
+    if (category !== "custom") {
+      // Don't select any image, just update the category
+      // User needs to click on an image to select it
     }
   };
 
@@ -331,25 +340,6 @@ export function SelectingCardsTabs({
               className="w-full bg-surface-raised"
             />
           </div>
-          {customImageValue && (
-            <Card
-              className={cn(
-                "bg-surface-raised",
-                "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-all duration-300",
-                "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% shadow-md",
-              )}
-            >
-              <div className="absolute top-2 right-2 z-10">
-                <Check className="size-5 text-primary-foreground" />
-              </div>
-              <CardHeader>
-                <CardTitle className="flex-shrink-0">Custom Image</CardTitle>
-                <CardDescription className="truncate max-w-md">
-                  {customImageValue}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          )}
         </div>
       )}
 

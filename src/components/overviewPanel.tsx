@@ -100,11 +100,27 @@ export function OverviewPanel({
   >;
   const gpuOptions = getGpuOptions() as Record<string, string>;
 
+  const isCustomImage =
+    categoryImage === "custom" || formData?.images === "custom";
+
   const selectedImageName = selectedImage
     ? Object.values(imageOptions)
         .flat()
         .find((option) => option.value === selectedImage)?.name
     : undefined;
+
+  // Only show custom image if there's actually a value
+  const hasCustomImageValue = Boolean(formData?.customimage);
+
+  const displayImageName = isCustomImage
+    ? hasCustomImageValue
+      ? "Custom Image"
+      : null
+    : selectedImageName || selectedImage;
+
+  const displayImageTag = isCustomImage
+    ? (formData?.customimage ?? "")
+    : selectedImage;
 
   const sshAccessEnabled = formData?.sshAccess === true;
 
@@ -119,18 +135,18 @@ export function OverviewPanel({
 
   return (
     <Panel title={"overview"} className={className}>
-      <PanelTitle className="flex gap-1 items-center">
+      <PanelTitle className="flex gap-1 items-center pt-6 px-6">
         <LayoutDashboard />
         Configuration Overview
       </PanelTitle>
       {/* <PanelDescription>Configuration summary before starting</PanelDescription> */}
 
-      <PanelContent className="flex flex-col gap-2 pt-4">
+      <PanelContent className="flex flex-col gap-2">
         <Separator />
         {/* Image Section */}
-        {selectedImage && (
+        {(selectedImage || (isCustomImage && hasCustomImageValue)) && (
           <>
-            <div>
+            <div className="px-6">
               <div className="flex items-center justify-between">
                 <H4>Image</H4>
                 <EditButton sectionId="image-section" />
@@ -138,13 +154,13 @@ export function OverviewPanel({
               <div className="flex flex-col gap-1">
                 <div className="flex justify-between">
                   <span>Name</span>
-                  <Strong className="text-right">
-                    {selectedImageName || selectedImage}
-                  </Strong>
+                  <Strong className="text-right">{displayImageName}</Strong>
                 </div>
                 <div className="flex justify-between">
                   <span>Tag</span>
-                  <Small className="truncate text-right">{selectedImage}</Small>
+                  <Small className="truncate text-right">
+                    {displayImageTag || "-"}
+                  </Small>
                 </div>
                 <div className="flex justify-between">
                   <Strong>SSH Access</Strong>
@@ -157,7 +173,7 @@ export function OverviewPanel({
         )}
 
         {/* Resources Section */}
-        <div>
+        <div className="px-6">
           <div className="flex items-center justify-between">
             <H4>Resources</H4>
             <EditButton sectionId="resources-section" />
@@ -193,7 +209,7 @@ export function OverviewPanel({
         <Separator />
 
         {/* Storage Section */}
-        <div>
+        <div className="px-6">
           <div className="flex items-center justify-between">
             <H4 className="flex items-center gap-2">
               {/* <HardDrive className="w-4 h-4" /> */}
@@ -288,7 +304,7 @@ export function OverviewPanel({
         <Separator />
       </PanelContent>
 
-      <PanelContent>{children}</PanelContent>
+      <PanelContent className="p-6">{children}</PanelContent>
     </Panel>
   );
 }

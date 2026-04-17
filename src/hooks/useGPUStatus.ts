@@ -41,7 +41,7 @@ export function useGPUStatus(): UseGPUStatusResult {
       total: 0,
       loading: true,
       error: null,
-    }))
+    })),
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,27 +53,34 @@ export function useGPUStatus(): UseGPUStatusResult {
     try {
       // Build query for all GPU models
       const query = new GrafanaQuery();
-      
+
       GPU_MODELS.forEach((gpu) => {
         query.freeGPUs(gpu.model);
         query.totalGPUs(gpu.model);
       });
 
       const results = await query.execute();
+      console.log("results:", results);
 
       // Parse results into GPUStatusData array
       const statuses: GPUStatusData[] = GPU_MODELS.map((gpu) => {
         const freeKey = `freeGPUs_${gpu.model.replace(/-/g, "_")}`;
         const totalKey = `totalGPUs_${gpu.model.replace(/-/g, "_")}`;
-        
+
         const freeValue = results[freeKey]?.value ?? 0;
         const totalValue = results[totalKey]?.value ?? 0;
 
         return {
           label: gpu.label,
           model: gpu.model,
-          free: typeof freeValue === "number" ? Math.max(0, Math.round(freeValue)) : 0,
-          total: typeof totalValue === "number" ? Math.max(0, Math.round(totalValue)) : 0,
+          free:
+            typeof freeValue === "number"
+              ? Math.max(0, Math.round(freeValue))
+              : 0,
+          total:
+            typeof totalValue === "number"
+              ? Math.max(0, Math.round(totalValue))
+              : 0,
           loading: false,
           error: null,
         };
@@ -81,13 +88,13 @@ export function useGPUStatus(): UseGPUStatusResult {
 
       // Filter out GPUs with 0 total
       const availableGPUs = statuses.filter((gpu) => gpu.total > 0);
-      
+
       setGpuStatuses(availableGPUs);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch GPU status";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch GPU status";
       console.error("GPU status fetch error:", err);
       setError(errorMessage);
-      
 
       setGpuStatuses(
         GPU_MODELS.map((gpu) => ({
@@ -96,7 +103,7 @@ export function useGPUStatus(): UseGPUStatusResult {
           total: 0,
           loading: false,
           error: errorMessage,
-        }))
+        })),
       );
     } finally {
       setLoading(false);
@@ -105,10 +112,10 @@ export function useGPUStatus(): UseGPUStatusResult {
 
   useEffect(() => {
     fetchGPUStatus();
-    
+
     // Refresh every 30 seconds
     const interval = setInterval(fetchGPUStatus, 30000);
-    
+
     return () => clearInterval(interval);
   }, [fetchGPUStatus]);
 

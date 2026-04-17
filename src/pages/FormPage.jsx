@@ -155,22 +155,24 @@ function FormPage() {
   });
 
   const submitForm = async () => {
-    const selectedImageKey =
-      formData.images === "custom" ? "customimage" : null;
-    const selectedStandardImage = IMAGE_FORM_KEYS.map(
-      (key) => formData[key],
-    ).find(Boolean);
-    const defaultContainerImage =
-      defaultFormData?.notebookImage?.containerImage;
-    const containerImage = selectedImageKey
-      ? formData[selectedImageKey]
-      : selectedStandardImage || defaultContainerImage;
-
+    const isCustomImage = formData.images === "custom";
     const imageCategory = formData.images || selectedCategory;
-    const imageFieldKey = IMAGE_CATEGORY_KEY_MAP[imageCategory];
-    const imageFieldValue = selectedImage
-      ? `cerit.io/hubs/${selectedImage}`
-      : containerImage;
+
+    // Get the container image based on selection type
+    let containerImage;
+    if (isCustomImage) {
+      containerImage = formData.customimage || "";
+    } else if (selectedImage) {
+      containerImage = `cerit.io/hubs/${selectedImage}`;
+    } else {
+      const selectedStandardImage = IMAGE_FORM_KEYS.map(
+        (key) => formData[key],
+      ).find(Boolean);
+      containerImage =
+        selectedStandardImage ||
+        defaultFormData?.notebookImage?.containerImage ||
+        "";
+    }
 
     const phselection = formData.phselection || "new";
     const storageEnabled = formData.storageCheck === "yes";
@@ -184,10 +186,13 @@ function FormPage() {
       container_image: containerImage,
     };
 
-    if (imageCategory === "custom") {
-      payload.customimage = imageFieldValue;
-    } else if (imageFieldKey) {
-      payload[imageFieldKey] = imageFieldValue;
+    if (isCustomImage) {
+      payload.customimage = containerImage;
+    } else {
+      const imageFieldKey = IMAGE_CATEGORY_KEY_MAP[imageCategory];
+      if (imageFieldKey) {
+        payload[imageFieldKey] = containerImage;
+      }
     }
 
     if (formData.sshAccess) {
@@ -432,6 +437,7 @@ function FormPage() {
                 formData={formData}
                 selectedImage={selectedImage}
                 categoryImage={selectedCategory}
+                className="p-0"
               >
                 <Button className="w-full" onClick={submitForm}>
                   Start

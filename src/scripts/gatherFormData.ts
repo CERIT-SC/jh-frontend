@@ -19,6 +19,8 @@ declare const spawnOptions: {
     container_image?: string;
     ssh?: boolean;
     shmsize?: string;
+    images?: string;
+    customimage?: string;
   };
   ssh_dns_domain?: string;
   gpu_instances?: any[];
@@ -85,6 +87,9 @@ export function gatherFormData() {
       notebookImage: {
         containerImage: opts.container_image || null,
         sshAccess: Boolean(opts.ssh),
+        type: opts.images === "custom" ? "customnb" : opts.images || null,
+        selectedOption:
+          opts.images === "custom" ? opts.customimage || "" : undefined,
       },
       sshName: spawnOptions.ssh_dns_domain || "",
     };

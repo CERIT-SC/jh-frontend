@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const GRAFANA_BASE_URL = import.meta.env.VITE_GRAFANA_URL || "";
+
 // Types
 interface GrafanaQueryPayload {
   queries: Array<{
@@ -60,25 +62,6 @@ type GPUModel =
   | "NVIDIA-H100-PCIe"
   | string;
 
-/**
- * AVAILABLE GPU MODELS:
- *
- * NVIDIA-A10           - Entry-level datacenter GPU
- * NVIDIA-A40           - Mid-range datacenter GPU
- * NVIDIA-A100-80GB-PCIe - High-end compute GPU with 80GB memory
- * NVIDIA-H100-NVL      - Latest generation, NVLink connected
- * NVIDIA-H100-PCIe     - Latest generation, PCIe interface
- *
- * USAGE EXAMPLE:
- * ```typescript
- * const result = await new GrafanaQuery()
- *   .freeGPUs("NVIDIA-A40")
- *   .totalGPUs("NVIDIA-A40")
- *   .execute();
- * // Returns: { freeGPUs_NVIDIA_A40: { value: 5 }, totalGPUs_NVIDIA_A40: { value: 10 } }
- * ```
- */
-
 // Predefined metric expressions factory
 const MetricExpressions = {
   cpuUsage: (ctx: GrafanaQueryContext) =>
@@ -102,20 +85,20 @@ const MetricExpressions = {
 
 /**
  * Grafana Query Builder
- * 
+ *
  * @example
  * // Single query
  * const result = await new GrafanaQuery({ userName: 'john', podName: 'pod-123' })
  *   .cpuUsage()
  *   .execute();
- * 
+ *
  * @example
  * // Multiple queries
  * const result = await new GrafanaQuery({ userName: 'john' })
  *   .cpuUsage()
  *   .freeGPUs()
  *   .execute();
- * 
+ *
  * @example
  * // Custom query
  * const result = await new GrafanaQuery()
@@ -132,7 +115,10 @@ export class GrafanaQuery {
   private timeRange: { from: string; to: string };
   private refIdCounter = 0;
 
-  constructor(context?: GrafanaQueryContext, timeRange?: { from: string; to: string }) {
+  constructor(
+    context?: GrafanaQueryContext,
+    timeRange?: { from: string; to: string },
+  ) {
     this.context = context || {};
     this.timeRange = timeRange || { from: "now-5m", to: "now" };
   }
@@ -176,7 +162,9 @@ export class GrafanaQuery {
    */
   freeGPUs(model?: GPUModel): this {
     const refId = this.generateRefId();
-    const metricName = model ? `freeGPUs_${model.replace(/-/g, "_")}` : "freeGPUs";
+    const metricName = model
+      ? `freeGPUs_${model.replace(/-/g, "_")}`
+      : "freeGPUs";
     this.queries.push({
       expr: MetricExpressions.freeGPUs(model),
       refId,
@@ -191,7 +179,9 @@ export class GrafanaQuery {
    */
   totalGPUs(model?: GPUModel): this {
     const refId = this.generateRefId();
-    const metricName = model ? `totalGPUs_${model.replace(/-/g, "_")}` : "totalGPUs";
+    const metricName = model
+      ? `totalGPUs_${model.replace(/-/g, "_")}`
+      : "totalGPUs";
     this.queries.push({
       expr: MetricExpressions.totalGPUs(model),
       refId,
@@ -236,7 +226,9 @@ export class GrafanaQuery {
    */
   async execute(): Promise<Record<MetricName, QueryResult>> {
     if (this.queries.length === 0) {
-      throw new Error("No queries added. Use .cpuUsage(), .freeGPUs(), or .query() before execute()");
+      throw new Error(
+        "No queries added. Use .cpuUsage(), .freeGPUs(), or .query() before execute()",
+      );
     }
 
     const payload: GrafanaQueryPayload = {
@@ -255,19 +247,23 @@ export class GrafanaQuery {
     };
 
     try {
-      const response = await axios.post("/api/ds/query", payload, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
+      const response = await axios.post(
+        `${GRAFANA_BASE_URL}/api/ds/query`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
         },
-      });
+      );
 
       const results: Record<MetricName, QueryResult> = {};
 
       // Map results by name instead of refId
       for (const query of this.queries) {
         const queryResult = response.data.results?.[query.refId];
-        
+
         if (!queryResult) {
           results[query.name] = { value: null };
           continue;
@@ -341,7 +337,10 @@ export async function fetchGrafanaData(userName?: string, podName?: string) {
 /**
  * @deprecated Use GrafanaQuery builder instead
  */
-export async function fetchGrafana(expr: string, timeRange?: { from: string; to: string }) {
+export async function fetchGrafana(
+  expr: string,
+  timeRange?: { from: string; to: string },
+) {
   const payload: GrafanaQueryPayload = {
     queries: [
       {
@@ -360,14 +359,20 @@ export async function fetchGrafana(expr: string, timeRange?: { from: string; to:
   };
 
   try {
-    const response = await axios.post("/api/ds/query", payload, {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+    const response = await axios.post(
+      `services/grafana/api/ds/query`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       },
-    });
+    );
 
-    const res = Object.values(response.data.results)[0] as GrafanaResult | undefined;
+    const res = Object.values(response.data.results)[0] as
+      | GrafanaResult
+      | undefined;
     const firstValue = res?.frames?.[0]?.data?.values?.[1]?.[0];
     console.log("First value:", firstValue);
 
