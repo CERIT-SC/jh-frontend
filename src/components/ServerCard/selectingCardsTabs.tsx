@@ -311,7 +311,7 @@ export function SelectingCardsTabs({
                 "bg-surface-raised border-surface-raised text-text",
                 "hover:bg-primary/10 hover:border-primary",
                 isActive &&
-                  "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                  "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
               )}
               onClick={() => handleCategoryChange(category)}
             >
@@ -361,7 +361,7 @@ export function SelectingCardsTabs({
                 "bg-surface-raised",
                 "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-all duration-300",
                 selectedImageId === value
-                  ? "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% shadow-md"
+                  ? "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% dark:via-secondary dark:from-surface-raised dark:to-secondary dark:bg-linear-45 dark:from-85% shadow-md"
                   : "hover:text-text hover:border-primary/30",
               )}
               onClick={() => onSelectImage(value, activeCategory)}

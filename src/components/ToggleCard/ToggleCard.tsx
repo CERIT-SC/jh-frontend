@@ -124,7 +124,7 @@ export function ToggleCard({
         disabled={disabled}
         aria-labelledby={`${id}-title`}
         aria-describedby={`${id}-description`}
-        className="scale-110"
+        className="scale-110 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
       />
     </div>
   );

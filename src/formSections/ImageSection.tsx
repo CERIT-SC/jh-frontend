@@ -177,7 +177,7 @@ export function ImageSelectionSectionTabs({
           id="sshCheckBox"
           checked={sshChecked}
           onCheckedChange={handleSshToggle}
-          className="data-[state=unchecked]:bg-surface-raised"
+          className="data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
         />
         <Label
           htmlFor="sshCheckBox"

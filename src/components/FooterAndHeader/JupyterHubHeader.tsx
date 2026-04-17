@@ -16,7 +16,8 @@ import {
 import { HomeIcon, LogOut } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@e-infra/design-system";
 import { ModeToggle } from "../ModeToggle";
-
+import HubLogo from "../../../public/static/custom-images/hub-rectangle.svg";
+import HubLogoDark from "../../../public/static/custom-images/hub-rectangle-dark.svg";
 interface JupyterHubHeaderProps {
   userName: string;
 }
@@ -34,8 +35,13 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
             {/* Logo */}
             <div className="flex h-10 items-center justify-center">
               <img
-                className="h-8 w-auto object-contain"
-                src="/static/custom-images/logo.png"
+                className="h-8 w-auto object-contain block dark:hidden"
+                src={HubLogo}
+                alt="Logo"
+              />
+              <img
+                className="h-8 w-auto object-contain dark:block hidden"
+                src={HubLogoDark}
                 alt="Logo"
               />
             </div>
@@ -54,7 +60,6 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
             </NavigationMenu>
           </HeaderLeft>
           <HeaderRight>
-            <ModeToggle />
             <span className="ml-2">{userName}</span>
             <Avatar>
               <AvatarImage
@@ -69,6 +74,7 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
               <LogOut className="h-5 w-5" />
               <span className="sr-only">Logout</span>
             </Button>
+            <ModeToggle />
           </HeaderRight>
         </HeaderContent>
       </Header>

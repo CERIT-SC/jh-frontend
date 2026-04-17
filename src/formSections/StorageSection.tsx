@@ -165,7 +165,7 @@ function SectionHeader({
         <Switch
           checked={enabled}
           onCheckedChange={handleToggle}
-          className="scale-120 data-[state=unchecked]:bg-surface-raised"
+          className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
         />
       )}
     </div>
@@ -188,7 +188,7 @@ function SectionContent({
   return (
     <div
       className={cn(
-        "p-4 rounded-b-lg border-t border-border bg-secondary dark:bg-secondary/80",
+        "p-4 rounded-b-lg border-t border-border bg-secondary dark:bg-surface",
         "animate-[slideInFade_300ms_ease-out]",
         className,
       )}
@@ -613,7 +613,7 @@ export default function StorageSelectionSection({
                       "bg-surface",
                       "hover:bg-primary/10 hover:border-primary",
                       isActive &&
-                        "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                        "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
                     )}
                     onClick={() =>
                       setPhSelectionType(option.value as "new" | "existing")
@@ -635,7 +635,7 @@ export default function StorageSelectionSection({
                   id="phCheckId"
                   checked={checkedErased}
                   onCheckedChange={handleErase}
-                  className="scale-120 data-[state=unchecked]:bg-surface"
+                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
                 />
                 <div className="flex-1">
                   <Label htmlFor="phCheckId" className="cursor-pointer">
@@ -704,7 +704,7 @@ export default function StorageSelectionSection({
                   id="locationStorageCheckId"
                   checked={checkedMount}
                   onCheckedChange={handleLocationStorageCheck}
-                  className="scale-120 "
+                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
                 />
                 <Label
                   htmlFor="locationStorageCheckId"
@@ -723,7 +723,7 @@ export default function StorageSelectionSection({
                   id="projectCheckId"
                   checked={checkedDirectories}
                   onCheckedChange={handleCheckboxDirectories}
-                  className="scale-120"
+                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
                 />
                 <div className="flex-1">
                   <Label htmlFor="projectCheckId" className="cursor-pointer">
@@ -773,7 +773,7 @@ export default function StorageSelectionSection({
                         "bg-surface",
                         "hover:bg-primary/10 hover:border-primary",
                         isActive &&
-                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
                       )}
                       onClick={() => setS3SelectionType(option.value)}
                     >
