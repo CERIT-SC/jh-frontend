@@ -2,9 +2,6 @@
 @import "@e-infra/design-system/setup.css";
 @source "../../node_modules/@e-infra/design-system/dist";
 
-/* :root {
-  --bg-image: url("/static/custom-images/e-INFRA_background.svg");
-} */
 @custom-variant dark (&:is(.dark *));
 
 html {
@@ -14,22 +11,91 @@ html {
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
+
+/* ── e-INFRA gradient background (light mode) ── */
 body {
-  /* background: #e5e7eb; */
-  background-image: var(--bg-image);
-  background-size: cover;
-  background-position: center;
+  /* Base color */
+  background-color: var(--background);
   background-attachment: fixed;
   font-size: 16px;
   position: relative;
-
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   height: 100%;
-  font-family: var(--font-sans);
+}
+body {
+  background-image:
+    /* Top-left cyan glow */
+    radial-gradient(
+      ellipse 600px 500px at 10% 8%,
+      rgba(76, 217, 244, 0.18) 0%,
+      transparent 70%
+    ),
+    /* Bottom-right purple glow */
+    radial-gradient(
+        ellipse 700px 550px at 90% 85%,
+        rgba(134, 52, 252, 0.14) 0%,
+        transparent 70%
+      ),
+    /* Center accent blend */
+    radial-gradient(
+        ellipse 550px 450px at 50% 50%,
+        rgba(76, 217, 244, 0.1) 0%,
+        rgba(134, 52, 252, 0.08) 50%,
+        transparent 80%
+      ),
+    /* Subtle top-right secondary */
+    radial-gradient(
+        ellipse 400px 350px at 85% 15%,
+        rgba(134, 52, 252, 0.1) 0%,
+        transparent 70%
+      ),
+    /* Subtle bottom-left secondary */
+    radial-gradient(
+        ellipse 400px 350px at 15% 75%,
+        rgba(76, 217, 244, 0.08) 0%,
+        transparent 70%
+      );
+}
+/* ── e-INFRA gradient background (dark mode) ── */
+.dark body {
+  background-color: #0f172a;
+  background-image:
+    /* Top-left cyan glow – stronger in dark */
+    radial-gradient(
+      ellipse 600px 500px at 10% 8%,
+      rgba(76, 217, 244, 0.35) 0%,
+      transparent 70%
+    ),
+    /* Bottom-right purple glow – stronger in dark */
+    radial-gradient(
+        ellipse 700px 550px at 90% 85%,
+        rgba(134, 52, 252, 0.3) 0%,
+        transparent 70%
+      ),
+    /* Center accent blend – more vivid */
+    radial-gradient(
+        ellipse 550px 450px at 50% 50%,
+        rgba(76, 217, 244, 0.22) 0%,
+        rgba(134, 52, 252, 0.18) 50%,
+        transparent 80%
+      ),
+    /* Top-right secondary */
+    radial-gradient(
+        ellipse 400px 350px at 85% 15%,
+        rgba(134, 52, 252, 0.22) 0%,
+        transparent 70%
+      ),
+    /* Bottom-left secondary */
+    radial-gradient(
+        ellipse 400px 350px at 15% 75%,
+        rgba(76, 217, 244, 0.18) 0%,
+        transparent 70%
+      );
+  background-attachment: fixed;
 }
 
 #root {

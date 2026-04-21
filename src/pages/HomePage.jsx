@@ -99,6 +99,9 @@ function HomePage() {
         delete updated[name];
         return updated;
       });
+      pushAlert(`Server ${name} deleted successfully`, {
+        variant: "success",
+      });
     } catch (error) {
       console.error(`Failed to stop server ${name}:`, error.message);
       pushAlert(`Failed to delete server ${name}: ${error.message}`, {

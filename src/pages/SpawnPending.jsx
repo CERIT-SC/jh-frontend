@@ -98,43 +98,45 @@ const SpawnPending = () => {
         {" "}
         {/*min-h-screen*/}
         <JupyterHubHeader userName={appConfig.userName}> </JupyterHubHeader>
-        <Panel className=" my-auto mx-auto w-5/6">
-          <PanelHeader>
-            <PanelTitle>
-              Starting your server
-              <span className="inline-block animate-bounce [animation-delay:0ms]">
-                .
-              </span>
-              <span className="inline-block animate-bounce [animation-delay:150ms]">
-                .
-              </span>
-              <span className="inline-block animate-bounce [animation-delay:300ms]">
-                .
-              </span>
-            </PanelTitle>
-            <PanelDescription>{getServerName()}</PanelDescription>
-          </PanelHeader>
-          <PanelContent>
-            <div className="flex justify-between items-center">
-              <span id="progress-message">Message</span>
-              <P>{progress}%</P>
-            </div>
-            <Progress value={parseInt(progress)} />
-            <Separator />
-            <details id="progress-details">
-              <summary>Event log</summary>
-              <div id="progress-log" className="space-y-2">
-                {/* Progress log content */}
+        <div className="container grow  mx-auto px-4 py-8 space-y-8 place-content-center">
+          <Panel className=" my-auto mx-auto w-full ">
+            <PanelHeader>
+              <PanelTitle>
+                Starting your server
+                <span className="inline-block animate-bounce [animation-delay:0ms]">
+                  .
+                </span>
+                <span className="inline-block animate-bounce [animation-delay:150ms]">
+                  .
+                </span>
+                <span className="inline-block animate-bounce [animation-delay:300ms]">
+                  .
+                </span>
+              </PanelTitle>
+              <PanelDescription>Name: {getServerName()}</PanelDescription>
+            </PanelHeader>
+            <PanelContent>
+              <div className="flex justify-between items-center">
+                <span id="progress-message">Message</span>
+                <P>{progress}%</P>
               </div>
-            </details>
-            {/* <Accordion type="single" collapsible className="transition">
+              <Progress value={parseInt(progress)} />
+              <Separator />
+              <details id="progress-details">
+                <summary>Event log</summary>
+                <div id="progress-log" className="space-y-2">
+                  {/* Progress log content */}
+                </div>
+              </details>
+              {/* <Accordion type="single" collapsible className="transition">
               <AccordionItem value="event-log">
                 <AccordionTrigger>Event log</AccordionTrigger>
                 <AccordionContent></AccordionContent>
               </AccordionItem>
             </Accordion> */}
-          </PanelContent>
-        </Panel>
+            </PanelContent>
+          </Panel>
+        </div>
         <EinfraFooter className="flex-none"></EinfraFooter>
       </div>
     </>
