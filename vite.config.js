@@ -1,19 +1,35 @@
 import { defineConfig } from "vite";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 // https://vitejs.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@routes": resolve(__dirname, "./src/routes"),
+      "@components": resolve(__dirname, "./src/components"),
+      "@pages": resolve(__dirname, "./src/pages"),
+      "@hooks": resolve(__dirname, "./src/hooks"),
+      "@api": resolve(__dirname, "./src/api"),
+      "@utils": resolve(__dirname, "./src/utils"),
+      "@assets": resolve(__dirname, "./src/assets"),
+      "@data": resolve(__dirname, "./src/data"),
+    },
+  },
+  root: __dirname,
   base: "/",
   build: {
     outDir: "./dist_hub",
     rollupOptions: {
       input: {
-        spawn: resolve(__dirname, "spawn.html"),
-        login: resolve(__dirname, "login.html"),
-        spawn_pending: resolve(__dirname, "spawn_pending.html"),
         home: resolve(__dirname, "home.html"),
+        login: resolve(__dirname, "login.html"),
+        spawn: resolve(__dirname, "spawn.html"),
+        spawn_pending: resolve(__dirname, "spawn_pending.html"),
         not_running: resolve(__dirname, "not_running.html"),
         token: resolve(__dirname, "token.html"),
       },
@@ -28,9 +44,6 @@ export default defineConfig({
           }
           return "static/[ext]/[name]-[hash][extname]";
         },
-      },
-      rollupOptions: {
-        external: ["@e-infra/design-system", "lucide-react"],
       },
     },
   },
@@ -47,7 +60,7 @@ export default defineConfig({
   // },
   plugins: [react(), tailwindcss()],
   server: {
-    open: process.env.ENTRY,
+    open: process.env?.ENTRY,
     proxy: {
       "/api": {
         target: "https://kuba-mon-int.cloud.e-infra.cz",

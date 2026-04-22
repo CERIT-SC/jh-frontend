@@ -50,7 +50,7 @@
     "build:hub": "vite build",
     "build:c9088": "cd c9088 && vite build --emptyOutDir",
     "build:cas": "cd cas && vite build --emptyOutDir",
-    "build:elter": "cd elter-ri && vite build --emptyOutDir",
+    "build:elter-ri": "cd elter-ri && vite build --emptyOutDir",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

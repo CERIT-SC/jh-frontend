@@ -18,6 +18,7 @@ dist*/
 .env.development.local
 .env.test.local
 .env.production.local
+.env
 .eslintcache
 package-lock.json
 
@@ -26,6 +27,7 @@ yarn-debug.log*
 yarn-error.log*
 .roo
 .roomodes
+.vscode
 
 build-storybook.log
 

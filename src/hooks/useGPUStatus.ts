@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { GrafanaQuery } from "../api/GrafanaAPI";
+import { GrafanaQuery } from "@api";
 
 export interface GPUStatusData {
   label: string;
