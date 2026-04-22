@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { Alert as EInfraAlert, AlertDescription } from "@e-infra/design-system";
+import { AlertDescription } from "@e-infra/design-system";
 import { AlertTriangle, Check, CircleX } from "lucide-react";
+
 export interface AlertItem {
   id: string;
   message: string;
@@ -35,10 +36,32 @@ function AlertCard({
     onRemove(alert.id);
   };
 
+  const getVariantStyles = () => {
+    switch (alert.variant) {
+      case "error":
+        return "border-error bg-error/10 text-error";
+      case "success":
+        return "border-success bg-success/10 text-success";
+      case "warning":
+        return "border-warning bg-warning/10 text-warning";
+      default:
+        return "border-border bg-background text-text";
+    }
+  };
+
+  const getIcon = () => {
+    if (alert.variant === "error")
+      return <CircleX className="h-4 w-4 shrink-0" />;
+    if (alert.variant === "success")
+      return <Check className="h-4 w-4 shrink-0" />;
+    if (alert.variant === "warning")
+      return <AlertTriangle className="h-4 w-4 shrink-0" />;
+    return null;
+  };
+
   return (
-    <EInfraAlert
-      variant={alert.variant ?? "default"}
-      className="w-[400px] top-0 bg-background/60 shadow-lg shadow-secondary/20 backdrop-blur-md supports-backdrop-filter:backdrop-blur-md cursor-pointer alert-enter transition-all duration-300"
+    <div
+      className={`w-[400px] top-0 border rounded-lg px-4 py-3 text-sm cursor-pointer alert-enter transition-all duration-300 flex items-start gap-3 ${getVariantStyles()}`}
       onClick={handleDismiss}
       role="button"
       tabIndex={0}
@@ -49,12 +72,9 @@ function AlertCard({
         }
       }}
     >
-      {alert.variant === "error" && <CircleX className="h-4 w-4" />}
-      {alert.variant === "success" && <Check className="h-4 w-4" />}
-      {alert.variant === "warning" && <AlertTriangle className="h-4 w-4" />}
-
+      {getIcon()}
       <AlertDescription>{alert.message}</AlertDescription>
-    </EInfraAlert>
+    </div>
   );
 }
 

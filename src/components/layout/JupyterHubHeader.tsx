@@ -31,7 +31,7 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
 
   return (
     <>
-      <Header>
+      <Header className="bg-background/60">
         <HeaderContent>
           <HeaderLeft>
             {/* Logo */}
@@ -62,17 +62,14 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
                 </NavigationMenuItem>
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() =>
-                          (window.location.href =
-                            "https://docs.cerit.io/en/docs/web-apps/jupyterhub")
-                        }
-                      >
-                        <Book className="h-4 w-4" />
-                      </Button>
+                    <TooltipTrigger
+                      onClick={() =>
+                        (window.location.href =
+                          "https://docs.cerit.io/en/docs/web-apps/jupyterhub")
+                      }
+                      className="inline-flex items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                    >
+                      <Book className="h-4 w-4" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Docs</p>

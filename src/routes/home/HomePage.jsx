@@ -1,7 +1,7 @@
 import "../../styles/index.css";
 import "./HomePage.css";
 import { JupyterHubApiClient } from "@api";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { EinfraFooter, JupyterHubHeader } from "@components/layout";
 import {
   ServerCard,
@@ -15,6 +15,11 @@ import { TileSelector } from "@components/ui";
 import { H1, H4, Panel, PanelContent, Button } from "@e-infra/design-system";
 import { LayoutGrid, LayoutList } from "lucide-react";
 import { GrafanaQuery } from "@api";
+
+/**
+ * @typedef {Object.<string, number>} ServerProgress
+ */
+
 function HomePage() {
   if (import.meta.env.DEV) {
     initDev();
@@ -26,8 +31,10 @@ function HomePage() {
     appConfig.default_server_active,
   );
   const [serverName, setServerName] = useState("");
+  const [serverProgress, setServerProgress] = useState({});
 
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
+  const eventSourcesRef = useRef(new Map());
 
   const handleStopServer = async (name) => {
     console.log(`Stopping server: ${name}`);
@@ -130,6 +137,83 @@ function HomePage() {
     window.location.reload();
   };
 
+  /**
+   * Handle quick start - starts server and tracks progress via SSE
+   * @param {string} name - Server name to quick start
+   */
+  const handleQuickStart = useCallback(
+    async (name) => {
+      // Set initial state: active but not ready, with 0 progress
+      setSpawners((prevSpawners) => {
+        const updated = { ...prevSpawners };
+        if (updated[name]) {
+          updated[name].active = true;
+          updated[name].ready = false;
+        }
+        return updated;
+      });
+      setServerProgress((prev) => ({ ...prev, [name]: 0 }));
+
+      const abort = apiClient.quickStartWithProgress(appConfig.userName, name, {
+        onProgress: (progress, data) => {
+          setServerProgress((prev) => ({ ...prev, [name]: progress }));
+        },
+        onComplete: () => {
+          // Server is ready, update spawner state
+          setSpawners((prevSpawners) => {
+            const updated = { ...prevSpawners };
+            if (updated[name]) {
+              updated[name].active = true;
+              updated[name].ready = true;
+            }
+            return updated;
+          });
+
+          setServerProgress((prev) => ({ ...prev, [name]: 100 }));
+          pushAlert(`Server ${name} started successfully`, {
+            variant: "success",
+          });
+
+          // Remove progress after delay
+          setTimeout(() => {
+            setServerProgress((prev) => {
+              const updated = { ...prev };
+              delete updated[name];
+              return updated;
+            });
+          }, 2000);
+        },
+        onError: (error) => {
+          console.error(`Failed to quick start server ${name}:`, error.message);
+          pushAlert(`Failed to start server ${name}`, {
+            variant: "error",
+          });
+          setServerProgress((prev) => {
+            const updated = { ...prev };
+            delete updated[name];
+            return updated;
+          });
+        },
+      });
+
+      // Store abort function for cleanup if needed
+      eventSourcesRef.current.set(name, { abort });
+    },
+    [pushAlert],
+  );
+
+  // Cleanup abort functions on unmount
+  useEffect(() => {
+    return () => {
+      eventSourcesRef.current.forEach((item) => {
+        if (item.abort) {
+          item.abort();
+        }
+      });
+      eventSourcesRef.current.clear();
+    };
+  }, []);
+
   const [gridType, setGridType] = useState(1);
   const ServerCardType = gridType === 1 ? ServerCard : ServerCardInline;
 
@@ -201,6 +285,8 @@ function HomePage() {
                     handleStart={() =>
                       handleAddServer(`/spawn/${appConfig.userName}/${name}`)
                     }
+                    handleQuickStart={() => handleQuickStart(name)}
+                    progress={serverProgress[name]}
                   />
                 ))}
                 {Object.keys(spawners).length < 15 && (

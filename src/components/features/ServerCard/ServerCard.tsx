@@ -33,6 +33,7 @@ import {
   Terminal,
   Plus,
   AlertCircle,
+  Rocket,
   Activity,
   Circle,
 } from "lucide-react";
@@ -45,6 +46,8 @@ interface CardProps {
   lastActivity?: number;
   isActive: boolean;
   isReady?: boolean;
+  /** Progress value (0-100) for spawn progress indication */
+  progress?: number;
 
   handleOpen?: () => void;
 
@@ -53,6 +56,8 @@ interface CardProps {
   handleDelete?: () => void;
 
   handleStart?: () => void;
+
+  handleQuickStart?: () => void;
 
   /** Whether to show the delete button (default: true) */
   showDeleteButton?: boolean;
@@ -64,6 +69,7 @@ interface ServerActionButtonsProps {
   handleStop?: () => void;
   handleDelete?: () => void;
   handleStart?: () => void;
+  handleQuickStart?: () => void;
   buttonClassName: string;
   showDeleteButton?: boolean;
 }
@@ -73,6 +79,7 @@ interface ServerActionButtonsState {
   stop: boolean;
   delete: boolean;
   start: boolean;
+  quickStart: boolean;
 }
 
 interface LastActivityProps {
@@ -117,6 +124,7 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
   handleStop = () => {},
   handleDelete = () => {},
   handleStart = () => {},
+  handleQuickStart = () => {},
   buttonClassName,
   showDeleteButton = true,
 }) => {
@@ -125,6 +133,7 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
     stop: false,
     delete: false,
     start: false,
+    quickStart: false,
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -201,6 +210,22 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
         {loading.start && <Loader2 className="h-4 w-4 animate-spin" />}
         Start <Play className="fill-current" strokeWidth={2} />
       </Button>
+      <Button
+        className={buttonClassName}
+        title="Quick Start"
+        variant={"tertiary"}
+        size="sm"
+        disabled={loading.quickStart}
+        onClick={() => handleAsyncClick("quickStart", handleQuickStart)}
+      >
+        Quick Start
+        {loading.quickStart ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          // <Play className="fill-current" strokeWidth={2} />
+          <Rocket className="fill-current" strokeWidth={2} />
+        )}
+      </Button>
       {showDeleteButton !== false && (
         <Button
           className={buttonClassName}
@@ -248,22 +273,30 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
 const StatusIndicator: React.FC<{
   isActive: boolean;
   isReady: boolean;
+  progress?: number;
   size?: "sm" | "md" | "lg";
-}> = ({ isActive, isReady, size = "md" }) => {
+}> = ({ isActive, isReady, progress, size = "md" }) => {
   const sizeClasses = {
     sm: "w-2 h-2",
     md: "w-2.5 h-2.5",
     lg: "w-3 h-3",
   };
 
+  // Determine status color based on progress and server state
+  const isPending =
+    (progress !== undefined && progress > 0 && progress < 100) ||
+    (isActive && !isReady);
+  const isComplete = progress === 100 || isReady;
+  const isInactive = !isActive && !isPending;
+
   return (
     <span className="relative flex items-center justify-center">
-      {isActive && (
+      {(isActive || isPending) && (
         <span
           className={cn(
             "absolute inline-flex rounded-full opacity-75 animate-ping",
             sizeClasses[size],
-            "bg-emerald-400",
+            isComplete ? "bg-emerald-400" : "bg-orange-400",
           )}
         />
       )}
@@ -271,9 +304,9 @@ const StatusIndicator: React.FC<{
         className={cn(
           "relative transition-colors duration-300",
           sizeClasses[size],
-          isReady
+          isComplete
             ? "fill-emerald-500 text-emerald-500"
-            : isActive
+            : isPending || (isActive && !isReady)
               ? "fill-orange-500 text-orange-500"
               : "fill-slate-400 text-slate-400",
         )}
@@ -289,12 +322,30 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   lastActivity,
   isActive = false,
   isReady = false,
+  progress,
   handleOpen = () => {},
   handleStop = () => {},
   handleDelete = () => {},
   handleStart = () => {},
+  handleQuickStart = () => {},
   showDeleteButton = true,
 }) => {
+  const [loading, setLoading] = React.useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    setShowDeleteDialog(false);
+    setLoading(true);
+    try {
+      await handleDelete();
+    } finally {
+      setLoading(false);
+    }
+  };
   if (variant === "inline") {
     return (
       <Panel
@@ -302,7 +353,11 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           "transition-colors duration-200",
           "border-l-2",
           "dark:bg-surface-raised",
-          isActive ? "border-l-emerald-500" : "border-l-border",
+          isReady
+            ? "border-emerald-500"
+            : !isActive
+              ? "border-slate-400"
+              : "border-orange-500",
         )}
       >
         <div className="flex items-center w-full justify-between gap-2">
@@ -318,16 +373,25 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                   variant={isActive ? "default" : "secondary"}
                   className={cn(
                     "shrink-0",
-                    isActive &&
-                      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+                    progress !== undefined && progress > 0 && progress < 100
+                      ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
+                      : isActive &&
+                          "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
                   )}
                 >
                   <StatusIndicator
                     isActive={isActive}
                     isReady={isReady}
+                    progress={progress}
                     size="lg"
                   />
-                  {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
+                  {progress !== undefined && progress > 0 && progress < 100
+                    ? "Pending"
+                    : isActive
+                      ? isReady
+                        ? "Running"
+                        : "Pending"
+                      : "Stopped"}
                 </Badge>
                 <LastActivityInfo lastActivity={lastActivity} />
               </div>
@@ -339,6 +403,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             handleStop={handleStop}
             handleDelete={handleDelete}
             handleStart={handleStart}
+            handleQuickStart={handleQuickStart}
             buttonClassName="shrink-0"
             showDeleteButton={showDeleteButton}
           />
@@ -353,7 +418,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         className={cn(
           "transition-colors duration-200",
           "border-l-2",
-          isActive ? "border-l-emerald-500" : "border-l-border",
+          "dark:bg-surface-raised",
         )}
       >
         <div className="flex items-center justify-between gap-2 p-3">
@@ -364,11 +429,17 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
               variant={isActive ? "default" : "secondary"}
               className={cn(
                 "shrink-0",
-                isActive &&
-                  "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+                progress !== undefined && progress > 0 && progress < 100
+                  ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
+                  : isActive &&
+                      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
               )}
             >
-              {isActive ? "Running" : "Stopped"}
+              {progress !== undefined && progress > 0 && progress < 100
+                ? "Pending"
+                : isActive
+                  ? "Running"
+                  : "Stopped"}
             </Badge>
             {lastActivity !== undefined && (
               <LastActivityInfo lastActivity={lastActivity} />
@@ -380,6 +451,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             handleStop={handleStop}
             handleDelete={handleDelete}
             handleStart={handleStart}
+            handleQuickStart={handleQuickStart}
             buttonClassName="shrink-0"
             showDeleteButton={showDeleteButton}
           />
@@ -391,16 +463,40 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   return (
     <Card
       className={cn(
-        "w-full transition-colors duration-200",
-        "border-t-2",
-        "dark:bg-surface-raised",
-        isReady ? "border-t-emerald-500" : "border-t-border",
-        isActive && !isReady && "border-t-orange-500",
+        "relative w-full transition-colors duration-200 ease-in-out",
+        "bg-surface dark:bg-surface-raised flex flex-col justify-center gap-6 rounded-md py-6 drop-shadow-md hover:drop-shadow-lg",
+        isReady
+          ? "border-t-2 border-emerald-500"
+          : !isActive
+            ? "border-t-2 border-slate-400"
+            : "before:absolute before:inset-y-0 before:left-0 before:pointer-events-none before:w-[var(--before-width)] before:border-t-2 before:rounded-tl-md before:border-orange-500",
       )}
+      style={{ "--before-width": `${progress}%` } as React.CSSProperties}
     >
       <CardHeader>
         <CardTitle>
-          <div className="flex justify-between items-center">{title}</div>
+          <div className="flex justify-between items-center w-full">
+            <span>{title}</span>
+            {showDeleteButton !== false && (
+              <Tooltip>
+                <TooltipTrigger
+                  onClick={handleDeleteClick}
+                  disabled={loading}
+                  title="Delete"
+                  className="h-8 w-8 text-muted-foreground hover:text-error hover:bg-error/10 rounded-md inline-flex items-center justify-center"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash size={18} strokeWidth={2.5} />
+                  )}
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>Delete server</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
@@ -409,14 +505,27 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           <Badge
             variant={isActive ? "default" : "secondary"}
             className={cn(
-              isActive &&
-                "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
+              progress !== undefined && progress > 0 && progress < 100
+                ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
+                : isActive &&
+                    "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
               isReady &&
                 "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
             )}
           >
-            <StatusIndicator isActive={isActive} isReady={isReady} size="lg" />
-            {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
+            <StatusIndicator
+              isActive={isActive}
+              isReady={isReady}
+              progress={progress}
+              size="lg"
+            />
+            {progress !== undefined && progress > 0 && progress < 100
+              ? "Pending"
+              : isActive
+                ? isReady
+                  ? "Running"
+                  : "Pending"
+                : "Stopped"}
           </Badge>
           <LastActivityInfo lastActivity={lastActivity} />
         </div>
@@ -428,10 +537,34 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           handleStop={handleStop}
           handleDelete={handleDelete}
           handleStart={handleStart}
+          handleQuickStart={handleQuickStart}
           buttonClassName="flex-1 gap"
-          showDeleteButton={showDeleteButton}
+          showDeleteButton={false}
         />
       </CardFooter>
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Delete Server</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this server? This action cannot be
+              undone and all associated data will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="error" onClick={confirmDelete}>
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
@@ -596,7 +729,7 @@ export const EmptyServerCard: React.FC<EmptyCardProps> = ({
       <CardContent className="flex flex-col items-center justify-center gap-3 w-full h-full text-center py-8 px-6">
         <div className="flex w-full flex-col gap-3 max-w-md">
           <div className="relative">{serverNameInput}</div>
-          {helperText}
+          {/* {helperText} */}
           {errorMessage}
           <div className="pt-1">{addButton("w-full justify-center")}</div>
         </div>

@@ -3,6 +3,7 @@
 @source "../../node_modules/@e-infra/design-system/dist";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant supports-backdrop-filter (@supports (backdrop-filter: blur(1px)));
 
 html {
   scroll-behavior: smooth;
