@@ -1,6 +1,5 @@
 import React, { useState, useEffect, Fragment, useCallback } from "react";
 import { TileSelector } from "../components/TileSelector/TileSelector";
-import { FieldHeader } from "../components/FieldHeader/FieldHeader";
 import { DropDownMenu } from "../components/DropDownMenu/DropDownMenu";
 import { getGpuOptions } from "../scripts/gatherFormData";
 import {
@@ -11,7 +10,6 @@ import { fetchGPUIndicators, GPUIndicatorsData } from "../api/GPUIndicatorsAPI";
 import {
   Panel,
   PanelTitle,
-  PanelDescription,
   PanelContent,
   Muted,
   Separator,
@@ -34,7 +32,6 @@ interface ResourceSelectionSectionProps {
 }
 
 export default function ResourceSelectionSection({
-  formData,
   setFormData,
   defaultFormData,
 }: ResourceSelectionSectionProps) {
@@ -141,13 +138,13 @@ export default function ResourceSelectionSection({
       {defCPU !== null && defMem !== null && defGPU !== null ? (
         <div className="flex flex-col gap-4">
           <TileSelector
-            selectionText="Select CPU limit:"
+            selectionText="CPU Limit (cores):"
             options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
             defaultValue={defCPU ?? undefined}
             onChange={handleCPUSelect}
           />
           <TileSelector
-            selectionText="Select memory limit (in GB):"
+            selectionText="Memory Limit (GB):"
             options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
             defaultValue={defMem ?? undefined}
             onChange={handleMemSelect}
@@ -158,12 +155,6 @@ export default function ResourceSelectionSection({
             >
             </FieldHeader> */}
           {/* <p>By default, no GPU is assigned.</p> */}
-          <DropDownMenu
-            formSelect={handleGPUSelect}
-            title="Select an option"
-            menuOptions={gpuOptions}
-            defaultOption={defGPU}
-          ></DropDownMenu>
 
           {/* GPU Status Section */}
           <Panel className="bg-surface-raised p-0 py-6">
@@ -182,7 +173,13 @@ export default function ResourceSelectionSection({
                 </button>
               </div>
             </PanelTitle>
-            <PanelContent className="flex flex-col px-6 gap-4 border-t">
+            <PanelContent className="flex flex-col px-6 gap-4 border-t pt-2">
+              <DropDownMenu
+                formSelect={handleGPUSelect}
+                title="GPU Options"
+                menuOptions={gpuOptions}
+                defaultOption={defGPU}
+              ></DropDownMenu>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-text-heading">

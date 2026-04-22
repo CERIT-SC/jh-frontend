@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 
 import { Input, Button } from "@e-infra/design-system";
 import { Plus, AlertCircle } from "lucide-react";
@@ -16,17 +16,13 @@ interface InputProps {
 }
 
 export const ServerAdd: React.FC<InputProps> = ({
-  label,
   value,
   onChange,
   placeholder = "",
-  description,
   buttonText,
   onButtonClick,
   existingNames = [],
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
-
   const isNameDuplicate = useMemo(() => {
     if (!value.trim()) return false;
     return existingNames.some(
@@ -45,8 +41,6 @@ export const ServerAdd: React.FC<InputProps> = ({
             id="addServer"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
             className={`w-full rounded-md border focus:ring focus:ring-opacity-50 py-3 px-4 lg:py-0 lg:px-0 ${
               isNameDuplicate

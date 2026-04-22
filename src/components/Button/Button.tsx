@@ -22,7 +22,7 @@ interface ButtonProps {
   onClickFun?: MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
   className?: string;
-  [key: string]: any;
+  children?: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({

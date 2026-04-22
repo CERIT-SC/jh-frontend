@@ -6,7 +6,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  Separator,
   Panel,
   H4,
   Muted,
@@ -29,7 +28,7 @@ import {
   Loader2,
   Play,
   SquareArrowOutUpRight,
-  Pause,
+  Power,
   Trash,
   Terminal,
   Plus,
@@ -45,6 +44,7 @@ interface CardProps {
   description?: string;
   lastActivity?: number;
   isActive: boolean;
+  isReady?: boolean;
 
   handleOpen?: () => void;
 
@@ -181,7 +181,7 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
           {loading.stop ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Pause className="fill-current" strokeWidth={2} />
+            <Power />
           )}
         </Button>
       </>
@@ -247,8 +247,9 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
 
 const StatusIndicator: React.FC<{
   isActive: boolean;
+  isReady: boolean;
   size?: "sm" | "md" | "lg";
-}> = ({ isActive, size = "md" }) => {
+}> = ({ isActive, isReady, size = "md" }) => {
   const sizeClasses = {
     sm: "w-2 h-2",
     md: "w-2.5 h-2.5",
@@ -270,9 +271,11 @@ const StatusIndicator: React.FC<{
         className={cn(
           "relative transition-colors duration-300",
           sizeClasses[size],
-          isActive
+          isReady
             ? "fill-emerald-500 text-emerald-500"
-            : "fill-slate-400 text-slate-400",
+            : isActive
+              ? "fill-orange-500 text-orange-500"
+              : "fill-slate-400 text-slate-400",
         )}
       />
     </span>
@@ -285,6 +288,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   description,
   lastActivity,
   isActive = false,
+  isReady = false,
   handleOpen = () => {},
   handleStop = () => {},
   handleDelete = () => {},
@@ -318,8 +322,12 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                       "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
                   )}
                 >
-                  <StatusIndicator isActive={isActive} size="lg" />
-                  {isActive ? "Running" : "Stopped"}
+                  <StatusIndicator
+                    isActive={isActive}
+                    isReady={isReady}
+                    size="lg"
+                  />
+                  {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
                 </Badge>
                 <LastActivityInfo lastActivity={lastActivity} />
               </div>
@@ -386,7 +394,8 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         "w-full transition-colors duration-200",
         "border-t-2",
         "dark:bg-surface-raised",
-        isActive ? "border-t-emerald-500" : "border-t-border",
+        isReady ? "border-t-emerald-500" : "border-t-border",
+        isActive && !isReady && "border-t-orange-500",
       )}
     >
       <CardHeader>
@@ -395,18 +404,19 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         </CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
-      <Separator />
       <CardContent>
         <div className="flex items-center gap-3">
           <Badge
             variant={isActive ? "default" : "secondary"}
             className={cn(
               isActive &&
+                "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
+              isReady &&
                 "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
             )}
           >
-            <StatusIndicator isActive={isActive} size="lg" />
-            {isActive ? "Running" : "Stopped"}
+            <StatusIndicator isActive={isActive} isReady={isReady} size="lg" />
+            {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
           </Badge>
           <LastActivityInfo lastActivity={lastActivity} />
         </div>
@@ -486,7 +496,7 @@ export const EmptyServerCard: React.FC<EmptyCardProps> = ({
       className={cn(
         "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
         "placeholder:text-muted-foreground/70",
-        isNameDuplicate && "border-destructive focus-visible:ring-destructive",
+        isNameDuplicate && "border-error focus-visible:ring-error",
       )}
       aria-invalid={isNameDuplicate}
       aria-describedby={isNameDuplicate ? "server-name-error" : undefined}
@@ -496,7 +506,7 @@ export const EmptyServerCard: React.FC<EmptyCardProps> = ({
   const errorMessage = isNameDuplicate ? (
     <div
       id="server-name-error"
-      className="flex items-center gap-2 text-sm text-destructive"
+      className="flex items-center gap-2 text-sm text-error"
       role="alert"
     >
       <AlertCircle size={16} />

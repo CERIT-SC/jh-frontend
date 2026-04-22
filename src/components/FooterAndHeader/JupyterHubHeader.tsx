@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 // import "./JupyterHubHeader.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSignOut, faBars } from "@fortawesome/free-solid-svg-icons";
 import {
   Header,
   Button,
@@ -12,8 +10,12 @@ import {
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
 } from "@e-infra/design-system";
-import { HomeIcon, LogOut } from "lucide-react";
+import { Book, LogOut } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@e-infra/design-system";
 import { ModeToggle } from "../ModeToggle";
 import HubLogo from "../../../public/static/custom-images/hub-rectangle.svg";
@@ -34,16 +36,18 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
           <HeaderLeft>
             {/* Logo */}
             <div className="flex h-10 items-center justify-center">
-              <img
-                className="h-8 w-auto object-contain block dark:hidden"
-                src={HubLogo}
-                alt="Logo"
-              />
-              <img
-                className="h-8 w-auto object-contain dark:block hidden"
-                src={HubLogoDark}
-                alt="Logo"
-              />
+              <a href="/hub/home">
+                <img
+                  className="h-8 w-auto object-contain block dark:hidden"
+                  src={HubLogo}
+                  alt="Logo"
+                />
+                <img
+                  className="h-8 w-auto object-contain dark:block hidden"
+                  src={HubLogoDark}
+                  alt="Logo"
+                />
+              </a>
             </div>
             {/* Nav */}
             <NavigationMenu>
@@ -56,6 +60,26 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
                     Token
                   </NavigationMenuLink>
                 </NavigationMenuItem>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          (window.location.href =
+                            "https://docs.cerit.io/en/docs/web-apps/jupyterhub")
+                        }
+                      >
+                        <Book className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Docs</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <ModeToggle />
               </NavigationMenuList>
             </NavigationMenu>
           </HeaderLeft>
@@ -74,7 +98,6 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
               <LogOut className="h-5 w-5" />
               <span className="sr-only">Logout</span>
             </Button>
-            <ModeToggle />
           </HeaderRight>
         </HeaderContent>
       </Header>

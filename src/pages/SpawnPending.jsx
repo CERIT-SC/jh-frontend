@@ -10,10 +10,6 @@ import {
   Separator,
   PanelTitle,
   PanelDescription,
-  Accordion,
-  AccordionTrigger,
-  AccordionContent,
-  AccordionItem,
   P,
 } from "@e-infra/design-system";
 

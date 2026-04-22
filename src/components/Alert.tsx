@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Alert as EInfraAlert, AlertDescription } from "@e-infra/design-system";
 import { AlertTriangle, Check, CircleX } from "lucide-react";
 export interface AlertItem {
@@ -34,7 +34,6 @@ function AlertCard({
   const handleDismiss = () => {
     onRemove(alert.id);
   };
-  const [dismissing, setDismissing] = useState(false);
 
   return (
     <EInfraAlert

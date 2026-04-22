@@ -148,7 +148,7 @@ export function OverviewPanel({
           <>
             <div className="px-6">
               <div className="flex items-center justify-between">
-                <H4>Image</H4>
+                <H4>Environment Configuration</H4>
                 <EditButton sectionId="image-section" />
               </div>
               <div className="flex flex-col gap-1">
@@ -168,44 +168,8 @@ export function OverviewPanel({
                 </div>
               </div>
             </div>
-            <Separator />
           </>
         )}
-
-        {/* Resources Section */}
-        <div className="px-6">
-          <div className="flex items-center justify-between">
-            <H4>Resources</H4>
-            <EditButton sectionId="resources-section" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex justify-between">
-              <span className="inline-flex items-center gap-1">
-                <Cpu className="w-4 h-4" />
-                CPU
-              </span>
-              <Strong>
-                {formData?.cpuselection}{" "}
-                {formData?.cpuselection === 1 ? "Core" : "Cores"}
-              </Strong>
-            </div>
-            <div className="flex justify-between">
-              <span className="inline-flex items-center gap-1">
-                <MemoryStick className="w-4 h-4" />
-                Memory
-              </span>
-              <Strong>{formData?.memselection} GB</Strong>
-            </div>
-            <div className="flex justify-between">
-              <span className="inline-flex items-center gap-1">
-                <Gpu className="w-4 h-4" />
-                GPU
-              </span>
-              <Strong>{selectedGpuLabel}</Strong>
-            </div>
-          </div>
-        </div>
-
         <Separator />
 
         {/* Storage Section */}
@@ -301,6 +265,43 @@ export function OverviewPanel({
             </div>
           </div>
         </div>
+
+        <Separator />
+        {/* Resources Section */}
+        <div className="px-6">
+          <div className="flex items-center justify-between">
+            <H4>Resource Configuration</H4>
+            <EditButton sectionId="resources-section" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="flex justify-between">
+              <span className="inline-flex items-center gap-1">
+                <Cpu className="w-4 h-4" />
+                CPU
+              </span>
+              <Strong>
+                {formData?.cpuselection}{" "}
+                {formData?.cpuselection === 1 ? "Core" : "Cores"}
+              </Strong>
+            </div>
+            <div className="flex justify-between">
+              <span className="inline-flex items-center gap-1">
+                <MemoryStick className="w-4 h-4" />
+                Memory
+              </span>
+              <Strong>{formData?.memselection} GB</Strong>
+            </div>
+            <div className="flex justify-between">
+              <span className="inline-flex items-center gap-1">
+                <Gpu className="w-4 h-4" />
+                GPU
+              </span>
+              <Strong>{selectedGpuLabel}</Strong>
+            </div>
+          </div>
+        </div>
+
+
         <Separator />
       </PanelContent>
 

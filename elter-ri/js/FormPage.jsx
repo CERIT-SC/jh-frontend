@@ -329,7 +329,7 @@ const StepThree = ({ setFormData, defaultFormData }) => {
                 src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A10&theme=light&panelId=2"
                 width="200"
                 height="200"
-                frameborder="0"
+                frameBorder="0"
                 align="left"
               ></iframe>
               <iframe
@@ -337,7 +337,7 @@ const StepThree = ({ setFormData, defaultFormData }) => {
                 src="https://kuba-mon-int.cloud.e-infra.cz/d-solo/d3d6e47f-6365-428e-94d1-e04956349e08/gpu-types-and-usage?orgId=1&var-GPU=NVIDIA-A40&theme=light&panelId=2"
                 width="200"
                 height="200"
-                frameborder="0"
+                frameBorder="0"
                 align="left"
               ></iframe>
             </div>

@@ -6,7 +6,7 @@ export default {
   component: EinfraFooter,
   decorators: [
     (Story) => (
-      <div style={{ border: "1px solid #ccc", width: "400px" }}>
+      <div className="w-full max-w-7xl border border-border">
         <Story />
       </div>
     ),
@@ -16,5 +16,14 @@ export default {
   },
 };
 
-export const Footer = {
+export const Footer = {};
+
+export const DarkMode = {
+  decorators: [
+    (Story) => (
+      <div className="dark w-full max-w-7xl">
+        <Story />
+      </div>
+    ),
+  ],
 };

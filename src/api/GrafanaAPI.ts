@@ -34,10 +34,6 @@ interface GrafanaResult {
   frames: GrafanaFrame[];
 }
 
-interface GrafanaResponse {
-  results: Record<string, GrafanaResult>;
-}
-
 interface QueryResult {
   value: number | null;
   timestamp?: number;

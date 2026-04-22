@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { useState, useEffect } from "react";
 import {
   Stepper,
   StepperContent,
@@ -16,6 +17,9 @@ import { Input } from "./input";
 import { Label } from "./label";
 import { Textarea } from "./textarea";
 import { P } from "@e-infra/design-system";
+import { DropDownButton } from "../DropDownButton/DropDownButton";
+import { DropDownOption } from "../DropDownButton/DropDownButton";
+import { SliderCheckBox } from "../SliderCheckBox/SliderCheckBox";
 
 const meta = {
   title: "Components/Stepper",
@@ -37,7 +41,7 @@ const steps = [
   { label: "Acknowledgements", description: "Add acknowledgements" },
 ];
 
-const StepOne = ({ setFormData, defaultFormData }) => {
+function Step1PublicationInfo() {
   const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
   const [checkSsh, setCheckSsh] = useState(null);
   const [selectedDropdownIndex, setSelectedDropdownIndex] = useState(null);
@@ -203,7 +207,7 @@ const StepOne = ({ setFormData, defaultFormData }) => {
       </SliderCheckBox>
     </div>
   );
-};
+}
 
 function Step2DuplicityCheck() {
   return (

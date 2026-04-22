@@ -1,7 +1,6 @@
 import "../styles/index.css";
 import { JupyterHubApiClient } from "../api/JupyterHubAPI";
 import React, { useState } from "react";
-import { Button } from "@e-infra/design-system";
 import { EinfraFooter } from "../components/FooterAndHeader/EinfraFooter";
 import JupyterHubHeader from "../components/FooterAndHeader/JupyterHubHeader";
 import {
@@ -13,16 +12,8 @@ import initDev from "../dev-setup";
 import { Alert } from "../components/Alert";
 import { useAlerts } from "../hooks/useAlerts";
 import { TileSelector } from "../components/TileSelector/TileSelector";
-import {
-  H2,
-  H3,
-  H4,
-  Panel,
-  PanelContent,
-  PanelDescription,
-  PanelHeader,
-} from "@e-infra/design-system";
-import { LayoutGrid, LayoutList, Server, Plus, Play } from "lucide-react";
+import { H1, H4, Panel, PanelContent, Button } from "@e-infra/design-system";
+import { LayoutGrid, LayoutList } from "lucide-react";
 import { GrafanaQuery } from "../api/GrafanaAPI";
 function HomePage() {
   if (import.meta.env.DEV) {
@@ -38,25 +29,12 @@ function HomePage() {
 
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
 
-  const fetchUsage = async () => {
-    try {
-      // const data = await fetchGrafanaData("xbencs00", "test-server");
-      const data = await new GrafanaQuery()
-        .freeGPUs("NVIDIA-A10")
-        .totalGPUs("NVIDIA-A10")
-        .execute();
-      console.log("Fetched Grafana data:", data);
-    } catch (error) {
-      console.error("Error fetching Grafana data:", error);
-    }
-  };
-
   const handleStopServer = async (name) => {
     console.log(`Stopping server: ${name}`);
     try {
       await apiClient
         .stopNamedServer(appConfig.userName, name, false)
-        .then((result) => {
+        .then(() => {
           pushAlert(`Server ${name} stopped successfully`, {
             variant: "success",
           });
@@ -66,6 +44,7 @@ function HomePage() {
         const updated = { ...prevSpawners };
         if (updated[name]) {
           updated[name].active = false;
+          updated[name].ready = false;
         }
         return updated;
       });
@@ -76,6 +55,39 @@ function HomePage() {
       });
     }
   };
+
+  const getServers = async () => {
+    try {
+      const data = await apiClient.getNamedServers(appConfig.userName);
+
+      if (data.length !== 0) {
+        Object.entries(data).forEach(([name, spawner]) => {
+          if (!spawners[name] || spawners[name]?.active !== spawner.active) {
+            setSpawners((prevSpawners) => {
+              const updated = {
+                ...prevSpawners,
+                [name]: {
+                  ...prevSpawners[name],
+                  active: true,
+                  ready: spawner.ready,
+                  url: spawner.url,
+                  last_activity: spawner.last_activity,
+                },
+              };
+              return updated;
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.error(`Failed to fetch servers:`, error.message);
+    }
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      getServers();
+    }
+  });
 
   const handleStopDefaultServer = async () => {
     try {
@@ -109,9 +121,13 @@ function HomePage() {
       });
     }
   };
+  const handleOpenServer = (url) => {
+    window.open(url, "_bank").focus();
+  };
 
-  const handleAddServer = () => {
-    window.location.href = `/hub/spawn/${appConfig.userName}/${serverName}`;
+  const handleAddServer = (url) => {
+    window.open(url);
+    window.location.reload();
   };
 
   const [gridType, setGridType] = useState(1);
@@ -121,51 +137,11 @@ function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
-      {/* <Button onClick={fetchUsage} className="mx-4 my-2">
-        Fetch CPU Usage (Grafana)
-      </Button> */}
       <div className="container grow  mx-auto px-4 py-8 space-y-8">
-        {/* Default Server Button */}
-
-        {/* <div className="add-server basis-1/3 flex flex-col gap-4">
-          <div className="default-server-btns">
-            <Panel className="itmes-center justify-center text-center flex flex-col gap-4">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Server color="var(--primary)" />
-                <H3>My Default Server</H3>
-              </div>
-              <PanelDescription>
-                This is your default server. You can use it for general
-                purposes. If you want to run a specific project, we recommend
-                you to add a new server.
-              </PanelDescription>
-              {defaultServerActive && (
-                <div className="btn-wrapper">
-                  <Button variant="secondary" onClick={handleStopDefaultServer}>
-                    Stop My Server
-                  </Button>
-                </div>
-              )}
-              <div className="btn-wrapper">
-                <Button
-                  className="w-full"
-                  onClick={() =>
-                    (window.location.href = defaultServerActive
-                      ? appConfig.url
-                      : `spawn/${appConfig.userName}`)
-                  }
-                >
-                  <Play size={16} strokeWidth={3} />
-                  My Server
-                </Button>
-              </div>
-            </Panel>
-          </div>
-        </div> */}
         <div className="named-servers">
-          <Panel>
+          <Panel className="bg-background/60">
             <div className="flex items-center">
-              <H4 className="grow">My servers</H4>
+              <H1 className="grow">My servers</H1>
               <TileSelector
                 options={[1, 2]}
                 defaultValue={1}
@@ -199,7 +175,7 @@ function HomePage() {
                     : "grid-cols-1")
                 }
               >
-                <ServerCardType
+                {/* <ServerCardType
                   title="Default Server"
                   key="default-server"
                   spawnerUrl={appConfig.url}
@@ -210,7 +186,7 @@ function HomePage() {
                     (window.location.href = `/spawn/${appConfig.userName}`)
                   }
                   showDeleteButton={false}
-                />
+                /> */}
                 {Object.entries(spawners).map(([name, spawner]) => (
                   <ServerCardType
                     title={name}
@@ -218,11 +194,12 @@ function HomePage() {
                     spawnerUrl={spawner.url}
                     lastActivity={spawner.last_activity}
                     isActive={spawner.active}
-                    handleOpen={() => (window.location.href = spawner.url)}
+                    isReady={spawner.ready}
+                    handleOpen={() => handleOpenServer(spawner.url)}
                     handleStop={() => handleStopServer(name)}
                     handleDelete={() => handleDeleteServer(name)}
                     handleStart={() =>
-                      (window.location.href = `/spawn/${appConfig.userName}/${name}`)
+                      handleAddServer(`/spawn/${appConfig.userName}/${name}`)
                     }
                   />
                 ))}

@@ -212,9 +212,10 @@ export function SelectingCardsTabs({
   onCustomImageChange,
 }: SelectingCardTabsProps) {
   const images = useMemo(() => getImageOptions() as ImageOptions, []);
-  const categories = [...Object.keys(images), "custom"];
+  const allCategories = Object.keys(images);
+  const categories = ["all", ...allCategories, "custom"];
   const [activeCategory, setActiveCategory] = useState<string>(
-    selectedCategory || categories[0] || "simple",
+    selectedCategory || "all",
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -232,7 +233,7 @@ export function SelectingCardsTabs({
 
     // Only notify parent for non-custom categories
     // Custom category should only trigger update when user types in the input
-    if (category !== "custom") {
+    if (category !== "custom" && category !== "all") {
       // Don't select any image, just update the category
       // User needs to click on an image to select it
     }
@@ -244,10 +245,22 @@ export function SelectingCardsTabs({
     if (activeCategory === "custom") {
       return [];
     }
-    const categoryImages = images[activeCategory] || [];
+
+    // Get images based on category
+    let categoryImages: Array<{ value: string; name: string }> = [];
+    if (activeCategory === "all") {
+      // Collect all images from all categories
+      categoryImages = allCategories.flatMap((cat) => images[cat] || []);
+    } else {
+      categoryImages = images[activeCategory] || [];
+    }
+
+    // If no search query, return all images for the category
     if (!searchQuery.trim()) {
       return categoryImages;
     }
+
+    // Filter based on search query
     const query = searchQuery.toLowerCase();
     return categoryImages.filter(({ name, value }) => {
       const baseName = extractBaseName(name).toLowerCase();
@@ -259,10 +272,21 @@ export function SelectingCardsTabs({
         imageValue.includes(query)
       );
     });
-  }, [images, activeCategory, searchQuery]);
+  }, [images, allCategories, activeCategory, searchQuery]);
 
   const clearSearch = (): void => {
     setSearchQuery("");
+  };
+
+  // Handle search input - automatically switch to ALL category when typing
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const newValue = e.target.value;
+    setSearchQuery(newValue);
+    // Automatically switch to ALL category when user starts typing
+    if (newValue.trim() && activeCategory !== "all") {
+      setActiveCategory("all");
+      setSelectCategory?.("all");
+    }
   };
 
   const handleCustomImageInput = (
@@ -280,9 +304,7 @@ export function SelectingCardsTabs({
           type="text"
           placeholder="Search images..."
           value={searchQuery}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setSearchQuery(e.target.value)
-          }
+          onChange={handleSearchChange}
           className="pl-10 pr-10 bg-surface-raised"
         />
         {searchQuery && (
@@ -302,6 +324,7 @@ export function SelectingCardsTabs({
         {categories.map((category) => {
           const isActive = activeCategory === category;
           const isCustomCategory = category === "custom";
+          const isAllCategory = category === "all";
           return (
             <Badge
               key={category}
@@ -312,13 +335,16 @@ export function SelectingCardsTabs({
                 "hover:bg-primary/10 hover:border-primary",
                 isActive &&
                   "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
+                isCustomCategory && "bg-tertiary",
               )}
               onClick={() => handleCategoryChange(category)}
             >
               {isCustomCategory
                 ? "Custom Image"
-                : sectionTitles[category as keyof typeof sectionTitles] ||
-                  category}
+                : isAllCategory
+                  ? "ALL"
+                  : sectionTitles[category as keyof typeof sectionTitles] ||
+                    category}
             </Badge>
           );
         })}
@@ -353,7 +379,7 @@ export function SelectingCardsTabs({
 
       {/* Image Cards Grid */}
       {activeCategory !== "custom" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar">
           {filteredImages.map(({ value, name }) => (
             <Card
               key={value}

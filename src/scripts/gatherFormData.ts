@@ -23,11 +23,11 @@ declare const spawnOptions: {
     customimage?: string;
   };
   ssh_dns_domain?: string;
-  gpu_instances?: any[];
-  images?: any[];
-  mhomes?: any[];
-  phomes?: any[];
-  s3buckets?: any[];
+  gpu_instances?: unknown[];
+  images?: unknown[];
+  mhomes?: unknown[];
+  phomes?: unknown[];
+  s3buckets?: unknown[];
 };
 export function gatherFormData() {
   if (!spawnOptions || !spawnOptions.user_options) {
@@ -199,11 +199,14 @@ export function getS3BucketOptions() {
   }
 
   const mapped = spawnOptions.s3buckets.reduce(
-    (acc: Record<string, string>, item: any) => {
+    (acc: Record<string, string>, item: unknown) => {
       const value =
         typeof item === "string"
           ? item
-          : item?.value || item?.name || item?.id || "";
+          : (item as { value?: string; name?: string; id?: string })?.value ||
+            (item as { value?: string; name?: string; id?: string })?.name ||
+            (item as { value?: string; name?: string; id?: string })?.id ||
+            "";
       if (value) {
         acc[value] = value;
       }

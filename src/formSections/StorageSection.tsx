@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  createContext,
+  useContext,
+} from "react";
 import { DropDownMenu } from "../components/DropDownMenu/DropDownMenu";
 import {
   getPersistentHomeOptions,
@@ -11,7 +18,6 @@ import {
   Input,
   Badge,
   H3,
-  H2,
   Code,
   P,
 } from "@e-infra/design-system";
@@ -86,8 +92,6 @@ declare const appConfig: { userName?: string };
 // ============================================================================
 // Reusable Section Container Component (Compound Pattern)
 // ============================================================================
-
-import { createContext, useContext } from "react";
 
 interface SectionContainerContextValue {
   enabled: boolean;
@@ -760,116 +764,14 @@ export default function StorageSelectionSection({
           </P>
         </SectionContainer.Header>
         <SectionContainer.Content>
-          <div className="space-y-4">
-            {/* S3 Type Selection */}
-            <div className="pl-4 space-y-2">
-              <P>Select Bucket Type</P>
-              <div className="flex flex-wrap gap-2">
-                {S3_OPTIONS.map((option) => {
-                  const isActive = s3SelectionType === option.value;
-                  return (
-                    <Badge
-                      key={option.value}
-                      variant={isActive ? "default" : "outline"}
-                      className={cn(
-                        "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
-                        "bg-surface",
-                        "hover:bg-primary/10 hover:border-primary",
-                        isActive &&
-                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
-                      )}
-                      onClick={() => setS3SelectionType(option.value)}
-                    >
-                      {option.label}
-                    </Badge>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Existing S3 Bucket */}
-            {s3SelectionType === "existing" && (
-              <div className="pl-4 animate-in fade-in-0 duration-200">
-                <DropDownMenu
-                  formSelect={handleS3Buckets}
-                  title="Select S3 Bucket"
-                  menuOptions={s3values}
-                  defaultOption={defaultOptionS3name}
-                  className="bg-surface"
-                />
-              </div>
-            )}
-
-            {/* New S3 Bucket */}
-            {s3SelectionType === "new" && (
-              <div className="space-y-4 pl-4 animate-in fade-in-0 duration-200">
-                <div className="space-y-2">
-                  <Label htmlFor="s3-url">S3 URL</Label>
-                  <Input
-                    id="s3-url"
-                    type="text"
-                    value={formData.s3url ?? ""}
-                    placeholder="https://s3.cloud.e-infra.cz"
-                    onChange={(e) => handleS3UrlChange(e.target.value)}
-                    className="w-full bg-surface"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="s3-bucket">Bucket Name</Label>
-                  <Input
-                    id="s3-bucket"
-                    type="text"
-                    value={formData.s3bucket ?? ""}
-                    placeholder="example-bucket"
-                    onChange={(e) => handleS3BucketChange(e.target.value)}
-                    className="w-full bg-surface"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="s3-access-key">Access Key</Label>
-                  <div className="relative">
-                    <Input
-                      id="s3-access-key"
-                      type={showAccessKey ? "text" : "password"}
-                      value={formData.s3accesskey ?? ""}
-                      placeholder="s3AccessKey"
-                      onChange={(e) => handleS3AccessKeyChange(e.target.value)}
-                      className="w-full pr-10 bg-surface"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowAccessKey(!showAccessKey)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
-                    >
-                      {showAccessKey ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="s3-secret-key">Secret Key</Label>
-                  <div className="relative">
-                    <Input
-                      id="s3-secret-key"
-                      type={showSecretKey ? "text" : "password"}
-                      value={formData.s3secretkey ?? ""}
-                      placeholder="s3SecretKey"
-                      onChange={(e) => handleS3SecretKeyChange(e.target.value)}
-                      className="w-full pr-10 bg-surface"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSecretKey(!showSecretKey)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
-                    >
-                      {showSecretKey ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+          <div className="pl-4 animate-in fade-in-0 duration-200">
+            <DropDownMenu
+              formSelect={handleS3Buckets}
+              title="Select S3 Bucket"
+              menuOptions={s3values}
+              defaultOption={defaultOptionS3name}
+              className="bg-surface"
+            />
           </div>
         </SectionContainer.Content>
       </SectionContainer>

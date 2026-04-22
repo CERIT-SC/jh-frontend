@@ -1,6 +1,5 @@
 import React from "react";
 import LoginPage from "./pages/LoginPage";
-import AnouncmentMessage from "./components/AnouncmentMessage/AnouncmentMessage";
 import { createRoot } from "react-dom/client";
 import "@fontsource/montserrat/600.css";
 import "./styles/index.css";

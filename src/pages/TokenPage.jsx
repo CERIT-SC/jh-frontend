@@ -14,11 +14,7 @@ import {
   PanelHeader,
   Input,
   Label,
-  H2,
-  H3,
   P,
-  Strong,
-  Muted,
   Code,
   Dialog,
   DialogContent,
@@ -26,7 +22,6 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-  DialogTrigger,
 } from "@e-infra/design-system";
 import React, { useState, useRef, useEffect } from "react";
 import JupyterHubHeader from "../components/FooterAndHeader/JupyterHubHeader";
@@ -37,7 +32,7 @@ function TokenPage() {
   const [showTokenDialog, setShowTokenDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [apiTokens, setApiTokens] = useState([]);
-  const [oauthClients, setOauthClients] = useState([]);
+  const [_oauthClients, setOauthClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const formRef = useRef(null);
 
