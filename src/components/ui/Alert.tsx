@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertDescription } from "@e-infra/design-system";
 import { AlertTriangle, Check, CircleX } from "lucide-react";
 
@@ -22,18 +22,45 @@ function AlertCard({
   alert: AlertItem;
   onRemove: (id: string) => void;
 }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const dismissTimerRef = useRef<number | null>(null);
+
+  const startDismiss = () => {
+    if (isExiting) return;
+
+    setIsExiting(true);
+    dismissTimerRef.current = window.setTimeout(() => {
+      onRemove(alert.id);
+    }, 300);
+  };
+
+  useEffect(() => {
+    // Trigger the enter transition after initial mount.
+    const frameId = requestAnimationFrame(() => setIsVisible(true));
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
   useEffect(() => {
     if (!alert.autoDismiss) return;
 
     const timeout = setTimeout(() => {
-      onRemove(alert.id);
+      startDismiss();
     }, alert.duration ?? 5000);
 
     return () => clearTimeout(timeout);
-  }, [alert, onRemove]);
+  }, [alert.autoDismiss, alert.duration]);
+
+  useEffect(() => {
+    return () => {
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleDismiss = () => {
-    onRemove(alert.id);
+    startDismiss();
   };
 
   const getVariantStyles = () => {
@@ -61,7 +88,11 @@ function AlertCard({
 
   return (
     <div
-      className={`w-[400px] top-0 border rounded-lg px-4 py-3 text-sm cursor-pointer alert-enter transition-all duration-300 flex items-start gap-3 ${getVariantStyles()}`}
+      className={`w-[400px] top-0 overflow-hidden transition-all duration-300 ease-out ${
+        isVisible && !isExiting
+          ? "max-h-32 translate-y-0 opacity-100 mb-0"
+          : "max-h-0 -translate-y-2 opacity-0 mb-0"
+      }`}
       onClick={handleDismiss}
       role="button"
       tabIndex={0}
@@ -72,8 +103,12 @@ function AlertCard({
         }
       }}
     >
-      {getIcon()}
-      <AlertDescription>{alert.message}</AlertDescription>
+      <div
+        className={`border rounded-lg px-4 py-3 text-sm cursor-pointer flex items-start gap-3 ${getVariantStyles()}`}
+      >
+        {getIcon()}
+        <AlertDescription>{alert.message}</AlertDescription>
+      </div>
     </div>
   );
 }
