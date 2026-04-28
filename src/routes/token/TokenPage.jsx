@@ -1,5 +1,7 @@
 import {
   Content,
+  ContentBody,
+  ContentHeading,
   Link,
   Small,
   Button,
@@ -199,10 +201,10 @@ function TokenPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <JupyterHubHeader userName={appConfig.userName || ""} />
-      <main className="flex flex-1 flex-col items-center px-4 py-8">
+      <main className="flex flex-1 flex-col items-center">
         <Content className="w-full max-w-7xl">
-          <Content.Heading>Manage JupyterHub Tokens</Content.Heading>
-          <Content.Body>
+          <ContentHeading>Manage JupyterHub Tokens</ContentHeading>
+          <ContentBody>
             {/* Request Token Form */}
             <Panel>
               <PanelHeader>Request New API Token</PanelHeader>
@@ -483,7 +485,7 @@ function TokenPage() {
                 No authorized applications.
               </P>
             )} */}
-          </Content.Body>
+          </ContentBody>
         </Content>
       </main>
       <EinfraFooter />

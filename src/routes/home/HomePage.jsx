@@ -129,11 +129,11 @@ function HomePage() {
     }
   };
   const handleOpenServer = (url) => {
-    window.open(url, "_bank").focus();
+    window.open(url, "_blank").focus();
   };
 
-  const handleAddServer = (url) => {
-    window.open(url);
+  const handleAddServer = () => {
+    window.open(`/spawn/${appConfig.userName}/${serverName}`, "_blank").focus();
     window.location.reload();
   };
 

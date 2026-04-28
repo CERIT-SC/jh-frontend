@@ -1,5 +1,6 @@
 import React from "react";
 import { einfraLogo } from "../../../public/static/custom-images";
+import { einfraLogoDark } from "../../../public/static/custom-images";
 import { cn, Link } from "@e-infra/design-system";
 import { Mail, FileText, ArrowUpRight } from "lucide-react";
 
@@ -28,7 +29,12 @@ export const EinfraFooter = ({
             <img
               src={einfraLogo}
               alt="e-INFRA CZ"
-              className="h-8 w-auto object-contain transition-opacity opacity-90 hover:opacity-100"
+              className="h-8 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 block dark:hidden"
+            />
+            <img
+              src={einfraLogoDark}
+              alt="e-INFRA CZ"
+              className="h-8 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 hidden dark:block"
             />
             <p className="text-sm font-medium text-text-muted">
               Operated by <span className="text-text">CERIT-SC</span>,{" "}

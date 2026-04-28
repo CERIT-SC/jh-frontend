@@ -7,6 +7,8 @@ import { gatherFormData, getS3BucketOptions } from "./utils/gatherFormData";
 import { ListObjectsCommand, S3Client } from "@aws-sdk/client-s3";
 import {
   Content,
+  ContentBody,
+  ContentHeading,
   Panel,
   PanelTitle,
   Button,
@@ -348,8 +350,8 @@ function FormPage() {
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
       <Content className="container grow mx-auto px-4 pb-6">
-        <Content.Heading>Start a new server</Content.Heading>
-        <Content.Body>
+        <ContentHeading>Start a new server</ContentHeading>
+        <ContentBody>
           <div className="flex flex-row gap-12 w-full h-full relative">
             {/* Left side: Scrollable content taking 2/3 */}
             <div className="w-2/3 no-scrollbar flex flex-col gap-8">
@@ -449,7 +451,7 @@ function FormPage() {
               </div>
             </div>
           </div>
-        </Content.Body>
+        </ContentBody>
       </Content>
       <EinfraFooter />
     </div>
