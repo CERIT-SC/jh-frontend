@@ -1,2 +1,3 @@
 export { useAlerts } from "./useAlerts";
-export { useGPUStatus } from "./useGPUStatus";
+export { useEventSource } from "./useEventSource";
+export { useSpawnProgress } from "./useSpawnProgress";

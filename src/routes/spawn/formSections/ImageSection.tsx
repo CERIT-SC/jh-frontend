@@ -1,7 +1,7 @@
-import { useState, useEffect, JSX } from "react";
+import { useState, useEffect } from "react";
 import { formImagesName } from "../data/formData";
 import { SelectingCardsTabs } from "@components/features";
-import { Separator, Switch, Label, Input } from "@e-infra/design-system";
+import { Separator, Switch, Label } from "@e-infra/design-system";
 import { getImageOptions } from "../utils/gatherFormData";
 
 type ImageOption = { value: string; name: string };
@@ -52,7 +52,6 @@ export function ImageSelectionSectionTabs({
 }: ImageSelectionProps) {
   const [sshChecked, setSshChecked] = useState(false);
   const [customImageValue, setCustomImageValue] = useState("");
-  const [isCustomImage, setIsCustomImage] = useState(false);
 
   useEffect(() => {
     if (defaultFormData?.notebookImage) {
@@ -63,7 +62,6 @@ export function ImageSelectionSectionTabs({
       if (defaultFormData.notebookImage.type === "customnb") {
         const customValue = defaultFormData.notebookImage.selectedOption || "";
         setCustomImageValue(customValue);
-        setIsCustomImage(true);
         setSelectedCategory("custom");
         setSelectedImage(null);
         onImageChange?.({
@@ -87,14 +85,12 @@ export function ImageSelectionSectionTabs({
         const formImageKey = formImagesMap[category] || category;
         setSelectedCategory(category);
         setSelectedImage(image);
-        setIsCustomImage(false);
         onImageChange?.({
           images: category,
           [formImageKey]: `cerit.io/hubs/${image}`,
         });
       } else {
         setCustomImageValue(imgVal || "");
-        setIsCustomImage(true);
         setSelectedCategory("custom");
         setSelectedImage(null);
         onImageChange?.({
@@ -112,7 +108,6 @@ export function ImageSelectionSectionTabs({
     if (categoryKey === "custom") {
       setSelectedImage(null);
       setSelectedCategory("custom");
-      setIsCustomImage(true);
 
       if (customImageValue) {
         onImageChange?.({
@@ -131,7 +126,6 @@ export function ImageSelectionSectionTabs({
     const formImageKey = formImagesMap[categoryKey] || categoryKey;
     setSelectedImage(imageValue);
     setSelectedCategory(categoryKey);
-    setIsCustomImage(false);
 
     onImageChange?.({
       images: categoryKey,
@@ -142,7 +136,6 @@ export function ImageSelectionSectionTabs({
 
   const handleCustomImageChange = (value: string) => {
     setCustomImageValue(value);
-    setIsCustomImage(true);
     setSelectedCategory("custom");
     setSelectedImage(null);
     onImageChange?.({

@@ -1,58 +1,317 @@
-.info-icon {
+/* ──────────────────────────────────────────────
+ * InfoBox — Tooltip/Popover Hybrid Styles
+ * ────────────────────────────────────────────── */
+
+.info-box-wrapper {
   position: relative;
-  display: inline-block;
-  margin-left: auto;
 }
 
-.info-text {
+/* ── Content Panel Base ──────────────────────── */
+
+.info-box-content {
   position: absolute;
-  bottom: 120%;
+  animation-duration: var(--info-box-duration, 200ms);
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+
+/* ── Position: Top ───────────────────────────── */
+
+.info-box--top {
+  bottom: calc(100% + 8px);
+}
+
+.info-box--top.info-box--align-center {
   left: 50%;
   transform: translateX(-50%);
-  background-color: #ccc;
-  color: #000000;
-  padding: 14px;
-  border-radius: 5px;
-  font-size: 12px;
-  text-align: center;
-  min-width: 200px;
-  z-index: 1;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.3s ease;
 }
 
-.info-text::after {
-  position: absolute;
-  top: 100%;
+.info-box--top.info-box--align-start {
+  left: 0;
+}
+
+.info-box--top.info-box--align-end {
+  right: 0;
+}
+
+/* ── Position: Bottom ────────────────────────── */
+
+.info-box--bottom {
+  top: calc(100% + 8px);
+}
+
+.info-box--bottom.info-box--align-center {
   left: 50%;
   transform: translateX(-50%);
-  border-width: 5px;
-  border-style: solid;
-  border-color: #333 transparent transparent transparent;
 }
 
-.info-icon:hover .info-text {
-  visibility: visible;
-  opacity: 1;
+.info-box--bottom.info-box--align-start {
+  left: 0;
 }
 
-@media (max-width: 768px) {
-  .info-text {
-    position: absolute;
-    bottom: 120%;
-    left: 50%;
-    transform: translate(-80%);
-    background-color: #ccc;
-    color: #000000;
-    padding: 14px;
-    border-radius: 5px;
-    font-size: 12px;
-    text-align: center;
-    min-width: 200px;
-    z-index: 1;
-    visibility: hidden;
+.info-box--bottom.info-box--align-end {
+  right: 0;
+}
+
+/* ── Position: Left ──────────────────────────── */
+
+.info-box--left {
+  right: calc(100% + 8px);
+  top: 50%;
+}
+
+.info-box--left.info-box--align-center {
+  transform: translateY(-50%);
+}
+
+.info-box--left.info-box--align-start {
+  top: 0;
+}
+
+.info-box--left.info-box--align-end {
+  bottom: 0;
+}
+
+/* ── Position: Right ─────────────────────────── */
+
+.info-box--right {
+  left: calc(100% + 8px);
+  top: 50%;
+}
+
+.info-box--right.info-box--align-center {
+  transform: translateY(-50%);
+}
+
+.info-box--right.info-box--align-start {
+  top: 0;
+}
+
+.info-box--right.info-box--align-end {
+  bottom: 0;
+}
+
+/* ── Entry Animations ────────────────────────── */
+/* Each position+align combo has its own keyframe to preserve
+   the positioning transform throughout the animation. */
+
+/* Top / center */
+@keyframes infoBoxEnterTopCenter {
+  from {
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transform: translateX(-50%) translateY(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* Top / start & end */
+@keyframes infoBoxEnterTopEdge {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Bottom / center */
+@keyframes infoBoxEnterBottomCenter {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* Bottom / start & end */
+@keyframes infoBoxEnterBottomEdge {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Left / center */
+@keyframes infoBoxEnterLeftCenter {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+}
+
+/* Left / start & end */
+@keyframes infoBoxEnterLeftEdge {
+  from {
+    opacity: 0;
+    transform: translateX(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Right / center */
+@keyframes infoBoxEnterRightCenter {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+}
+
+/* Right / start & end */
+@keyframes infoBoxEnterRightEdge {
+  from {
+    opacity: 0;
+    transform: translateX(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Assign entry animations per position+align */
+.info-box--top.info-box--align-center.info-box-enter {
+  animation-name: infoBoxEnterTopCenter;
+}
+.info-box--top.info-box--align-start.info-box-enter,
+.info-box--top.info-box--align-end.info-box-enter {
+  animation-name: infoBoxEnterTopEdge;
+}
+
+.info-box--bottom.info-box--align-center.info-box-enter {
+  animation-name: infoBoxEnterBottomCenter;
+}
+.info-box--bottom.info-box--align-start.info-box-enter,
+.info-box--bottom.info-box--align-end.info-box-enter {
+  animation-name: infoBoxEnterBottomEdge;
+}
+
+.info-box--left.info-box--align-center.info-box-enter {
+  animation-name: infoBoxEnterLeftCenter;
+}
+.info-box--left.info-box--align-start.info-box-enter,
+.info-box--left.info-box--align-end.info-box-enter {
+  animation-name: infoBoxEnterLeftEdge;
+}
+
+.info-box--right.info-box--align-center.info-box-enter {
+  animation-name: infoBoxEnterRightCenter;
+}
+.info-box--right.info-box--align-start.info-box-enter,
+.info-box--right.info-box--align-end.info-box-enter {
+  animation-name: infoBoxEnterRightEdge;
+}
+
+/* ── Exit Animations ─────────────────────────── */
+/* Exit animations fade out while preserving the
+   positioning transform to avoid visual jumps. */
+
+@keyframes infoBoxExitCenter {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes infoBoxExitEdge {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.info-box-exit {
+  animation-timing-function: cubic-bezier(0.4, 0, 1, 1) !important;
+}
+
+.info-box--top.info-box--align-center.info-box-exit,
+.info-box--bottom.info-box--align-center.info-box-exit,
+.info-box--left.info-box--align-center.info-box-exit,
+.info-box--right.info-box--align-center.info-box-exit {
+  animation-name: infoBoxExitCenter !important;
+}
+
+.info-box--top.info-box--align-start.info-box-exit,
+.info-box--top.info-box--align-end.info-box-exit,
+.info-box--bottom.info-box--align-start.info-box-exit,
+.info-box--bottom.info-box--align-end.info-box-exit,
+.info-box--left.info-box--align-start.info-box-exit,
+.info-box--left.info-box--align-end.info-box-exit,
+.info-box--right.info-box--align-start.info-box-exit,
+.info-box--right.info-box--align-end.info-box-exit {
+  animation-name: infoBoxExitEdge !important;
+}
+
+/* ── Responsive Adjustments ──────────────────── */
+
+@media (max-width: 640px) {
+  .info-box-content {
+    max-width: min(
+      var(--info-box-max-width, 320px),
+      calc(100vw - 32px)
+    ) !important;
+  }
+
+  /* On small screens, side-positioned panels flip to bottom */
+  .info-box--left,
+  .info-box--right {
+    left: 50% !important;
+    right: auto !important;
+    top: calc(100% + 8px) !important;
+    bottom: auto !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .info-box--left.info-box-exit,
+  .info-box--right.info-box-exit {
+    animation-name: infoBoxExitCenter !important;
+  }
+
+  .info-box--left.info-box-enter,
+  .info-box--right.info-box-enter {
+    animation-name: infoBoxEnterBottomCenter !important;
+  }
+}
+
+/* ── Reduced Motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .info-box-content,
+  .info-box-enter,
+  .info-box-exit {
+    animation-duration: 0ms !important;
+    animation-name: none !important;
+  }
+
+  .info-box-enter,
+  .info-box-exit {
+    opacity: 1;
   }
 }

@@ -5,7 +5,12 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist/types/node",
     "strict": true
   },
-  "include": ["**/*.js", "**/*.cjs"]
+  "include": ["vite.config.js", "tailwind.config.js"]
 }

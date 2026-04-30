@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment, useCallback } from "react";
-import { TileSelector, DropDownMenu } from "@components/ui";
+import { TileSelector } from "@components/ui";
 import { getGpuOptions } from "../utils/gatherFormData";
 import { GPUStatusIndicator, GPUSquare } from "@components/features";
 import { fetchGPUIndicators, GPUIndicatorsData } from "@api";
@@ -9,6 +9,8 @@ import {
   PanelContent,
   Muted,
   Separator,
+  Badge,
+  cn,
 } from "@e-infra/design-system";
 import { Loader2, RefreshCw } from "lucide-react";
 
@@ -35,6 +37,7 @@ export default function ResourceSelectionSection({
   const [defMem, setDefMem] = useState<number | null>(null);
   const [defCPU, setDefCPU] = useState<number | null>(null);
   const [defGPU, setDefGPU] = useState<[string, string] | null>(null);
+  const [selectedGpu, setSelectedGpu] = useState<string | null>(null);
 
   // GPU status state
   const [gpuStatuses, setGpuStatuses] = useState<
@@ -104,6 +107,7 @@ export default function ResourceSelectionSection({
       setDefMem(resolvedMem);
       setDefCPU(resolvedCpu);
       setDefGPU(resolvedGpu);
+      setSelectedGpu(resolvedGpu[0]);
     }
   }, [defaultFormData]);
 
@@ -156,7 +160,7 @@ export default function ResourceSelectionSection({
           <Panel className="bg-surface-raised p-0 py-6">
             <PanelTitle className="px-6 pb-4">
               <div className="flex justify-between">
-                GPU Availability
+                GPU
                 <button
                   onClick={fetchGPUStatus}
                   disabled={loading}
@@ -170,12 +174,29 @@ export default function ResourceSelectionSection({
               </div>
             </PanelTitle>
             <PanelContent className="flex flex-col px-6 gap-4 border-t pt-2">
-              <DropDownMenu
-                formSelect={handleGPUSelect}
-                title="GPU Options"
-                menuOptions={gpuOptions}
-                defaultOption={defGPU}
-              ></DropDownMenu>
+              <div className="flex flex-wrap gap-2 animate-fade-in">
+                {Object.entries(gpuOptions).map(([value, label]) => {
+                  const isActive = selectedGpu === value;
+                  return (
+                    <Badge
+                      key={value}
+                      className={cn(
+                        "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                        "bg-surface border-surface text-text",
+                        "hover:bg-primary/10 hover:border-primary",
+                        isActive &&
+                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
+                      )}
+                      onClick={() => {
+                        setSelectedGpu(value);
+                        handleGPUSelect(value);
+                      }}
+                    >
+                      {label}
+                    </Badge>
+                  );
+                })}
+              </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-text-heading">

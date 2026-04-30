@@ -1,0 +1,357 @@
+import "../../styles/index.css";
+import "./HomePage.css";
+import { JupyterHubApiClient } from "@api";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Footer, JupyterHubHeader } from "@components/layout";
+import {
+  ServerCard,
+  ServerCardInline,
+  EmptyServerCard,
+} from "@components/features";
+import initDev from "../../dev-setup";
+import { Alert } from "@components/ui";
+import { useAlerts } from "@hooks";
+import { TileSelector } from "@components/ui";
+import { H1, Panel, PanelContent } from "@e-infra/design-system";
+import { LayoutGrid, LayoutList } from "lucide-react";
+import type { HomeAppConfig } from "@src-types/routes/appConfig";
+
+/**
+ * Global config injected by JupyterHub's Jinja2 template (home.html).
+ */
+declare const appConfig: HomeAppConfig;
+
+/**
+ * Type for spawner data structure returned by JupyterHub API
+ */
+interface ApiSpawnerData {
+  active: boolean;
+  ready: boolean;
+  url?: string;
+  last_activity?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Type for internal spawner state with extended data
+ */
+interface SpawnerData extends ApiSpawnerData {
+  name?: string;
+}
+
+/**
+ * Type for server progress tracking
+ */
+interface ServerProgress {
+  [serverName: string]: number;
+}
+
+/**
+ * Type for event source abort controller
+ */
+interface EventSourceItem {
+  abort: () => void;
+}
+
+function HomePage() {
+  if (import.meta.env.DEV) {
+    initDev();
+  }
+
+  const { alerts, pushAlert, removeAlert } = useAlerts();
+  const [spawners, setSpawners] = useState<Record<string, SpawnerData>>(
+    appConfig.spawners as Record<string, SpawnerData>,
+  );
+  const [serverName, setServerName] = useState("");
+  const [serverProgress, setServerProgress] = useState<ServerProgress>({});
+
+  const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
+  const eventSourcesRef = useRef<Map<string, EventSourceItem>>(new Map());
+
+  const handleStopServer = async (name: string) => {
+    console.log(`Stopping server: ${name}`);
+    try {
+      await apiClient
+        .stopNamedServer(appConfig.userName, name, false)
+        .then(() => {
+          pushAlert(`Server ${name} stopped successfully`, {
+            variant: "success",
+          });
+        });
+
+      setSpawners((prevSpawners) => {
+        const updated = { ...prevSpawners };
+        if (updated[name]) {
+          updated[name].active = false;
+          updated[name].ready = false;
+        }
+        return updated;
+      });
+    } catch (error) {
+      console.error(
+        `Failed to stop server ${name}:`,
+        error instanceof Error ? error.message : error,
+      );
+      pushAlert(
+        `Failed to stop server ${name}: ${error instanceof Error ? error.message : error}`,
+        {
+          variant: "error",
+        },
+      );
+    }
+  };
+
+  const getServers = async () => {
+    try {
+      const data = (await apiClient.getNamedServers(
+        appConfig.userName,
+      )) as Record<string, ApiSpawnerData>;
+
+      if (Object.keys(data).length !== 0) {
+        Object.entries(data).forEach(([name, spawner]) => {
+          if (!spawners[name] || spawners[name]?.active !== spawner.active) {
+            setSpawners((prevSpawners) => {
+              const updated = {
+                ...prevSpawners,
+                [name]: {
+                  ...prevSpawners[name],
+                  active: true,
+                  ready: spawner.ready,
+                  url: spawner.url,
+                  last_activity: spawner.last_activity,
+                },
+              };
+              return updated;
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.error(
+        `Failed to fetch servers:`,
+        error instanceof Error ? error.message : error,
+      );
+    }
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      getServers();
+    }
+  });
+
+  const handleDeleteServer = async (name: string) => {
+    try {
+      await apiClient.stopNamedServer(appConfig.userName, name, true);
+
+      setSpawners((prevSpawners) => {
+        const updated = { ...prevSpawners };
+        delete updated[name];
+        return updated;
+      });
+      pushAlert(`Server ${name} deleted successfully`, {
+        variant: "success",
+      });
+    } catch (error) {
+      console.error(
+        `Failed to stop server ${name}:`,
+        error instanceof Error ? error.message : error,
+      );
+      pushAlert(
+        `Failed to delete server ${name}: ${error instanceof Error ? error.message : error}`,
+        {
+          variant: "error",
+        },
+      );
+    }
+  };
+  const handleOpenServer = (url: string) => {
+    window.open(url, "_blank")?.focus();
+  };
+
+  const handleAddServer = () => {
+    window
+      .open(`/spawn/${appConfig.userName}/${serverName}`, "_blank")
+      ?.focus();
+    window.location.reload();
+  };
+  const handleStartServer = (name: string) => {
+    window.open(`/spawn/${appConfig.userName}/${name}`, "_blank")?.focus();
+    window.location.reload();
+  };
+
+  /**
+   * Handle quick start - starts server and tracks progress via SSE
+   * @param name - Server name to quick start
+   */
+  const handleQuickStart = useCallback(
+    async (name: string) => {
+      // Set initial state: active but not ready, with 0 progress
+      setSpawners((prevSpawners) => {
+        const updated = { ...prevSpawners };
+        if (updated[name]) {
+          updated[name].active = true;
+          updated[name].ready = false;
+        }
+        return updated;
+      });
+      setServerProgress((prev) => ({ ...prev, [name]: 0 }));
+
+      const abort = apiClient.quickStartWithProgress(appConfig.userName, name, {
+        onProgress: (progress) => {
+          setServerProgress((prev) => ({ ...prev, [name]: progress }));
+        },
+        onComplete: () => {
+          // Server is ready, update spawner state
+          setSpawners((prevSpawners) => {
+            const updated = { ...prevSpawners };
+            if (updated[name]) {
+              updated[name].active = true;
+              updated[name].ready = true;
+            }
+            return updated;
+          });
+
+          setServerProgress((prev) => ({ ...prev, [name]: 100 }));
+          pushAlert(`Server ${name} started successfully`, {
+            variant: "success",
+          });
+
+          // Remove progress after delay
+          setTimeout(() => {
+            setServerProgress((prev) => {
+              const updated = { ...prev };
+              delete updated[name];
+              return updated;
+            });
+          }, 2000);
+        },
+        onError: (error) => {
+          console.error(
+            `Failed to quick start server ${name}:`,
+            error instanceof Error ? error.message : error,
+          );
+          pushAlert(`Failed to start server ${name}`, {
+            variant: "error",
+          });
+          setServerProgress((prev) => {
+            const updated = { ...prev };
+            delete updated[name];
+            return updated;
+          });
+        },
+      });
+
+      // Store abort function for cleanup if needed
+      eventSourcesRef.current.set(name, { abort });
+    },
+    [pushAlert],
+  );
+
+  // Cleanup abort functions on unmount
+  useEffect(() => {
+    return () => {
+      eventSourcesRef.current.forEach((item) => {
+        if (item.abort) {
+          item.abort();
+        }
+      });
+      eventSourcesRef.current.clear();
+    };
+  }, []);
+
+  const [gridType, setGridType] = useState(1);
+  const ServerCardType = gridType === 1 ? ServerCard : ServerCardInline;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Alert alerts={alerts} onRemove={removeAlert} />
+      <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
+      <div className="container grow  mx-auto px-4 py-8 space-y-8">
+        <div className="named-servers">
+          <Panel className="bg-background/60">
+            <div className="flex items-center">
+              <H1 className="grow">My servers</H1>
+              <TileSelector
+                options={[1, 2]}
+                defaultValue={1}
+                onChange={setGridType}
+                className="w-24 h-10"
+                renderOptionLabel={(value) =>
+                  value === 1 ? (
+                    <span
+                      className="inline-flex justify-center"
+                      aria-label="Grid view"
+                    >
+                      <LayoutGrid size={14} />
+                    </span>
+                  ) : (
+                    <span
+                      className="inline-flex justify-center"
+                      aria-label="List view"
+                    >
+                      <LayoutList size={14} />
+                    </span>
+                  )
+                }
+              />
+            </div>
+            <PanelContent className="pt-2">
+              <div
+                className={
+                  "mt-4 grid gap-8 " +
+                  (gridType === 1
+                    ? "grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center"
+                    : "grid-cols-1")
+                }
+              >
+                {/* <ServerCardType
+                  title="Default Server"
+                  key="default-server"
+                  spawnerUrl={appConfig.url}
+                  isActive={defaultServerActive}
+                  handleOpen={() => (window.location.href = appConfig.url)}
+                  handleStop={handleStopDefaultServer}
+                  handleStart={() =>
+                    (window.location.href = `/spawn/${appConfig.userName}`)
+                  }
+                  showDeleteButton={false}
+                /> */}
+                {Object.entries(spawners).map(([name, spawner]) => (
+                  <ServerCardType
+                    title={name}
+                    key={name}
+                    spawnerUrl={spawner.url}
+                    lastActivity={spawner.last_activity}
+                    isActive={spawner.active}
+                    isReady={spawner.ready}
+                    handleOpen={() => handleOpenServer(spawner.url!)}
+                    handleStop={() => handleStopServer(name)}
+                    handleDelete={() => handleDeleteServer(name)}
+                    handleStart={() => handleStartServer(name)}
+                    handleQuickStart={() => handleQuickStart(name)}
+                    progress={serverProgress[name]}
+                  />
+                ))}
+                {Object.keys(spawners).length < 15 && (
+                  <EmptyServerCard
+                    onAddServer={handleAddServer}
+                    serverName={serverName}
+                    onServerNameChange={(value) => setServerName(value)}
+                    placeholder="Name Your Server"
+                    buttonText="Add Server"
+                    description="e.g. ml-experiment, thesis-analysis"
+                    existingNames={Object.keys(spawners)}
+                    variant={gridType === 1 ? "default" : "inline"}
+                  />
+                )}
+              </div>
+            </PanelContent>
+          </Panel>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+export default HomePage;

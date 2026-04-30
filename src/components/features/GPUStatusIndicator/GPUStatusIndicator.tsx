@@ -1,9 +1,4 @@
 import React from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@e-infra/design-system";
 
 export type GPUStatus = "free" | "used";
 
@@ -107,36 +102,28 @@ export const GPUStatusIndicator: React.FC<GPUStatusIndicatorProps> = ({
   ];
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div
-          className={`flex items-start gap-3 cursor-pointer ${className}`}
-          tabIndex={0}
-          role="status"
-          aria-label={`${label}: ${free} free, ${used} used`}
-        >
-          {/* GPU Type Label */}
-          <span className="text-base font-semibold text-text-heading min-w-[4rem] pt-1 shrink-0 basis-24">
-            {label}
-          </span>
+    <div
+      className={`flex items-start gap-3 ${className}`}
+      role="status"
+      aria-label={`${label}: ${free} free, ${used} used`}
+    >
+      {/* Label and Stats - stacked vertically */}
+      <div className="min-w-[4rem] shrink-0 basis-24 pt-1">
+        <span className="text-base font-semibold text-text-heading block">
+          {label}
+        </span>
+        <span className="text-xs text-text-muted block mt-0.5">
+          {free} free / {total} total
+        </span>
+      </div>
 
-          {/* GPU Squares - responsive flex-wrap */}
-          <div className={`flex flex-wrap items-start ${gapClasses[gap]}`}>
-            {gpuStatuses.map((status, index) => (
-              <GPUSquare key={index} status={status} size={size} />
-            ))}
-          </div>
-        </div>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="text-xs">
-        <div className="flex flex-col gap-0.5">
-          <span className="font-medium">{label}</span>
-          <span>
-            {free} free / {total} total
-          </span>
-        </div>
-      </TooltipContent>
-    </Tooltip>
+      {/* GPU Squares - responsive flex-wrap */}
+      <div className={`flex flex-wrap items-start ${gapClasses[gap]}`}>
+        {gpuStatuses.map((status, index) => (
+          <GPUSquare key={index} status={status} size={size} />
+        ))}
+      </div>
+    </div>
   );
 };
 

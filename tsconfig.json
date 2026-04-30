@@ -39,7 +39,9 @@
       "@assets": ["./src/assets"],
       "@assets/*": ["./src/assets/*"],
       "@data": ["./src/data"],
-      "@data/*": ["./src/data/*"]
+      "@data/*": ["./src/data/*"],
+      "@src-types": ["./src/types"],
+      "@src-types/*": ["./src/types/*"]
     }
   },
   "include": ["src"],

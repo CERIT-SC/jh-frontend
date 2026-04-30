@@ -1,4 +1,4 @@
-import JupyterHubHeader from "./JupyterHubHeader";
+import { JupyterHubHeader } from "./JupyterHubHeader";
 import React from "react";
 
 export default {
@@ -17,7 +17,7 @@ export default {
 };
 
 export const Header = {
-    args: {
-        userName: "Marvin"
-    },
+  args: {
+    userName: "Marvin",
+  },
 };

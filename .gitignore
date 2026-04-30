@@ -30,6 +30,7 @@ yarn-error.log*
 .vscode
 
 build-storybook.log
+storybook-static
 
 # static files
 static-files-*

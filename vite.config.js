@@ -6,6 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// Type declaration for process.env
+const process = { env: { ENTRY: undefined } };
+
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {

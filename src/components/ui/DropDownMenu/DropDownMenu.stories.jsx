@@ -1,5 +1,5 @@
 import { DropDownMenu } from "./DropDownMenu";
-import { gpu_instance } from "../../data/formData";
+import { gpu_instance } from "../../../routes/spawn/data/formData";
 
 export default {
   title: "Example/DropDownMenu",

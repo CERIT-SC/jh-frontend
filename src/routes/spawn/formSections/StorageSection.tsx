@@ -15,21 +15,13 @@ import {
   Switch,
   Alert,
   Label,
-  Input,
   Badge,
   H3,
   Code,
   P,
+  Link,
 } from "@e-infra/design-system";
-import {
-  AlertTriangle,
-  HardDrive,
-  Cloud,
-  Server,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import { ToggleCard } from "@components/ui";
+import { AlertTriangle, HardDrive, Cloud, Server } from "lucide-react";
 import { cn } from "@utils";
 
 // ============================================================================
@@ -265,15 +257,15 @@ const PERSISTENT_HOME_OPTIONS = [
     description: "Use an existing persistent home",
   },
 ];
-
-const S3_OPTIONS = [
-  {
-    value: "existing",
-    label: "Existing",
-    description: "Mount an existing S3 bucket",
-  },
-  { value: "new", label: "New", description: "Configure a new S3 bucket" },
-];
+// @deprecated
+// const S3_OPTIONS = [
+//   {
+//     value: "existing",
+//     label: "Existing",
+//     description: "Mount an existing S3 bucket",
+//   },
+//   { value: "new", label: "New", description: "Configure a new S3 bucket" },
+// ];
 
 // ============================================================================
 // Main Component
@@ -291,7 +283,6 @@ export default function StorageSelectionSection({
   s3SelectionType,
   setS3SelectionType,
   s3values,
-  pushAlert,
 }: StorageSelectionSectionProps): React.ReactElement {
   // State management
   const [phSelectionType, setPhSelectionType] = useState<"new" | "existing">(
@@ -301,8 +292,9 @@ export default function StorageSelectionSection({
   const [checkedDirectories, setCheckedDirectories] = useState(false);
   const [checkedStorage, setCheckedStorage] = useState(false);
   const [checkedMount, setCheckedMount] = useState(false);
-  const [showAccessKey, setShowAccessKey] = useState(false);
-  const [showSecretKey, setShowSecretKey] = useState(false);
+  // @deprecated
+  // const [showAccessKey, setShowAccessKey] = useState(false);
+  // const [showSecretKey, setShowSecretKey] = useState(false);
 
   const [defaultOptionPhname, setDefaultOptionPhname] = useState<
     [string, string] | undefined
@@ -440,9 +432,6 @@ export default function StorageSelectionSection({
   }, []);
 
   // Sync Persistent Home selection to formData
-  // Note: We don't clear phname here because initialization happens first,
-  // and we want to preserve the default value from previous session.
-  // The DropDownMenu will handle setting phname when user makes a selection.
   useEffect(() => {
     onPersistentHomeChange((prev) => ({
       ...prev,
@@ -557,40 +546,41 @@ export default function StorageSelectionSection({
     [onS3Change],
   );
 
-  const createS3ChangeHandler = useCallback(
-    (field: "s3url" | "s3bucket" | "s3accesskey" | "s3secretkey") =>
-      (value: string) => {
-        onS3Change((prev) => ({
-          ...prev,
-          [field]: value,
-        }));
-      },
-    [onS3Change],
-  );
+  // @deprecated
+  // const createS3ChangeHandler = useCallback(
+  //   (field: "s3url" | "s3bucket" | "s3accesskey" | "s3secretkey") =>
+  //     (value: string) => {
+  //       onS3Change((prev) => ({
+  //         ...prev,
+  //         [field]: value,
+  //       }));
+  //     },
+  //   [onS3Change],
+  // );
 
-  const handleS3UrlChange = useMemo(
-    () => createS3ChangeHandler("s3url"),
-    [createS3ChangeHandler],
-  );
-  const handleS3BucketChange = useMemo(
-    () => createS3ChangeHandler("s3bucket"),
-    [createS3ChangeHandler],
-  );
-  const handleS3AccessKeyChange = useMemo(
-    () => createS3ChangeHandler("s3accesskey"),
-    [createS3ChangeHandler],
-  );
-  const handleS3SecretKeyChange = useMemo(
-    () => createS3ChangeHandler("s3secretkey"),
-    [createS3ChangeHandler],
-  );
+  // const handleS3UrlChange = useMemo(
+  //   () => createS3ChangeHandler("s3url"),
+  //   [createS3ChangeHandler],
+  // );
+  // const handleS3BucketChange = useMemo(
+  //   () => createS3ChangeHandler("s3bucket"),
+  //   [createS3ChangeHandler],
+  // );
+  // const handleS3AccessKeyChange = useMemo(
+  //   () => createS3ChangeHandler("s3accesskey"),
+  //   [createS3ChangeHandler],
+  // );
+  // const handleS3SecretKeyChange = useMemo(
+  //   () => createS3ChangeHandler("s3secretkey"),
+  //   [createS3ChangeHandler],
+  // );
 
   // ============================================================================
   // Render
   // ============================================================================
 
   return (
-    <div className="form-wrap max-w-4xl mx-auto flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {/* Persistent Home Configuration */}
       <SectionContainer>
         <SectionContainer.Header
@@ -765,6 +755,19 @@ export default function StorageSelectionSection({
         </SectionContainer.Header>
         <SectionContainer.Content>
           <div className="pl-4 animate-in fade-in-0 duration-200">
+            <Alert variant="default" className="mb-4">
+              <Cloud className="h-4 w-4" />
+              <span className="text-xs">
+                To create bucket go to{" "}
+                <Link
+                  href="https://s3-ui.cloud.e-infra.cz/"
+                  className="underline"
+                >
+                  https://s3-ui.cloud.e-infra.cz/
+                </Link>
+                .
+              </span>
+            </Alert>
             <DropDownMenu
               formSelect={handleS3Buckets}
               title="Select S3 Bucket"

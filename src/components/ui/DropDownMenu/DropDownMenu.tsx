@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "./DropDownMenu.css";
 import {
   Select,
   SelectContent,

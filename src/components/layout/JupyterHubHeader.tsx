@@ -17,14 +17,16 @@ import {
 } from "@e-infra/design-system";
 import { Book, LogOut } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@e-infra/design-system";
-import { ModeToggle } from "./ModeToggle";
+import { ModeToggle } from "../ui/ModeToggle";
 import HubLogo from "../../../public/static/custom-images/hub-rectangle.svg";
 import HubLogoDark from "../../../public/static/custom-images/hub-rectangle-dark.svg";
 interface JupyterHubHeaderProps {
   userName: string;
 }
 
-const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
+export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
+  userName,
+}) => {
   const handleLogout = () => {
     window.location.href = "/hub/logout";
   };
@@ -148,5 +150,3 @@ const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
     // </nav>
   );
 };
-
-export default JupyterHubHeader;

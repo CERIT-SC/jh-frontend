@@ -143,24 +143,6 @@ export const DenseGrid: Story = {
 };
 
 // GPUSquare Stories
-const SquareMeta: Meta<typeof GPUSquare> = {
-  title: "Components/GPUStatusIndicator/GPUSquare",
-  component: GPUSquare,
-  tags: ["autodocs"],
-  argTypes: {
-    status: {
-      control: "select",
-      options: ["free", "used"],
-      description: "Status of the GPU square",
-    },
-    size: {
-      control: "select",
-      options: ["sm", "md", "lg"],
-      description: "Size of the square",
-    },
-  },
-};
-
 export const FreeSquare: StoryObj<typeof GPUSquare> = {
   args: {
     status: "free",

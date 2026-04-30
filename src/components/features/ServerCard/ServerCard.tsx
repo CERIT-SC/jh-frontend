@@ -22,6 +22,10 @@ import {
   DialogDescription,
   DialogFooter,
   cn,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
 } from "@e-infra/design-system";
 import {
   SquarePlus,
@@ -36,8 +40,10 @@ import {
   Rocket,
   Activity,
   Circle,
+  MoreHorizontal,
 } from "lucide-react";
 import { dateFormat, dateFormatRelative } from "@utils";
+
 interface CardProps {
   /** Main title of the card */
   title: string;
@@ -58,9 +64,6 @@ interface CardProps {
   handleStart?: () => void;
 
   handleQuickStart?: () => void;
-
-  /** Whether to show the delete button (default: true) */
-  showDeleteButton?: boolean;
 }
 
 interface ServerActionButtonsProps {
@@ -71,7 +74,6 @@ interface ServerActionButtonsProps {
   handleStart?: () => void;
   handleQuickStart?: () => void;
   buttonClassName: string;
-  showDeleteButton?: boolean;
 }
 
 interface ServerActionButtonsState {
@@ -126,7 +128,6 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
   handleStart = () => {},
   handleQuickStart = () => {},
   buttonClassName,
-  showDeleteButton = true,
 }) => {
   const [loading, setLoading] = React.useState<ServerActionButtonsState>({
     open: false,
@@ -152,10 +153,6 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
     }
   };
 
-  const handleDeleteClick = () => {
-    setShowDeleteDialog(true);
-  };
-
   const confirmDelete = async () => {
     setShowDeleteDialog(false);
     await handleAsyncClick("delete", handleDelete);
@@ -164,85 +161,96 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
   if (isActive) {
     return (
       <>
-        <Button
-          className={buttonClassName}
-          title="Open"
-          size="sm"
-          disabled={loading.open}
-          onClick={() => handleAsyncClick("open", handleOpen)}
-        >
-          Open
-          {loading.open ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <SquareArrowOutUpRight size={16} strokeWidth={2.5} />
-          )}
-        </Button>
-        <Button
-          className={buttonClassName}
-          title="Stop"
-          variant="tertiary"
-          size="sm"
-          disabled={loading.stop}
-          onClick={() => handleAsyncClick("stop", handleStop)}
-        >
-          Stop
-          {loading.stop ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Power />
-          )}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className={buttonClassName}
+              title="Open"
+              size="sm"
+              disabled={loading.open}
+              onClick={() => handleAsyncClick("open", handleOpen)}
+            >
+              Open
+              {loading.open ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <SquareArrowOutUpRight size={16} strokeWidth={2.5} />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p>Open server dashboard</p>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className={buttonClassName}
+              title="Stop"
+              variant="tertiary"
+              size="sm"
+              disabled={loading.stop}
+              onClick={() => handleAsyncClick("stop", handleStop)}
+            >
+              Stop
+              {loading.stop ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Power />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p>Stop the server</p>
+          </TooltipContent>
+        </Tooltip>
       </>
     );
   }
 
   return (
     <>
-      <Button
-        className={buttonClassName}
-        title="Start"
-        variant="default"
-        size="sm"
-        disabled={loading.start}
-        onClick={() => handleAsyncClick("start", handleStart)}
-      >
-        {loading.start && <Loader2 className="h-4 w-4 animate-spin" />}
-        Start <Play className="fill-current" strokeWidth={2} />
-      </Button>
-      <Button
-        className={buttonClassName}
-        title="Quick Start"
-        variant={"tertiary"}
-        size="sm"
-        disabled={loading.quickStart}
-        onClick={() => handleAsyncClick("quickStart", handleQuickStart)}
-      >
-        Quick Start
-        {loading.quickStart ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          // <Play className="fill-current" strokeWidth={2} />
-          <Rocket className="fill-current" strokeWidth={2} />
-        )}
-      </Button>
-      {showDeleteButton !== false && (
-        <Button
-          className={buttonClassName}
-          title="Delete"
-          variant="error"
-          size="sm"
-          disabled={loading.delete}
-          onClick={handleDeleteClick}
-        >
-          Delete
-          {loading.delete ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Trash size={16} strokeWidth={2.5} />
-          )}
-        </Button>
-      )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            className={buttonClassName}
+            title="Start"
+            variant="default"
+            size="sm"
+            disabled={loading.start}
+            onClick={() => handleAsyncClick("start", handleStart)}
+          >
+            {loading.start && <Loader2 className="h-4 w-4 animate-spin" />}
+            Start <Play className="fill-current" strokeWidth={2} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p>Start with new configuration</p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            className={buttonClassName}
+            title="Quick Start"
+            variant={"tertiary"}
+            size="sm"
+            disabled={loading.quickStart}
+            onClick={() => handleAsyncClick("quickStart", handleQuickStart)}
+          >
+            Quick Start
+            {loading.quickStart ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              // <Play className="fill-current" strokeWidth={2} />
+              <Rocket className="fill-current" strokeWidth={2} />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p>QuickStart with last used configuration</p>
+        </TooltipContent>
+      </Tooltip>
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent showCloseButton>
           <DialogHeader>
@@ -287,7 +295,6 @@ const StatusIndicator: React.FC<{
     (progress !== undefined && progress > 0 && progress < 100) ||
     (isActive && !isReady);
   const isComplete = progress === 100 || isReady;
-  const isInactive = !isActive && !isPending;
 
   return (
     <span className="relative flex items-center justify-center">
@@ -328,38 +335,42 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   handleDelete = () => {},
   handleStart = () => {},
   handleQuickStart = () => {},
-  showDeleteButton = true,
 }) => {
-  const [loading, setLoading] = React.useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  const handleDeleteClick = () => {
-    setShowDeleteDialog(true);
-  };
-
-  const confirmDelete = async () => {
-    setShowDeleteDialog(false);
-    setLoading(true);
-    try {
-      await handleDelete();
-    } finally {
-      setLoading(false);
-    }
-  };
   if (variant === "inline") {
     return (
       <Panel
         className={cn(
           "transition-colors duration-200",
-          "border-l-2",
+          "border-0",
+          "relative",
           "dark:bg-surface-raised",
           isReady
-            ? "border-emerald-500"
+            ? "border-l-2 border-success"
             : !isActive
-              ? "border-slate-400"
-              : "border-orange-500",
+              ? "border-l-2 border-slate-400"
+              : "border-l-2 border-warning/30 before:absolute before:inset-x-[-2px] before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
         )}
+        style={{ "--before-height": `${progress}%` } as React.CSSProperties}
       >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className="absolute top-0 right-0 pointer-events-auto hover:bg-surface"
+              variant="ghost"
+              size="icon"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={handleDelete}>
+              <span className="flex items-center gap-2 text-error">
+                <Trash size={16} strokeWidth={2.5} />
+                Delete
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <div className="flex items-center w-full justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Terminal className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -372,11 +383,12 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                 <Badge
                   variant={isActive ? "default" : "secondary"}
                   className={cn(
-                    "shrink-0",
                     progress !== undefined && progress > 0 && progress < 100
                       ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
                       : isActive &&
-                          "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+                          "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
+                    isReady &&
+                      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
                   )}
                 >
                   <StatusIndicator
@@ -385,13 +397,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                     progress={progress}
                     size="lg"
                   />
-                  {progress !== undefined && progress > 0 && progress < 100
-                    ? "Pending"
-                    : isActive
-                      ? isReady
-                        ? "Running"
-                        : "Pending"
-                      : "Stopped"}
+                  {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
                 </Badge>
                 <LastActivityInfo lastActivity={lastActivity} />
               </div>
@@ -405,7 +411,6 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             handleStart={handleStart}
             handleQuickStart={handleQuickStart}
             buttonClassName="shrink-0"
-            showDeleteButton={showDeleteButton}
           />
         </div>
       </Panel>
@@ -453,7 +458,6 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             handleStart={handleStart}
             handleQuickStart={handleQuickStart}
             buttonClassName="shrink-0"
-            showDeleteButton={showDeleteButton}
           />
         </div>
       </Card>
@@ -466,10 +470,10 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         "relative w-full transition-colors duration-200 ease-in-out",
         "bg-surface dark:bg-surface-raised flex flex-col justify-center gap-6 rounded-md py-6 drop-shadow-md hover:drop-shadow-lg",
         isReady
-          ? "border-t-2 border-emerald-500"
+          ? "border-t-2 border-success"
           : !isActive
             ? "border-t-2 border-slate-400"
-            : "before:absolute before:inset-y-0 before:left-0 before:pointer-events-none before:w-[var(--before-width)] before:border-t-2 before:rounded-tl-md before:border-orange-500",
+            : "border-t-2 border-warning/30 before:absolute before:inset-y-[-2px] before:left-0 before:pointer-events-none before:w-[var(--before-width)] before:border-t-2 before:rounded-tl-md before:border-warning",
       )}
       style={{ "--before-width": `${progress}%` } as React.CSSProperties}
     >
@@ -477,25 +481,25 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         <CardTitle>
           <div className="flex justify-between items-center w-full">
             <span>{title}</span>
-            {showDeleteButton !== false && (
-              <Tooltip>
-                <TooltipTrigger
-                  onClick={handleDeleteClick}
-                  disabled={loading}
-                  title="Delete"
-                  className="h-8 w-8 text-muted-foreground hover:text-error hover:bg-error/10 rounded-md inline-flex items-center justify-center"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="pointer-events-auto hover:bg-surface"
+                  variant="ghost"
+                  size="icon"
                 >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash size={18} strokeWidth={2.5} />
-                  )}
-                </TooltipTrigger>
-                <TooltipContent side="left">
-                  <p>Delete server</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={handleDelete}>
+                  <span className="flex items-center gap-2 text-error">
+                    <Trash size={16} strokeWidth={2.5} />
+                    Delete
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
@@ -519,13 +523,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
               progress={progress}
               size="lg"
             />
-            {progress !== undefined && progress > 0 && progress < 100
-              ? "Pending"
-              : isActive
-                ? isReady
-                  ? "Running"
-                  : "Pending"
-                : "Stopped"}
+            {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
           </Badge>
           <LastActivityInfo lastActivity={lastActivity} />
         </div>
@@ -539,32 +537,8 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           handleStart={handleStart}
           handleQuickStart={handleQuickStart}
           buttonClassName="flex-1 gap"
-          showDeleteButton={false}
         />
       </CardFooter>
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent showCloseButton>
-          <DialogHeader>
-            <DialogTitle>Delete Server</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this server? This action cannot be
-              undone and all associated data will be permanently removed.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowDeleteDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="error" onClick={confirmDelete}>
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 };

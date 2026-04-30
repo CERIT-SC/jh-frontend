@@ -15,8 +15,6 @@ export const FieldHeader: React.FC<FieldHeaderProps> = ({
   activeText = "",
   children,
 }) => {
-  const info = <InfoBox infoText={infoText}></InfoBox>;
-
   return (
     <div>
       <div className="field-header">
@@ -26,9 +24,13 @@ export const FieldHeader: React.FC<FieldHeaderProps> = ({
         <div className="activeText">
           <p>{activeText}</p>
         </div>
-        <div className="infoText">{infoText !== "" && info}</div>
-
-        {/*{activeText}*/}
+        <div className="infoText">
+          {infoText !== "" && (
+            <InfoBox position="top">
+              <p>{infoText}</p>
+            </InfoBox>
+          )}
+        </div>
       </div>
       <div className="field-children">{children}</div>
     </div>
