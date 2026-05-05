@@ -1,6 +1,9 @@
 import { useCallback, useState } from "react";
 import type { AlertItem } from "@components/ui/Alert/Alert";
 
+/** Maximum number of alerts visible at any time. */
+export const MAX_VISIBLE_ALERTS = 4;
+
 /** Options for the {@link pushAlert} function. */
 export interface PushAlertOptions {
   variant?: AlertItem["variant"];
@@ -32,10 +35,14 @@ export function useAlerts(): UseAlertsReturn {
         globalThis.crypto?.randomUUID?.() ??
         `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-      setAlerts((prev) => [
-        ...prev,
-        { id, message, variant, autoDismiss, duration },
-      ]);
+      setAlerts((prev) => {
+        // When the visible limit is reached, drop the oldest alert to
+        // prevent the screen from being overwhelmed during error spamming.
+        const current =
+          prev.length >= MAX_VISIBLE_ALERTS ? prev.slice(1) : prev;
+
+        return [...current, { id, message, variant, autoDismiss, duration }];
+      });
     },
     [],
   );

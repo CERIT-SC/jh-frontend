@@ -20,6 +20,7 @@ import {
   Code,
   P,
   Link,
+  H4,
 } from "@e-infra/design-system";
 import { AlertTriangle, HardDrive, Cloud, Server } from "lucide-react";
 import { cn } from "@utils";
@@ -184,7 +185,7 @@ function SectionContent({
   return (
     <div
       className={cn(
-        "p-4 rounded-b-lg border-t border-border bg-secondary dark:bg-surface",
+        "p-4 rounded-b-lg border-t border-border bg-secondary-300 dark:bg-surface",
         "animate-[slideInFade_300ms_ease-out]",
         className,
       )}
@@ -227,7 +228,7 @@ function SectionContainer({
       <section
         id={id}
         className={cn(
-          "rounded-lg ring shadow-sm bg-surface transition-all duration-300",
+          "rounded-lg ring shadow-sm bg-background transition-all duration-300",
           enabled ? "" : "ring-border",
           className,
         )}
@@ -586,7 +587,7 @@ export default function StorageSelectionSection({
         <SectionContainer.Header
           icon={<HardDrive className="w-5 h-5 mt-0.5" aria-hidden="true" />}
         >
-          <H3>PersistentNotebook Home</H3>
+          <H4>PersistentNotebook Home</H4>
           <P>
             Persistent home ensures your data persists even when the notebook is
             deleted. Mounted to <Code>/home/jovyan</Code>

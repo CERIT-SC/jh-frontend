@@ -15,24 +15,31 @@ interface AlertStackProps {
   onRemove: (id: string) => void;
 }
 
+/** Exit animation duration in ms — must match the CSS `transition-duration`. */
+const EXIT_DURATION_MS = 300;
+
 function AlertCard({
   alert,
   onRemove,
+  isForcedExiting = false,
 }: {
   alert: AlertItem;
   onRemove: (id: string) => void;
+  /** When `true`, the card plays its exit animation immediately (used for
+   *  alerts evicted by the visible-limit). */
+  isForcedExiting?: boolean;
 }) {
   const [isVisible, setIsVisible] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
+  const [isSelfExiting, setIsSelfExiting] = useState(false);
   const dismissTimerRef = useRef<number | null>(null);
 
-  const startDismiss = () => {
-    if (isExiting) return;
+  const startDismiss = (): void => {
+    if (isSelfExiting) return;
 
-    setIsExiting(true);
+    setIsSelfExiting(true);
     dismissTimerRef.current = window.setTimeout(() => {
       onRemove(alert.id);
-    }, 300);
+    }, EXIT_DURATION_MS);
   };
 
   useEffect(() => {
@@ -44,26 +51,21 @@ function AlertCard({
   useEffect(() => {
     if (!alert.autoDismiss) return;
 
-    const timeout = setTimeout(() => {
-      startDismiss();
-    }, alert.duration ?? 5000);
-
+    const timeout = setTimeout(startDismiss, alert.duration ?? 5000);
     return () => clearTimeout(timeout);
   }, [alert.autoDismiss, alert.duration]);
 
   useEffect(() => {
     return () => {
-      if (dismissTimerRef.current) {
+      if (dismissTimerRef.current !== null) {
         clearTimeout(dismissTimerRef.current);
       }
     };
   }, []);
 
-  const handleDismiss = () => {
-    startDismiss();
-  };
+  const isExiting = isForcedExiting || isSelfExiting;
 
-  const getVariantStyles = () => {
+  const getVariantStyles = (): string => {
     switch (alert.variant) {
       case "error":
         return "border-error bg-error/10 text-error";
@@ -77,29 +79,32 @@ function AlertCard({
   };
 
   const getIcon = () => {
-    if (alert.variant === "error")
-      return <CircleX className="h-4 w-4 shrink-0" />;
-    if (alert.variant === "success")
-      return <Check className="h-4 w-4 shrink-0" />;
-    if (alert.variant === "warning")
-      return <AlertTriangle className="h-4 w-4 shrink-0" />;
-    return null;
+    switch (alert.variant) {
+      case "error":
+        return <CircleX className="h-4 w-4 shrink-0" />;
+      case "success":
+        return <Check className="h-4 w-4 shrink-0" />;
+      case "warning":
+        return <AlertTriangle className="h-4 w-4 shrink-0" />;
+      default:
+        return null;
+    }
   };
 
   return (
     <div
-      className={`w-[400px] top-0 overflow-hidden transition-all duration-300 ease-out ${
+      className={`w-full overflow-hidden transition-all duration-300 ease-out ${
         isVisible && !isExiting
-          ? "max-h-32 translate-y-0 opacity-100 mb-0"
-          : "max-h-0 -translate-y-2 opacity-0 mb-0"
+          ? "max-h-32 translate-y-0 opacity-100"
+          : "max-h-0 -translate-y-2 opacity-0"
       }`}
-      onClick={handleDismiss}
+      onClick={startDismiss}
       role="button"
       tabIndex={0}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          handleDismiss();
+          startDismiss();
         }
       }}
     >
@@ -113,14 +118,72 @@ function AlertCard({
   );
 }
 
+/**
+ * Renders a stack of toast-style alert notifications at the top-center of the
+ * viewport.
+ *
+ * When an alert is removed from the `alerts` prop (e.g. by the
+ * `MAX_VISIBLE_ALERTS` limit in `useAlerts`), the component keeps the
+ * removed alert in the DOM briefly so it can play its exit animation before
+ * being unmounted.
+ *
+ * The container is viewport-constrained so alerts never obscure the entire
+ * screen — a `max-height` with `overflow-y-auto` ensures scrollability if
+ * the stack would otherwise exceed the available space.
+ */
 export function Alert({ alerts, onRemove }: AlertStackProps) {
-  if (alerts.length === 0) return null;
+  /** Alerts removed from props but still playing their exit animation. */
+  const [exitingAlerts, setExitingAlerts] = useState<AlertItem[]>([]);
+  const prevAlertsRef = useRef<AlertItem[]>(alerts);
+
+  useEffect(() => {
+    const prev = prevAlertsRef.current;
+    const currentIds = new Set(alerts.map((a) => a.id));
+
+    // Detect alerts that were removed from props (e.g. by the
+    // MAX_VISIBLE_ALERTS limit in useAlerts) and stage them for exit
+    // animation before final unmount.
+    const removed = prev.filter((a) => !currentIds.has(a.id));
+
+    if (removed.length > 0) {
+      setExitingAlerts((existing) => [...existing, ...removed]);
+
+      const removedIds = new Set(removed.map((a) => a.id));
+      const timer = setTimeout(() => {
+        setExitingAlerts((existing) =>
+          existing.filter((a) => !removedIds.has(a.id)),
+        );
+      }, EXIT_DURATION_MS);
+
+      prevAlertsRef.current = alerts;
+      return () => clearTimeout(timer);
+    }
+
+    prevAlertsRef.current = alerts;
+  }, [alerts]);
+
+  const exitingIds = new Set(exitingAlerts.map((a) => a.id));
+  const visibleAlerts = [...alerts, ...exitingAlerts];
+
+  if (visibleAlerts.length === 0) return null;
 
   return (
-    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-60 flex justify-center w-full px-2 pointer-events-none">
-      <div className="flex w-full max-w-md flex-col gap-2 pointer-events-auto">
-        {alerts.map((alert) => (
-          <AlertCard key={alert.id} alert={alert} onRemove={onRemove} />
+    <div
+      className="fixed top-20 left-0 right-0 z-60 flex justify-center px-2 pointer-events-none"
+      aria-live="polite"
+      aria-label="Notifications"
+    >
+      <div
+        role="list"
+        className="flex w-full max-w-md flex-col gap-2 pointer-events-auto max-h-[calc(100vh-6rem)] overflow-y-auto overscroll-contain"
+      >
+        {visibleAlerts.map((alert) => (
+          <AlertCard
+            key={alert.id}
+            alert={alert}
+            onRemove={onRemove}
+            isForcedExiting={exitingIds.has(alert.id)}
+          />
         ))}
       </div>
     </div>

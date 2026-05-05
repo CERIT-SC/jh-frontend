@@ -384,18 +384,22 @@ function FormPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="">
       <JupyterHubHeader
         userName={appConfig.userName as string}
       ></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
-      <Content className="container grow mx-auto px-4 pb-6">
+      {/* <Content className="container mx-auto px-4 pb-6"> */}
+      <div className="container mx-auto px-4 py-8 space-y-8">
         <ContentHeading>Start a new server</ContentHeading>
         <ContentBody>
-          <div className="flex flex-row gap-12 w-full h-full relative">
-            {/* Left side: Scrollable content taking 2/3 */}
-            <div className="w-2/3 no-scrollbar flex flex-col gap-8">
-              <Panel id="image-section" className="scroll-mt-20 p-0">
+          <div className="flex flex-row gap-4 xl:gap-12 w-full h-full relative">
+            {/* Left side: Scrollable content */}
+            <div className=" no-scrollbar flex flex-col gap-8">
+              <Panel
+                id="image-section"
+                className="scroll-mt-20 p-0 bg-background"
+              >
                 <PanelTitle className="mb-2 px-6 pt-6">
                   Step 1: Environment Options
                 </PanelTitle>
@@ -426,7 +430,10 @@ function FormPage() {
                 </PanelContent>
               </Panel>
 
-              <Panel id="storage-section" className="scroll-mt-20 p-0">
+              <Panel
+                id="storage-section"
+                className="scroll-mt-20 p-0 bg-background"
+              >
                 <PanelTitle className="mb-2 px-6 pt-6">
                   Step 2: Storage Options
                 </PanelTitle>
@@ -479,7 +486,10 @@ function FormPage() {
                 </PanelContent>
               </Panel>
 
-              <Panel id="resources-section" className="scroll-mt-20 p-0">
+              <Panel
+                id="resources-section"
+                className="scroll-mt-20 p-0 bg-background"
+              >
                 <PanelTitle className="mb-2 px-6 pt-6">
                   Step 3: Resource Options
                 </PanelTitle>
@@ -497,8 +507,8 @@ function FormPage() {
               </Panel>
             </div>
 
-            {/* Right side:Sticky 1/3 */}
-            <div className="w-1/3 relative">
+            {/* Right side:Sticky */}
+            <div className="min-w-sm relative">
               <div className="sticky top-20">
                 <OverviewPanel
                   formData={formData}
@@ -514,7 +524,8 @@ function FormPage() {
             </div>
           </div>
         </ContentBody>
-      </Content>
+      </div>
+      {/* </Content> */}
       <Footer />
     </div>
   );

@@ -8,6 +8,7 @@ import {
   Strong,
   Badge,
   Button,
+  P,
 } from "@e-infra/design-system";
 import React, { JSX } from "react";
 import {
@@ -68,13 +69,13 @@ function StatusIndicator({ enabled }: { enabled: boolean }): JSX.Element {
   return enabled ? (
     <Badge
       variant="outline"
-      className="bg-[var(--color-success-100)] text-[var(--color-success-700)] border-[var(--color-success-200)] flex items-center gap-1"
+      className="bg-[var(--color-success-100)] text-[var(--color-success-700)] border-[var(--color-success-200)] flex items-center gap-1 mt-1"
     >
       <Check className="w-3 h-3" />
       <span className="text-xs">Enabled</span>
     </Badge>
   ) : (
-    <Badge variant="secondary" className=" flex items-center gap-1">
+    <Badge variant="secondary" className=" flex items-center gap-1 mt-1">
       <X className="w-3 h-3" />
       <span className="text-xs">Disabled</span>
     </Badge>
@@ -135,7 +136,7 @@ export function OverviewPanel({
       </PanelTitle>
       {/* <PanelDescription>Configuration summary before starting</PanelDescription> */}
 
-      <PanelContent className="flex flex-col gap-2">
+      <PanelContent className="flex flex-col gap-4">
         <Separator />
         {/* Image Section */}
         {(selectedImage || (isCustomImage && hasCustomImageValue)) && (
@@ -146,18 +147,18 @@ export function OverviewPanel({
                 <EditButton sectionId="image-section" />
               </div>
               <div className="flex flex-col gap-1">
-                <div className="flex justify-between">
-                  <span>Name</span>
+                <div className="flex items-center justify-between">
+                  <P>Name</P>
                   <Strong className="text-right">{displayImageName}</Strong>
                 </div>
-                <div className="flex justify-between">
-                  <span>Tag</span>
+                <div className="flex items-center justify-between">
+                  <P>Tag</P>
                   <Small className="truncate text-right">
                     {displayImageTag || "-"}
                   </Small>
                 </div>
-                <div className="flex justify-between">
-                  <Strong>SSH Access</Strong>
+                <div className="flex items-center justify-between">
+                  <P>SSH Access</P>
                   <StatusIndicator enabled={sshAccessEnabled} />
                 </div>
               </div>
@@ -167,7 +168,7 @@ export function OverviewPanel({
         <Separator />
 
         {/* Storage Section */}
-        <div className="px-6">
+        <div className="px-6 gap-2 flex flex-col">
           <div className="flex items-center justify-between">
             <H4 className="flex items-center gap-2">
               {/* <HardDrive className="w-4 h-4" /> */}
@@ -181,7 +182,7 @@ export function OverviewPanel({
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <Strong className="text-sm">Persistent Home</Strong>
+                  <Strong>Persistent Home</Strong>
                 </div>
                 <Small className="block mt-1 line-clamp-1">
                   {phSelection === "new"
@@ -207,7 +208,7 @@ export function OverviewPanel({
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <Strong className="text-sm">MetaCentrum Storage</Strong>
+                  <Strong>MetaCentrum Storage</Strong>
                   <Server className="w-3 h-3 text-gray-400" />
                 </div>
                 {metaCentrumEnabled && (
@@ -237,7 +238,7 @@ export function OverviewPanel({
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="flex items-center gap-2">
-                  <Strong className="text-sm">S3 Object Storage</Strong>
+                  <Strong>S3 Object Storage</Strong>
                   <Cloud className="w-3 h-3 text-gray-400" />
                 </div>
                 {s3Enabled && (

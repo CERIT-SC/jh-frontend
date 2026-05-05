@@ -376,11 +376,12 @@ export function SelectingCardsTabs({
 
       {/* Image Cards Grid */}
       {activeCategory !== "custom" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar py-2">
           {filteredImages.map(({ value, name }) => (
             <Card
               key={value}
               className={cn(
+                "min-w-auto",
                 "bg-surface-raised",
                 "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-all duration-300",
                 selectedImageId === value
@@ -408,7 +409,7 @@ export function SelectingCardsTabs({
                 />
               </div>
               <CardHeader>
-                <CardTitle className="flex-shrink-0">
+                <CardTitle className="flex-shrink-0 text-xl">
                   {extractBaseName(name)}
                 </CardTitle>
                 <CardDescription>

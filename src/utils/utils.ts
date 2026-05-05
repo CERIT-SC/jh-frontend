@@ -6,15 +6,22 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function dateFormat(date: string | number | Date): string {
-  return new Date(date).toLocaleString("en-GB", {
+  if (!date || date === 0) {
+    return "Never";
+  }
+  const formattedDate = new Date(date).toLocaleString("en-GB", {
     day: "numeric",
     month: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "numeric",
   });
+  return formattedDate;
 }
 export function dateFormatRelative(date: string | number | Date): string {
+  if (!date || date === 0) {
+    return "Never active";
+  }
   const now = new Date();
   const past = new Date(date);
   const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);

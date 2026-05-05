@@ -11,6 +11,7 @@ import {
   Separator,
   Badge,
   cn,
+  PanelDescription,
 } from "@e-infra/design-system";
 import { Loader2, RefreshCw } from "lucide-react";
 
@@ -137,18 +138,34 @@ export default function ResourceSelectionSection({
     <>
       {defCPU !== null && defMem !== null && defGPU !== null ? (
         <div className="flex flex-col gap-4">
-          <TileSelector
-            selectionText="CPU Limit (cores):"
-            options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
-            defaultValue={defCPU ?? undefined}
-            onChange={handleCPUSelect}
-          />
-          <TileSelector
-            selectionText="Memory Limit (GB):"
-            options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
-            defaultValue={defMem ?? undefined}
-            onChange={handleMemSelect}
-          />
+          <Panel className="p-0 bg-background border-primary">
+            <PanelTitle className="mb-2 px-6 pt-6">CPU Limit</PanelTitle>
+            <PanelDescription className="px-6">
+              Select the limit of CPU cores
+            </PanelDescription>
+            <Separator className="mt-2" />
+            <PanelContent className="px-6 pb-6 bg-secondary-300 dark:bg-surface rounded-b-lg">
+              <TileSelector
+                options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
+                defaultValue={defCPU ?? undefined}
+                onChange={handleCPUSelect}
+              />
+            </PanelContent>
+          </Panel>
+          <Panel className="p-0 bg-background border-primary">
+            <PanelTitle className="mb-2 px-6 pt-6">Memory Limit</PanelTitle>
+            <PanelDescription className="px-6">
+              Select the limit of memory in GB
+            </PanelDescription>
+            <Separator className="mt-2" />
+            <PanelContent className="px-6 pb-6 bg-secondary-300 dark:bg-surface rounded-b-lg">
+              <TileSelector
+                options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
+                defaultValue={defMem ?? undefined}
+                onChange={handleMemSelect}
+              />
+            </PanelContent>
+          </Panel>
           {/* <FieldHeader
               title="GPU"
               infoText="We strongly advise to request a GPU part instead of whole GPU due to their limited amount. If you use whole GPU inefficiently, you might be banned from requesting it again."
@@ -157,7 +174,7 @@ export default function ResourceSelectionSection({
           {/* <p>By default, no GPU is assigned.</p> */}
 
           {/* GPU Status Section */}
-          <Panel className="bg-surface-raised p-0 py-6">
+          <Panel className="bg-surface-raised p-0 pt-6 bg-background border-primary">
             <PanelTitle className="px-6 pb-4">
               <div className="flex justify-between">
                 GPU
@@ -173,7 +190,7 @@ export default function ResourceSelectionSection({
                 </button>
               </div>
             </PanelTitle>
-            <PanelContent className="flex flex-col px-6 gap-4 border-t pt-2">
+            <PanelContent className="flex flex-col px-6 gap-4 border-t py-4 bg-secondary-300 dark:bg-surface rounded-b-lg">
               <div className="flex flex-wrap gap-2 animate-fade-in">
                 {Object.entries(gpuOptions).map(([value, label]) => {
                   const isActive = selectedGpu === value;
@@ -182,7 +199,7 @@ export default function ResourceSelectionSection({
                       key={value}
                       className={cn(
                         "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
-                        "bg-surface border-surface text-text",
+                        "bg-surface-raised border-border text-text",
                         "hover:bg-primary/10 hover:border-primary",
                         isActive &&
                           "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
@@ -228,7 +245,7 @@ export default function ResourceSelectionSection({
               ) : gpuStatuses.length === 0 ? (
                 <Muted className="text-sm">No GPUs available in cluster</Muted>
               ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                   {gpuStatuses.map((gpu, index) => (
                     <Fragment key={gpu.model}>
                       <GPUStatusIndicator

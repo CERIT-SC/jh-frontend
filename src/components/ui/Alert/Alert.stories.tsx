@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { useRef, useCallback } from "react";
 import { Alert, type AlertItem } from "./Alert";
+import { useAlerts, MAX_VISIBLE_ALERTS } from "@hooks/useAlerts";
 
 // ── Mock Data Helpers ────────────────────────────────────────────────────
 
@@ -26,22 +28,6 @@ const mockAlerts: AlertItem[] = [
   },
 ];
 
-function createMockAlert(
-  id: string,
-  message: string,
-  variant: AlertItem["variant"] = "default",
-  autoDismiss?: boolean,
-  duration?: number,
-): AlertItem {
-  return {
-    id,
-    message,
-    variant,
-    autoDismiss,
-    duration,
-  };
-}
-
 // ── Main Meta ─────────────────────────────────────────────────────────────
 
 const meta: Meta<typeof Alert> = {
@@ -60,21 +46,16 @@ Alert components for displaying toast-style notifications in the JupyterHub inte
 ### Alert
 A container component that renders a stack of alert notifications positioned at the top-center of the viewport.
 
-**Features:**
-- Fixed positioning at top-center of screen
-- Supports multiple alerts stacked vertically
-- Pointer events disabled on container, enabled on individual alerts
-- Responsive width with max-width constraint
-
 ### AlertCard (Internal)
 Individual alert card with animation and auto-dismiss functionality.
 
-**Features:**
-- Enter/exit animations with CSS transitions
-- Auto-dismiss with configurable duration (default: 5000ms)
-- Click or keyboard (Enter/Space) to dismiss
-- Visual variants: default, success, warning, error
-- Icon indicators for error, success, and warning variants
+
+## Visible Limit
+
+The \`useAlerts\` hook enforces a maximum of **${MAX_VISIBLE_ALERTS}** visible alerts.
+When a new alert is pushed while the limit is reached, the oldest alert is
+automatically removed from the state. The \`Alert\` component detects this
+removal and plays a smooth exit animation before unmounting the evicted card.
 
 ## Variants
 
@@ -91,7 +72,7 @@ import { useAlerts } from './hooks/useAlerts';
 
 function App() {
   const { alerts, removeAlert } = useAlerts();
-  
+
   return <Alert alerts={alerts} onRemove={removeAlert} />;
 }
 \`\`\`
@@ -123,56 +104,6 @@ type Story = StoryObj<typeof Alert>;
 
 // ── Alert Stories ────────────────────────────────────────────────────────
 
-export const Default: Story = {
-  name: "Single Default Alert",
-  args: {
-    alerts: [createMockAlert("alert-1", "This is a default alert message")],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
-  },
-};
-
-export const Success: Story = {
-  name: "Single Success Alert",
-  args: {
-    alerts: [
-      createMockAlert(
-        "alert-success",
-        "Operation completed successfully!",
-        "success",
-      ),
-    ],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
-  },
-};
-
-export const Warning: Story = {
-  name: "Single Warning Alert",
-  args: {
-    alerts: [
-      createMockAlert(
-        "alert-warning",
-        "This is a warning message. Please review carefully.",
-        "warning",
-      ),
-    ],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
-  },
-};
-
-export const Error: Story = {
-  name: "Single Error Alert",
-  args: {
-    alerts: [
-      createMockAlert(
-        "alert-error",
-        "An error occurred. Please try again.",
-        "error",
-      ),
-    ],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
-  },
-};
-
 export const AllVariants: Story = {
   name: "All Variants Stacked",
   args: {
@@ -181,65 +112,59 @@ export const AllVariants: Story = {
   },
 };
 
-export const AutoDismiss: Story = {
-  name: "Auto-Dismiss Alert (3 seconds)",
-  args: {
-    alerts: [
-      createMockAlert(
-        "alert-auto",
-        "This alert will auto-dismiss in 3 seconds",
-        "success",
-        true,
-        3000,
-      ),
-    ],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
-  },
-};
+// ── Interactive Limit Demo ────────────────────────────────────────────────
 
-export const LongMessage: Story = {
-  name: "Alert with Long Message",
-  args: {
-    alerts: [
-      createMockAlert(
-        "alert-long",
-        "This is a much longer alert message that demonstrates how the Alert component handles extended content. The message should wrap properly and remain readable within the alert container.",
-        "default",
-      ),
-    ],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
-  },
-};
+/**
+ * Interactive story demonstrating the `MAX_VISIBLE_ALERTS` limit.
+ * Click "Push Alert" to add alerts — once the limit of 4 is reached,
+ * the oldest alert is automatically evicted with a smooth exit animation.
+ */
+function AlertLimitDemo() {
+  const { alerts, pushAlert, removeAlert } = useAlerts();
+  const counterRef = useRef(0);
 
-export const Empty: Story = {
-  name: "Empty State (No Alerts)",
-  args: {
-    alerts: [],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
-  },
-};
+  const handlePush = useCallback(() => {
+    counterRef.current += 1;
+    const variants: Array<AlertItem["variant"]> = [
+      "error",
+      "warning",
+      "success",
+      "default",
+    ];
+    pushAlert(`Alert #${counterRef.current} — spam test`, {
+      variant: variants[counterRef.current % variants.length],
+      autoDismiss: false,
+    });
+  }, [pushAlert]);
 
-export const MultipleErrors: Story = {
-  name: "Multiple Error Alerts",
-  args: {
-    alerts: [
-      createMockAlert("error-1", "Database connection failed", "error"),
-      createMockAlert("error-2", "Authentication timeout", "error"),
-      createMockAlert("error-3", "Network unreachable", "error"),
-    ],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
-  },
-};
+  return (
+    <div className="min-h-screen bg-background p-8 flex flex-col items-center justify-end pb-16">
+      <Alert alerts={alerts} onRemove={removeAlert} />
+      <div className="flex flex-col items-center gap-4 w-full max-w-md">
+        <p className="text-text-muted text-sm text-center">
+          Max visible alerts: <strong>{MAX_VISIBLE_ALERTS}</strong> · Current:{" "}
+          <strong>{alerts.length}</strong>
+        </p>
+        <button
+          type="button"
+          onClick={handlePush}
+          className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground cursor-pointer"
+        >
+          Push Alert
+        </button>
+      </div>
+    </div>
+  );
+}
 
-export const MixedStack: Story = {
-  name: "Mixed Alert Stack",
-  args: {
-    alerts: [
-      createMockAlert("alert-1", "Server starting...", "default"),
-      createMockAlert("alert-2", "Image pulled successfully", "success"),
-      createMockAlert("alert-3", "High memory usage detected", "warning"),
-      createMockAlert("alert-4", "Failed to connect to GPU", "error"),
-    ],
-    onRemove: (id) => console.log(`Removed alert: ${id}`),
+export const VisibleLimitDemo: Story = {
+  name: `Visible Limit (max ${MAX_VISIBLE_ALERTS}) — Interactive`,
+  parameters: {
+    docs: {
+      description: {
+        story: `Demonstrates the automatic eviction of the oldest alert when the visible limit of ${MAX_VISIBLE_ALERTS} is reached. Click "Push Alert" repeatedly to observe the behaviour.`,
+      },
+    },
   },
+  render: () => <AlertLimitDemo />,
 };
