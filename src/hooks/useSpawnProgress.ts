@@ -42,11 +42,6 @@ interface UseSpawnProgressReturn {
 /**
  * Manages JupyterHub spawn-progress state by combining the generic
  * `useEventSource` hook with domain-specific parsing and state tracking.
- *
- * Uses refs for high-frequency mutable values (progress, message, eventLog)
- * and a single counter-based `useState` to batch re-renders. This avoids
- * multiple synchronous setState calls per SSE event while keeping the
- * returned values always current.
  */
 export function useSpawnProgress({
   url,
@@ -67,6 +62,9 @@ export function useSpawnProgress({
   const onFailedRef = useRef(onFailed);
   onReadyRef.current = onReady;
   onFailedRef.current = onFailed;
+
+  // Ref to store disconnect function for use in handleMessage
+  const internalDisconnectRef = useRef<(() => void) | null>(null);
 
   // ── Render trigger ──────────────────────────────────────────────────
   // Incrementing a counter is the lightest way to force React to re-render
@@ -117,11 +115,15 @@ export function useSpawnProgress({
       if (evt.ready) {
         isReadyRef.current = true;
         onReadyRef.current?.();
+        // Disconnect SSE - no more events needed after ready
+        internalDisconnectRef.current?.();
       }
 
       if (evt.failed) {
         isFailedRef.current = true;
         onFailedRef.current?.(new Error("Server spawn failed"));
+        // Disconnect SSE - no more events needed after failure
+        internalDisconnectRef.current?.();
       }
 
       scheduleRender();
@@ -146,6 +148,9 @@ export function useSpawnProgress({
       onMessage: handleMessage,
       onError: handleError,
     });
+
+  // Store disconnect in ref to call from handleMessage without re-creating handler
+  internalDisconnectRef.current = disconnect;
 
   // Suppress the unused-variable warning — renderTick drives re-renders
   void renderTick;

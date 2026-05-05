@@ -22,10 +22,7 @@ import {
   DialogDescription,
   DialogFooter,
   cn,
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
+  Separator,
 } from "@e-infra/design-system";
 import {
   SquarePlus,
@@ -40,7 +37,6 @@ import {
   Rocket,
   Activity,
   Circle,
-  MoreHorizontal,
 } from "lucide-react";
 import { dateFormat, dateFormatRelative } from "@utils";
 
@@ -338,7 +334,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
 }) => {
   if (variant === "inline") {
     return (
-      <Panel
+      <Card
         className={cn(
           "transition-colors duration-200",
           "border-0",
@@ -352,28 +348,9 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         )}
         style={{ "--before-height": `${progress}%` } as React.CSSProperties}
       >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              className="absolute top-0 right-0 pointer-events-auto hover:bg-surface"
-              variant="ghost"
-              size="icon"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={handleDelete}>
-              <span className="flex items-center gap-2 text-error">
-                <Trash size={16} strokeWidth={2.5} />
-                Delete
-              </span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <div className="flex items-center w-full justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <Terminal className="h-5 w-5 shrink-0 text-muted-foreground" />
+        <div className="flex items-center w-full justify-between gap-2 px-6">
+          <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
+            <Terminal className="hidden sm:block h-5 w-5 shrink-0 text-muted-foreground" />
             <div className="min-w-0 flex-1">
               <H4 className="truncate">{title}</H4>
               <div className="flex items-center gap-3 text-xs">
@@ -383,6 +360,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                 <Badge
                   variant={isActive ? "default" : "secondary"}
                   className={cn(
+                    "hidden sm:flex",
                     progress !== undefined && progress > 0 && progress < 100
                       ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
                       : isActive &&
@@ -407,13 +385,36 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             isActive={isActive}
             handleOpen={handleOpen}
             handleStop={handleStop}
-            handleDelete={handleDelete}
             handleStart={handleStart}
             handleQuickStart={handleQuickStart}
-            buttonClassName="shrink-0"
+            buttonClassName="flex-1 grow-2"
           />
+          <Separator
+            className="data-[orientation=vertical]:h-6"
+            orientation="vertical"
+            decorative={true}
+          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="group  hover:bg-surface-raised"
+                variant="ghost"
+                size="icon"
+                onClick={handleDelete}
+              >
+                <Trash
+                  className=" group-hover:text-error transition-colors duration-400"
+                  size={16}
+                  strokeWidth={2.5}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Delete server</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
-      </Panel>
+      </Card>
     );
   }
 
@@ -422,43 +423,62 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
       <Card
         className={cn(
           "transition-colors duration-200",
-          "border-l-2",
+          "border-0",
+          "relative",
           "dark:bg-surface-raised",
+          isReady
+            ? "border-l-2 border-success"
+            : !isActive
+              ? "border-l-2 border-slate-400"
+              : "border-l-2 border-warning/30 before:absolute before:inset-x-[-2px] before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
         )}
+        style={{ "--before-height": `${progress}%` } as React.CSSProperties}
       >
-        <div className="flex items-center justify-between gap-2 p-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex items-center w-full justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
             <Terminal className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <span className="font-medium truncate">{title}</span>
-            <Badge
-              variant={isActive ? "default" : "secondary"}
-              className={cn(
-                "shrink-0",
-                progress !== undefined && progress > 0 && progress < 100
-                  ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
-                  : isActive &&
-                      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
-              )}
-            >
-              {progress !== undefined && progress > 0 && progress < 100
-                ? "Pending"
-                : isActive
-                  ? "Running"
-                  : "Stopped"}
-            </Badge>
-            {lastActivity !== undefined && (
-              <LastActivityInfo lastActivity={lastActivity} />
-            )}
+            <div className="min-w-0 flex-1">
+              <H4 className="truncate">{title}</H4>
+              <div className="flex items-center gap-3 text-xs">
+                {description && (
+                  <Muted className="truncate">{description}</Muted>
+                )}
+                <LastActivityInfo lastActivity={lastActivity} />
+              </div>
+            </div>
           </div>
           <ServerActionButtons
             isActive={isActive}
             handleOpen={handleOpen}
             handleStop={handleStop}
-            handleDelete={handleDelete}
             handleStart={handleStart}
             handleQuickStart={handleQuickStart}
-            buttonClassName="shrink-0"
+            buttonClassName="flex-1 grow-2"
           />
+          <Separator
+            className="data-[orientation=vertical]:h-6"
+            orientation="vertical"
+            decorative={true}
+          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="group  hover:bg-surface-raised"
+                variant="ghost"
+                size="icon"
+                onClick={handleDelete}
+              >
+                <Trash
+                  className=" group-hover:text-error transition-colors duration-400"
+                  size={16}
+                  strokeWidth={2.5}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Delete server</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </Card>
     );
@@ -481,25 +501,25 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         <CardTitle>
           <div className="flex justify-between items-center w-full">
             <span>{title}</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <Button
-                  className="pointer-events-auto hover:bg-surface"
+                  className="group  hover:bg-surface-raised"
                   variant="ghost"
                   size="icon"
+                  onClick={handleDelete}
                 >
-                  <MoreHorizontal className="h-4 w-4" />
+                  <Trash
+                    className=" group-hover:text-error transition-colors duration-400"
+                    size={16}
+                    strokeWidth={2.5}
+                  />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleDelete}>
-                  <span className="flex items-center gap-2 text-error">
-                    <Trash size={16} strokeWidth={2.5} />
-                    Delete
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Delete server</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
@@ -551,121 +571,36 @@ export const ServerCardCompact: React.FC<CardProps> = (props) => {
   return <BaseServerCard {...props} variant="compact" />;
 };
 
-interface EmptyCardProps {
-  /** Callback when server is added */
-  onAddServer: () => void;
-  /** Current value of the server name input */
-  serverName: string;
-  /** Callback when server name changes */
-  onServerNameChange: (value: string) => void;
-  /** Array of existing server names to check for duplicates */
-  existingNames?: string[];
-  /** Placeholder text for the input */
-  placeholder?: string;
-  /** Button text */
-  buttonText?: string;
-  /** Description/helper text */
-  description?: string;
+interface EmptyServerCardProps {
+  /** Callback when the add server button is clicked (opens modal) */
+  onClick?: () => void;
   /** Visual variant of the card */
   variant?: ServerCardVariant;
 }
 
-export const EmptyServerCard: React.FC<EmptyCardProps> = ({
-  onAddServer,
-  serverName,
-  onServerNameChange,
-  existingNames = [],
-  placeholder = "Name Your Server",
-  buttonText = "Add Server",
-  description,
+/**
+ * EmptyServerCard - A simple card with a SquarePlus button that triggers a modal
+ * The modal logic and server name input are handled by the parent component
+ */
+export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
+  onClick,
   variant = "default",
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
-
-  const isNameDuplicate = useMemo(() => {
-    if (!serverName.trim()) return false;
-    return existingNames.some(
-      (name) => name.toLowerCase() === serverName.trim().toLowerCase(),
-    );
-  }, [serverName, existingNames]);
-
-  const isInvalid = serverName === "" || isNameDuplicate;
-
-  const serverNameInput = (
-    <Input
-      type="text"
-      id="addServer"
-      value={serverName}
-      onChange={(e) => onServerNameChange(e.target.value)}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
-      placeholder={placeholder}
-      className={cn(
-        "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
-        "placeholder:text-muted-foreground/70",
-        isNameDuplicate && "border-error focus-visible:ring-error",
-      )}
-      aria-invalid={isNameDuplicate}
-      aria-describedby={isNameDuplicate ? "server-name-error" : undefined}
-    />
-  );
-
-  const errorMessage = isNameDuplicate ? (
-    <div
-      id="server-name-error"
-      className="flex items-center gap-2 text-sm text-error"
-      role="alert"
-    >
-      <AlertCircle size={16} />
-      <span>Server name &ldquo;{serverName}&rdquo; is already in use</span>
-    </div>
-  ) : null;
-
-  const addButton = (className = "") => (
-    <Button
-      variant={isInvalid ? "outline" : "default"}
-      className={cn(
-        "transition-opacity duration-200",
-        isInvalid ? "opacity-50 cursor-not-allowed" : "",
-        className,
-      )}
-      onClick={onAddServer}
-      disabled={isInvalid}
-      title=""
-    >
-      <Plus size={16} strokeWidth={3} />
-      {buttonText}
-    </Button>
-  );
-
-  const helperText = description && !isNameDuplicate && (
-    <Muted className="text-xs text-muted-foreground/80 flex items-center gap-1.5">
-      <span className="inline-block w-1 h-1 rounded-full bg-muted-foreground/40" />
-      {description}
-    </Muted>
-  );
-
   if (variant === "inline") {
     return (
       <Panel
         className={cn(
-          "border-2 border-dashed transition-colors duration-200",
-          isFocused ? "border-primary/30 bg-primary/5" : "",
-          !isFocused && !serverName ? "opacity-60 hover:opacity-100" : "",
+          "group border-2 border-dashed bg-transparent transition-all duration-200",
+          " hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02] dark:border-primary/30",
+          "cursor-pointer",
         )}
+        onClick={onClick}
       >
-        <div className="flex items-start w-full justify-between gap-3 py-2">
-          <div className="shrink-0 w-10 h-10 bg-surface-raised flex items-center justify-center max-w-[42px] self-center">
-            <Plus className="w-5 h-5 text-muted-foreground" strokeWidth={2.5} />
-          </div>
-          <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-            <div className="flex items-center gap-3">
-              <div className="flex-1 min-w-0">{serverNameInput}</div>
-              {addButton("shrink-0")}
-            </div>
-            {helperText}
-            {errorMessage}
-          </div>
+        <div className="flex items-center w-full justify-center gap-3 py-4">
+          <SquarePlus
+            className="w-12 h-12 text-border group-hover:text-primary/80 transition-colors duration-200 dark:text-primary/30"
+            strokeWidth={2}
+          />
         </div>
       </Panel>
     );
@@ -676,37 +611,37 @@ export const EmptyServerCard: React.FC<EmptyCardProps> = ({
       <Card
         className={cn(
           "border-2 border-dashed transition-colors duration-200",
-          isFocused ? "border-primary/30 bg-primary/5" : "hover:bg-muted/50",
+          "hover:border-primary/50 hover:bg-primary/5 dark:border-primary/30",
+          "cursor-pointer",
         )}
+        onClick={onClick}
       >
-        <div className="flex flex-col gap-2 p-4">
-          <div className="flex items-center gap-2">
-            <SquarePlus className="h-5 w-5 text-muted-foreground shrink-0" />
-            <div className="flex-1 min-w-0">{serverNameInput}</div>
-            {addButton("shrink-0")}
-          </div>
-          {helperText}
-          {errorMessage}
+        <div className="flex flex-col items-center justify-center gap-2 p-6">
+          <SquarePlus
+            className="h-8 w-8 text-muted-foreground group-hover:text-primary/80 transition-colors duration-200"
+            strokeWidth={2}
+          />
+          <span className="text-sm text-muted-foreground">Add Server</span>
         </div>
       </Card>
     );
   }
 
+  // Default variant
   return (
     <Card
       className={cn(
-        "w-full flex items-center justify-center border-2 border-dashed bg-transparent transition-colors duration-200",
-        isFocused ? "border-primary/30 bg-primary/5" : "",
-        !isFocused && !serverName ? "opacity-60 hover:opacity-100" : "",
+        "group w-full flex items-center justify-center border-2 border-dashed bg-transparent transition-all duration-200 dark:border-primary/30",
+        " hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02]",
+        "cursor-pointer min-h-[200px]",
       )}
+      onClick={onClick}
     >
-      <CardContent className="flex flex-col items-center justify-center gap-3 w-full h-full text-center py-8 px-6">
-        <div className="flex w-full flex-col gap-3 max-w-md">
-          <div className="relative">{serverNameInput}</div>
-          {/* {helperText} */}
-          {errorMessage}
-          <div className="pt-1">{addButton("w-full justify-center")}</div>
-        </div>
+      <CardContent className="flex flex-col items-center justify-center gap-4 w-full h-full text-center py-8 px-6">
+        <SquarePlus
+          className="w-16 h-16 text-border group-hover:text-primary/80 transition-colors duration-200 dark:text-primary/30"
+          strokeWidth={2}
+        />
       </CardContent>
     </Card>
   );

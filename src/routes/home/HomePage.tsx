@@ -1,7 +1,7 @@
 import "../../styles/index.css";
 import "./HomePage.css";
 import { JupyterHubApiClient } from "@api";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import {
   ServerCard,
@@ -12,8 +12,23 @@ import initDev from "../../dev-setup";
 import { Alert } from "@components/ui";
 import { useAlerts } from "@hooks";
 import { TileSelector } from "@components/ui";
-import { H1, Panel, PanelContent } from "@e-infra/design-system";
-import { LayoutGrid, LayoutList } from "lucide-react";
+import {
+  H1,
+  Panel,
+  PanelContent,
+  Badge,
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  Button,
+  Input,
+  cn,
+} from "@e-infra/design-system";
+import { LayoutGrid, LayoutList, Plus, AlertCircle } from "lucide-react";
 import type { HomeAppConfig } from "@src-types/routes/appConfig";
 
 /**
@@ -64,6 +79,16 @@ function HomePage() {
   );
   const [serverName, setServerName] = useState("");
   const [serverProgress, setServerProgress] = useState<ServerProgress>({});
+  const [isAddServerModalOpen, setIsAddServerModalOpen] = useState(false);
+
+  const isNameDuplicate = useMemo(() => {
+    if (!serverName.trim()) return false;
+    return Object.keys(spawners).some(
+      (name) => name.toLowerCase() === serverName.trim().toLowerCase(),
+    );
+  }, [serverName, spawners]);
+
+  const isInvalid = serverName === "" || isNameDuplicate;
 
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
   const eventSourcesRef = useRef<Map<string, EventSourceItem>>(new Map());
@@ -169,10 +194,16 @@ function HomePage() {
   };
 
   const handleAddServer = () => {
+    if (isInvalid) return;
     window
       .open(`/spawn/${appConfig.userName}/${serverName}`, "_blank")
       ?.focus();
-    window.location.reload();
+    setServerName("");
+    setIsAddServerModalOpen(false);
+    // Reload after a short delay to allow the new server to be created
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
   const handleStartServer = (name: string) => {
     window.open(`/spawn/${appConfig.userName}/${name}`, "_blank")?.focus();
@@ -267,8 +298,92 @@ function HomePage() {
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="container grow  mx-auto px-4 py-8 space-y-8">
+        {/* Bagges */}
+        <div className="flex items-center gap-4 px-6 my-0">
+          <Badge className="px-4 py-2 text-md">My servers</Badge>
+          <Dialog
+            open={isAddServerModalOpen}
+            onOpenChange={setIsAddServerModalOpen}
+          >
+            <DialogTrigger asChild>
+              <Badge
+                variant={"outline"}
+                className={cn(
+                  "px-4 py-2 text-md",
+                  "cursor-pointer transition-all duration-200 bg-tertiary",
+                  " hover:border-primary dark:hover:border-primary/50 ",
+                )}
+                onClick={() => setIsAddServerModalOpen(true)}
+              >
+                + New Server
+              </Badge>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Name Your Server</DialogTitle>
+                <DialogDescription>
+                  Choose a unique name for your new server. This name will be
+                  used to identify your server in the list.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4 py-4">
+                <Input
+                  type="text"
+                  id="newServerName"
+                  value={serverName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setServerName(e.target.value)
+                  }
+                  placeholder="e.g. ml-experiment, thesis-analysis"
+                  className={cn(
+                    "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
+                    "placeholder:text-muted-foreground/70",
+                    isNameDuplicate && "border-error focus-visible:ring-error",
+                  )}
+                  aria-invalid={isNameDuplicate}
+                  aria-describedby={
+                    isNameDuplicate ? "server-name-error" : undefined
+                  }
+                  autoFocus
+                />
+                {isNameDuplicate && (
+                  <div
+                    id="server-name-error"
+                    className="flex items-center gap-2 text-sm text-error"
+                    role="alert"
+                  >
+                    <AlertCircle size={16} />
+                    <span>
+                      Server name &ldquo;{serverName}&rdquo; is already in use
+                    </span>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setIsAddServerModalOpen(false);
+                    setServerName("");
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant={isInvalid ? "outline" : "default"}
+                  className={cn(isInvalid && "opacity-50 cursor-not-allowed")}
+                  onClick={handleAddServer}
+                  disabled={isInvalid}
+                >
+                  <Plus size={16} strokeWidth={3} />
+                  Add Server
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="named-servers">
-          <Panel className="bg-background/60">
+          <Panel className="bg-transparent border-0 shadow-none">
             <div className="flex items-center">
               <H1 className="grow">My servers</H1>
               <TileSelector
@@ -334,13 +449,7 @@ function HomePage() {
                 ))}
                 {Object.keys(spawners).length < 15 && (
                   <EmptyServerCard
-                    onAddServer={handleAddServer}
-                    serverName={serverName}
-                    onServerNameChange={(value) => setServerName(value)}
-                    placeholder="Name Your Server"
-                    buttonText="Add Server"
-                    description="e.g. ml-experiment, thesis-analysis"
-                    existingNames={Object.keys(spawners)}
+                    onClick={() => setIsAddServerModalOpen(true)}
                     variant={gridType === 1 ? "default" : "inline"}
                   />
                 )}
