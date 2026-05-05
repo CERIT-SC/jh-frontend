@@ -1,7 +1,7 @@
 import React from "react";
 import { einfraLogo } from "../../../public/static/custom-images";
 import { einfraLogoDark } from "../../../public/static/custom-images";
-import { cn, Link } from "@e-infra/design-system";
+import { Button, cn, Link } from "@e-infra/design-system";
 import { Mail, FileText, ArrowUpRight } from "lucide-react";
 
 interface FooterProps {
@@ -12,7 +12,7 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
   return (
     <footer
       className={cn(
-        "relative overflow-hidden border-t border-border/60 bg-surface/60 backdrop-blur-xl supports-backdrop-filter:backdrop-blur-xl px-6 py-5",
+        "relative overflow-hidden bg-surface/60 backdrop-blur-xl supports-backdrop-filter:backdrop-blur-xl px-6 py-5",
         className,
       )}
     >
@@ -42,25 +42,22 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
 
           {/* Right — Links with visual treatment */}
           <nav className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="https://docs.cerit-sc.cz/en/docs/web-apps/jupyterhub"
-              className="group inline-flex items-center gap-2 rounded-lg border border-transparent bg-surface-raised/50 px-4 py-2 text-sm font-medium text-text-muted transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-lg hover:shadow-primary/5"
-            >
-              <FileText className="h-4 w-4 transition-transform group-hover:scale-110" />
+            <Button variant="outline">
+              <FileText className="h-4 w-4" />
               <span>Documentation</span>
-              <ArrowUpRight className="h-3.5 w-3.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:translate-y-[-0.5px] group-hover:opacity-60" />
-            </Link>
-            <Link
-              href="mailto:k8s@cerit-sc.cz"
-              className="group inline-flex items-center gap-2 rounded-lg border border-transparent bg-surface-raised/50 px-4 py-2 text-sm font-medium text-text-muted transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-lg hover:shadow-primary/5"
+              <ArrowUpRight className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => (window.location.href = "mailto:k8s@cerit-sc.cz")}
             >
-              <Mail className="h-4 w-4 transition-transform group-hover:scale-110" />
+              <Mail className="h-4 w-4" />
               <span>k8s@cerit-sc.cz</span>
-            </Link>
+            </Button>
           </nav>
         </div>
 
-        {/* Divider with gradient — balanced padding */}
+        {/* Divider with gradient */}
         <div className="relative py-2">
           <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
         </div>
