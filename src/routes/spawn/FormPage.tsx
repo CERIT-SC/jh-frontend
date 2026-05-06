@@ -514,7 +514,7 @@ function FormPage() {
                   formData={formData}
                   selectedImage={selectedImage}
                   categoryImage={selectedCategory}
-                  className="p-0"
+                  className="p-0 bg-background"
                 >
                   <Button className="w-full" onClick={submitForm}>
                     Start

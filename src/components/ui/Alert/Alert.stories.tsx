@@ -64,17 +64,6 @@ removal and plays a smooth exit animation before unmounting the evicted card.
 - **warning**: Yellow/amber styling with alert triangle for warnings
 - **error**: Red styling with X icon for errors
 
-## Usage
-
-\`\`\`tsx
-import { Alert } from './components/ui/Alert';
-import { useAlerts } from './hooks/useAlerts';
-
-function App() {
-  const { alerts, removeAlert } = useAlerts();
-
-  return <Alert alerts={alerts} onRemove={removeAlert} />;
-}
 \`\`\`
         `,
       },

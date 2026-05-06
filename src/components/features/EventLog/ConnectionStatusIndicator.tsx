@@ -5,6 +5,7 @@ import { cn } from "@e-infra/design-system";
 interface ConnectionStatusIndicatorProps {
   state: ConnectionState;
   reconnectAttempts: number;
+  onReconnect?: () => void;
   className?: string;
 }
 
@@ -44,7 +45,7 @@ const STATE_CONFIG: Record<
 };
 
 /**
- * Visual indicator for SSE connection state with a manual reconnect action.
+ * Visual indicator connection state with a manual reconnect action.
  */
 export function ConnectionStatusIndicator({
   state,

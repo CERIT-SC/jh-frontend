@@ -36,12 +36,6 @@ interface UseEventSourceReturn {
 /**
  * Encapsulates EventSource lifecycle management with automatic
  * exponential-backoff reconnection.
- *
- * Guarantees:
- * - EventSource is always closed on unmount
- * - Reconnection stops after `maxAttempts`
- * - Manual `reconnect()` resets the attempt counter
- * - `disconnect()` closes immediately and prevents further auto-reconnect
  */
 export function useEventSource({
   url,

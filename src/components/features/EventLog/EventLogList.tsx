@@ -16,21 +16,15 @@ interface EventLogListProps {
   className?: string;
 }
 
-/**
- * Lightweight virtualized list for SSE event logs.
- *
- * Only renders the items visible in the viewport (plus a small overscan
- * buffer), keeping DOM node count constant regardless of log volume.
- * Auto-scrolls to the latest entry unless the user has scrolled up.
- */
 export function EventLogList({ entries, className }: EventLogListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(CONTAINER_MAX_HEIGHT);
   const isAutoScrollRef = useRef(true);
 
-  // ── Virtualization math ─────────────────────────────────────────────
   const totalHeight = entries.length * ITEM_HEIGHT;
+
+  const needsVirtualization = totalHeight > CONTAINER_MAX_HEIGHT;
 
   const visibleCount = Math.ceil(containerHeight / ITEM_HEIGHT);
 
@@ -50,14 +44,12 @@ export function EventLogList({ entries, className }: EventLogListProps) {
     [entries, startIndex, endIndex],
   );
 
-  // ── Scroll handler ──────────────────────────────────────────────────
   const handleScroll = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
 
     setScrollTop(el.scrollTop);
 
-    // Determine whether user is near the bottom (within 2 rows)
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
     isAutoScrollRef.current = distanceFromBottom <= ITEM_HEIGHT * 2;
   }, []);
@@ -118,7 +110,7 @@ export function EventLogList({ entries, className }: EventLogListProps) {
         <div className="flex items-center justify-center py-8 text-text-muted text-sm">
           Waiting for events…
         </div>
-      ) : (
+      ) : needsVirtualization ? (
         <div style={{ height: totalHeight, position: "relative" }}>
           <div style={{ transform: `translateY(${offsetY}px)` }}>
             {visibleEntries.map((entry) => (
@@ -126,6 +118,8 @@ export function EventLogList({ entries, className }: EventLogListProps) {
             ))}
           </div>
         </div>
+      ) : (
+        entries.map((entry) => <EventLogItem key={entry.id} entry={entry} />)
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useCallback } from "react";
+import { useState, useEffect, Fragment, useCallback } from "react";
 import { TileSelector } from "@components/ui";
 import { getGpuOptions } from "../utils/gatherFormData";
 import { GPUStatusIndicator, GPUSquare } from "@components/features";

@@ -298,94 +298,97 @@ function HomePage() {
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="container grow  mx-auto px-4 py-8 space-y-8">
-        {/* Bagges */}
-        <div className="flex items-center gap-4 px-6 my-0">
-          <Badge className="px-4 py-2 text-md">My servers</Badge>
-          <Dialog
-            open={isAddServerModalOpen}
-            onOpenChange={setIsAddServerModalOpen}
-          >
-            <DialogTrigger asChild>
-              <Badge
-                variant={"outline"}
-                className={cn(
-                  "px-4 py-2 text-md",
-                  "cursor-pointer transition-all duration-200 bg-tertiary",
-                  " hover:border-primary dark:hover:border-primary/50 ",
-                )}
-                onClick={() => setIsAddServerModalOpen(true)}
-              >
-                + New Server
-              </Badge>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Name Your Server</DialogTitle>
-                <DialogDescription>
-                  Choose a unique name for your new server. This name will be
-                  used to identify your server in the list.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-4 py-4">
-                <Input
-                  type="text"
-                  id="newServerName"
-                  value={serverName}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setServerName(e.target.value)
-                  }
-                  placeholder="e.g. ml-experiment, thesis-analysis"
-                  className={cn(
-                    "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
-                    "placeholder:text-muted-foreground/70",
-                    isNameDuplicate && "border-error focus-visible:ring-error",
-                  )}
-                  aria-invalid={isNameDuplicate}
-                  aria-describedby={
-                    isNameDuplicate ? "server-name-error" : undefined
-                  }
-                  autoFocus
-                />
-                {isNameDuplicate && (
-                  <div
-                    id="server-name-error"
-                    className="flex items-center gap-2 text-sm text-error"
-                    role="alert"
-                  >
-                    <AlertCircle size={16} />
-                    <span>
-                      Server name &ldquo;{serverName}&rdquo; is already in use
-                    </span>
-                  </div>
-                )}
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setIsAddServerModalOpen(false);
-                    setServerName("");
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant={isInvalid ? "outline" : "default"}
-                  className={cn(isInvalid && "opacity-50 cursor-not-allowed")}
-                  onClick={handleAddServer}
-                  disabled={isInvalid}
-                >
-                  <Plus size={16} strokeWidth={3} />
-                  Add Server
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
         <div className="named-servers">
           <Panel className="bg-transparent border-0 shadow-none">
             <div className="flex items-center">
-              <H1 className="grow">My servers</H1>
+              {/* <H1 className="grow">My servers</H1> */}
+              <div className="flex items-center gap-4 my-0 grow">
+                <Badge className="px-4 py-2 text-md">My servers</Badge>
+                <Dialog
+                  open={isAddServerModalOpen}
+                  onOpenChange={setIsAddServerModalOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Badge
+                      variant={"outline"}
+                      className={cn(
+                        "px-4 py-2 text-md",
+                        "cursor-pointer transition-all duration-200 bg-tertiary",
+                        " hover:border-primary dark:hover:border-primary/50 ",
+                      )}
+                      onClick={() => setIsAddServerModalOpen(true)}
+                    >
+                      + New Server
+                    </Badge>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Name Your Server</DialogTitle>
+                      <DialogDescription>
+                        Choose a unique name for your new server. This name will
+                        be used to identify your server in the list.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-4 py-4">
+                      <Input
+                        type="text"
+                        id="newServerName"
+                        value={serverName}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setServerName(e.target.value)
+                        }
+                        placeholder="e.g. ml-experiment, thesis-analysis"
+                        className={cn(
+                          "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
+                          "placeholder:text-muted-foreground/70",
+                          isNameDuplicate &&
+                            "border-error focus-visible:ring-error",
+                        )}
+                        aria-invalid={isNameDuplicate}
+                        aria-describedby={
+                          isNameDuplicate ? "server-name-error" : undefined
+                        }
+                        autoFocus
+                      />
+                      {isNameDuplicate && (
+                        <div
+                          id="server-name-error"
+                          className="flex items-center gap-2 text-sm text-error"
+                          role="alert"
+                        >
+                          <AlertCircle size={16} />
+                          <span>
+                            Server name &ldquo;{serverName}&rdquo; is already in
+                            use
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setIsAddServerModalOpen(false);
+                          setServerName("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant={isInvalid ? "outline" : "default"}
+                        className={cn(
+                          isInvalid && "opacity-50 cursor-not-allowed",
+                        )}
+                        onClick={handleAddServer}
+                        disabled={isInvalid}
+                      >
+                        <Plus size={16} strokeWidth={3} />
+                        Add Server
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
               <TileSelector
                 options={[1, 2]}
                 defaultValue={1}

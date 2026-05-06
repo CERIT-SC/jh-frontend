@@ -40,9 +40,6 @@ individual GPU status for a single GPU type.
 Each square represents one physical GPU:
 - **Green** (success) for free/available GPUs
 - **Red** (error) for used/busy GPUs
-
-Uses e-infra design system semantic colors.
-Responsive flex-wrap layout - squares wrap naturally based on container width.
         `,
       },
     },
@@ -57,30 +54,6 @@ export const Default: Story = {
     label: "A100",
     free: 2,
     total: 4,
-  },
-};
-
-export const AllFree: Story = {
-  args: {
-    label: "V100",
-    free: 4,
-    total: 4,
-  },
-};
-
-export const AllUsed: Story = {
-  args: {
-    label: "RTX4090",
-    free: 0,
-    total: 8,
-  },
-};
-
-export const MixedStatus: Story = {
-  args: {
-    label: "A100",
-    free: 3,
-    total: 8,
   },
 };
 
@@ -101,59 +74,6 @@ export const LargeSize: Story = {
     total: 4,
     size: "lg",
     gap: "lg",
-  },
-};
-
-export const SingleGPU: Story = {
-  args: {
-    label: "A100",
-    free: 1,
-    total: 1,
-  },
-};
-
-export const ManyGPUs: Story = {
-  args: {
-    label: "H100",
-    free: 10,
-    total: 16,
-    size: "sm",
-    gap: "sm",
-  },
-};
-
-export const WrappingGrid: Story = {
-  args: {
-    label: "A100",
-    free: 12,
-    total: 24,
-    size: "md",
-    gap: "md",
-  },
-};
-
-export const DenseGrid: Story = {
-  args: {
-    label: "RTX4090",
-    free: 20,
-    total: 32,
-    size: "sm",
-    gap: "sm",
-  },
-};
-
-// GPUSquare Stories
-export const FreeSquare: StoryObj<typeof GPUSquare> = {
-  args: {
-    status: "free",
-    size: "md",
-  },
-};
-
-export const UsedSquare: StoryObj<typeof GPUSquare> = {
-  args: {
-    status: "used",
-    size: "md",
   },
 };
 

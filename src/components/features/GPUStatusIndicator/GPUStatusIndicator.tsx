@@ -57,7 +57,7 @@ export const GPUSquare: React.FC<GPUSquareProps> = ({
     <div
       className={`
         ${sizeClasses[size]}
-        ${status === "free" ? "bg-success" : "bg-error"}
+        ${status === "free" ? "bg-success dark:bg-success/80" : "bg-error dark:bg-error/80"}
         rounded
         ring-1
         ring-black/10

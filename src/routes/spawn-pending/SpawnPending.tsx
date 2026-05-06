@@ -1,5 +1,5 @@
 import "./SpawnPending.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (spawn_pending.html).
@@ -44,6 +44,8 @@ function getServerName(): string {
  */
 const SpawnPending: React.FC = () => {
   const [logOpen, setLogOpen] = useState(false);
+  /** Tracks whether the user has manually closed the log — prevents auto-expand from overriding their choice */
+  const userClosedRef = useRef(false);
   const serverName = getServerName();
 
   // appConfig is a global constant injected by spawn_pending.html (Jinja2)
@@ -72,12 +74,21 @@ const SpawnPending: React.FC = () => {
     onFailed: handleFailed,
   });
 
-  // Auto-expand the event log when events start arriving
+  // Auto-expand the event log when events start arriving,
+  // but only if the user hasn't manually closed it
   useEffect(() => {
-    if (eventLog.length > 0 && !logOpen) {
+    if (eventLog.length > 0 && !logOpen && !userClosedRef.current) {
       setLogOpen(true);
     }
   }, [eventLog.length, logOpen]);
+
+  // Handle collapsible open/close — mark when user manually closes
+  const handleLogOpenChange = useCallback((open: boolean) => {
+    setLogOpen(open);
+    if (!open) {
+      userClosedRef.current = true;
+    }
+  }, []);
 
   // Handle page refresh via button
   const handleRefresh = useCallback(() => {
@@ -146,7 +157,7 @@ const SpawnPending: React.FC = () => {
             )}
 
             {/* ── Event log (collapsible + virtualized) ─────────── */}
-            <Collapsible open={logOpen} onOpenChange={setLogOpen}>
+            <Collapsible open={logOpen} onOpenChange={handleLogOpenChange}>
               <CollapsibleTrigger className="flex w-full items-center gap-2 text-sm font-medium text-text-heading hover:text-text transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus rounded-sm">
                 <ChevronDown
                   className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"

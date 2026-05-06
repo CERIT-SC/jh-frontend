@@ -45,15 +45,6 @@ const mockFailedEntries: EventLogEntry[] = [
   createMockEntry(2, 25, "Image pull progress: 30%"),
   createMockEntry(3, 25, "Error: Image not found", undefined, true, false),
 ];
-
-const mockLongEntries: EventLogEntry[] = Array.from({ length: 50 }, (_, i) =>
-  createMockEntry(
-    i,
-    Math.min(100, i * 2),
-    `Event ${i + 1}: ${["Initializing", "Processing", "Loading", "Starting"][i % 4]} step ${i + 1}`,
-  ),
-);
-
 // ── Main Meta (EventLogList) ────────────────────────────────────────────
 
 const meta: Meta<typeof EventLogList> = {
@@ -72,28 +63,8 @@ Event Log components for displaying JupyterHub SSE spawn progress events.
 ### EventLogList
 A virtualized list component for displaying SSE event logs from JupyterHub spawn progress.
 
-**Features:**
-- Virtualization: Only renders visible items plus overscan buffer for smooth scrolling
-- Auto-scroll: Automatically scrolls to latest entries unless user has scrolled up
-- Timestamp formatting: Displays client-side timestamps in HH:MM:SS format
-- Progress indicators: Visual progress badges with color coding
-- Status-based styling: Success/error background tints for ready/failed states
-- HTML message support: Safely renders sanitized HTML messages with styled links
-
-**Performance:**
-- Fixed row height (40px) for efficient virtualization
-- Configurable max height (320px default)
-- Overscan of 5 items above/below viewport
-
 ### EventLogItem
 Renders a single event log entry with timestamp, progress badge, and message.
-
-**Features:**
-- Memoized rendering: Optimized for virtualized list re-use
-- Timestamp stripping: Removes JupyterHub's server-side timestamp prefixes
-- HTML message support: Safely renders sanitized HTML with styled links
-- Status-based styling: Background tints for success/error states
-- Accessible: Proper ARIA labels and semantic structure
 
 ### ConnectionStatusIndicator
 Visual indicator for SSE connection state with reconnection status.
@@ -142,13 +113,6 @@ export const Failed: Story = {
   name: "EventLogList - Failed Spawn",
   args: {
     entries: mockFailedEntries,
-  },
-};
-
-export const LongList: Story = {
-  name: "EventLogList - Long List (50 items)",
-  args: {
-    entries: mockLongEntries,
   },
 };
 
@@ -233,90 +197,14 @@ export const ItemTimestampPrefix: StoryObj<typeof EventLogItem> = {
   ),
 };
 
-// ── ConnectionStatusIndicator Stories ───────────────────────────────────
-
-export const ConnectionConnected: StoryObj<typeof ConnectionStatusIndicator> = {
-  name: "ConnectionStatusIndicator - Connected",
-  render: () => (
-    <ConnectionStatusIndicator
-      state="connected"
-      reconnectAttempts={0}
-      onReconnect={() => {}}
-    />
-  ),
-};
-
-export const ConnectionConnecting: StoryObj<typeof ConnectionStatusIndicator> =
-  {
-    name: "ConnectionStatusIndicator - Connecting",
-    render: () => (
-      <ConnectionStatusIndicator
-        state="connecting"
-        reconnectAttempts={0}
-        onReconnect={() => {}}
-      />
-    ),
-  };
-
-export const ConnectionDisconnected: StoryObj<
-  typeof ConnectionStatusIndicator
-> = {
-  name: "ConnectionStatusIndicator - Disconnected",
-  render: () => (
-    <ConnectionStatusIndicator
-      state="disconnected"
-      reconnectAttempts={0}
-      onReconnect={() => {}}
-    />
-  ),
-};
-
-export const ConnectionError: StoryObj<typeof ConnectionStatusIndicator> = {
-  name: "ConnectionStatusIndicator - Error",
-  render: () => (
-    <ConnectionStatusIndicator
-      state="error"
-      reconnectAttempts={0}
-      onReconnect={() => {}}
-    />
-  ),
-};
-
-export const ConnectionRetrying: StoryObj<typeof ConnectionStatusIndicator> = {
-  name: "ConnectionStatusIndicator - Retrying (3 attempts)",
-  render: () => (
-    <ConnectionStatusIndicator
-      state="connecting"
-      reconnectAttempts={3}
-      onReconnect={() => {}}
-    />
-  ),
-};
-
 export const ConnectionAllStates: StoryObj = {
   name: "ConnectionStatusIndicator - All States Overview",
   render: () => (
     <div className="flex flex-col gap-4">
-      <ConnectionStatusIndicator
-        state="connected"
-        reconnectAttempts={0}
-        onReconnect={() => {}}
-      />
-      <ConnectionStatusIndicator
-        state="connecting"
-        reconnectAttempts={1}
-        onReconnect={() => {}}
-      />
-      <ConnectionStatusIndicator
-        state="disconnected"
-        reconnectAttempts={0}
-        onReconnect={() => {}}
-      />
-      <ConnectionStatusIndicator
-        state="error"
-        reconnectAttempts={5}
-        onReconnect={() => {}}
-      />
+      <ConnectionStatusIndicator state="connected" reconnectAttempts={0} />
+      <ConnectionStatusIndicator state="connecting" reconnectAttempts={1} />
+      <ConnectionStatusIndicator state="disconnected" reconnectAttempts={0} />
+      <ConnectionStatusIndicator state="error" reconnectAttempts={5} />
     </div>
   ),
 };

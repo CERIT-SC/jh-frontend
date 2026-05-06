@@ -10,10 +10,6 @@ interface EventLogItemProps {
 /**
  * Strips JupyterHub's leading timestamp prefix from message strings.
  *
- * JupyterHub prefixes messages with ISO 8601 timestamps like
- * `2026-04-28T11:11:56Z Pulling image...`
- * Since we render our own timestamp column, the embedded one is redundant.
- *
  * Matches patterns:
  * - `2026-04-28T11:11:56Z`       (ISO 8601 with Z timezone)
  * - `2026-04-28T11:11:56.123Z`   (ISO 8601 with milliseconds)
@@ -31,9 +27,6 @@ function stripTimestampPrefix(text: string): string {
 
 /**
  * Strips timestamp HTML from html_message strings.
- *
- * JupyterHub wraps timestamps in `<span class="timestamp">` or similar,
- * or includes them as bare text before the actual message content.
  */
 function stripHtmlTimestampPrefix(html: string): string {
   // Remove <span class="timestamp">...</span> and similar wrappers
@@ -47,12 +40,6 @@ function stripHtmlTimestampPrefix(html: string): string {
   return stripTimestampPrefix(cleaned);
 }
 
-/**
- * Renders a single event log entry.
- *
- * Memoized because items in a virtualized list are re-used across
- * scroll positions and must not re-render unless their data changes.
- */
 export const EventLogItem = memo(function EventLogItem({
   entry,
   style,
