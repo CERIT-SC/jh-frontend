@@ -33,7 +33,9 @@ export default defineConfig({
         login: resolve(__dirname, "login.html"),
         spawn: resolve(__dirname, "spawn.html"),
         spawn_pending: resolve(__dirname, "spawn_pending.html"),
+        stop_pending: resolve(__dirname, "stop_pending.html"),
         not_running: resolve(__dirname, "not_running.html"),
+        not_found: resolve(__dirname, "404.html"),
         token: resolve(__dirname, "token.html"),
       },
       output: {

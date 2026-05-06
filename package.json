@@ -28,9 +28,11 @@
   "scripts": {
     "dev:form": "ENTRY=spawn.html vite",
     "dev:spawn_p": "ENTRY=spawn_pending.html vite",
+    "dev:stop_pending": "ENTRY=stop_pending.html vite",
     "dev:login": "ENTRY=login.html vite",
     "dev:not_running": "ENTRY=not_running.html vite",
     "dev:home": "ENTRY=home.html vite",
+    "dev:not_found": "ENTRY=404.html vite",
     "dev:token": "ENTRY=token.html vite",
     "dev-cas:form": "cd cas && ENTRY=spawn.html vite",
     "dev-cas:spawn_p": "cd cas && ENTRY=spawn_pending.html vite",

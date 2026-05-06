@@ -20,7 +20,6 @@ root.render(
       {/*</AnouncmentMessage>*/}
       <LoginPage
         buttonText="Sign in via unified login e-INFRA CZ AAI"
-        imagePath="/static/custom-images/logo-einfra_barvy.svg"
         link="/hub/oauth_login?next=%2Fhub%2F"
       />
     </div>
