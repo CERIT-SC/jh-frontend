@@ -639,7 +639,7 @@ export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
     >
       <CardContent className="flex flex-col items-center justify-center gap-4 w-full h-full text-center py-8 px-6">
         <SquarePlus
-          className="w-16 h-16 text-border group-hover:text-primary/80 transition-colors duration-200 dark:text-primary/30"
+          className="w-16 h-16 text-border group-hover:text-primary/80 transition-colors duration-200 dark:text-base-500"
           strokeWidth={2}
         />
       </CardContent>

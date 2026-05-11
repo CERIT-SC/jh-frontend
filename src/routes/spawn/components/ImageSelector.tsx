@@ -383,14 +383,14 @@ export function SelectingCardsTabs({
               className={cn(
                 "min-w-auto",
                 "bg-surface-raised",
-                "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-all duration-300",
+                "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-colors duration-400 ease-in-out",
                 selectedImageId === value
                   ? "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% dark:via-secondary dark:from-surface-raised dark:to-secondary dark:bg-linear-45 dark:from-85% shadow-md"
                   : "hover:text-text hover:border-primary/30",
               )}
               onClick={() => onSelectImage(value, activeCategory)}
             >
-              {/* Check indicator in corner - visible on hover when not selected */}
+              {/* Check indicator in corner */}
               <div
                 className={cn(
                   "absolute top-2 right-2 z-10 transition-opacity duration-200",

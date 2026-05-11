@@ -1,15 +1,9 @@
 import { useCallback } from "react";
-import {
-  Panel,
-  PanelContent,
-  PanelHeader,
-  PanelTitle,
-  PanelDescription,
-} from "@e-infra/design-system";
+import { Card, CardContent } from "@e-infra/design-system";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import { Button } from "@components/ui";
-import { Orbit, Home } from "lucide-react";
-import Logo from "../../../public/static/custom-images/light-background-jupyterhub-logo-square.svg";
+import { Home } from "lucide-react";
+import { notFound } from "../../../public/static/custom-images";
 /**
  * Global config injected by JupyterHub's Jinja2 template (not_found.html).
  */
@@ -29,19 +23,16 @@ const NotFoundPage: React.FC = () => {
       <JupyterHubHeader userName={userName} />
 
       <div className="container grow mx-auto px-4 py-8 space-y-8 place-content-center">
-        <Panel className="my-auto mx-auto w-full max-w-2xl bg-background/90">
-          <PanelContent className="flex flex-col items-center gap-6 text-center">
+        <Card className="full max-w-lg overflow-hidden border-border/50 bg-surface/80 shadow-xl backdrop-blur-md supports-backdrop-filter:bg-surface/60 mx-auto">
+          <CardContent className="flex flex-col items-center gap-6 text-center">
             {/* 404 illustration */}
-            <div className="relative flex items-center justify-center mb-4">
+            <div className="relative flex items-center justify-center">
               <img
                 width={264}
-                className="absolute"
-                src={Logo}
+                className=""
+                src={notFound}
                 alt="404 Not Found"
               />
-              <span className="p-4 text-6xl font-bold text-text-muted select-none">
-                404
-              </span>
             </div>
 
             <p className="text-center text-text-muted max-w-md">
@@ -59,8 +50,8 @@ const NotFoundPage: React.FC = () => {
             >
               <Home className="h-4 w-4" />
             </Button>
-          </PanelContent>
-        </Panel>
+          </CardContent>
+        </Card>
       </div>
 
       <Footer className="flex-none" />

@@ -24,11 +24,10 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8">
-      {/* Main login card with glassmorphism */}
       <Card
         variant="default"
         animation="translate"
-        className="w-full max-w-lg overflow-hidden border-border/50 bg-surface/80 shadow-xl backdrop-blur-md supports-backdrop-filter:bg-surface/80"
+        className="w-full max-w-lg overflow-hidden border-border/50 bg-surface/80 shadow-xl backdrop-blur-md supports-backdrop-filter:bg-surface/60"
       >
         <CardHeader className="flex flex-col items-center gap-4 pb-2 pt-8">
           {/* Logo */}

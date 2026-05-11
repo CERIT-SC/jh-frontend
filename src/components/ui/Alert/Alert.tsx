@@ -25,8 +25,6 @@ function AlertCard({
 }: {
   alert: AlertItem;
   onRemove: (id: string) => void;
-  /** When `true`, the card plays its exit animation immediately (used for
-   *  alerts evicted by the visible-limit). */
   isForcedExiting?: boolean;
 }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -68,11 +66,11 @@ function AlertCard({
   const getVariantStyles = (): string => {
     switch (alert.variant) {
       case "error":
-        return "border-error bg-error/10 text-error";
+        return "border-error bg-error/40 text-error";
       case "success":
-        return "border-success bg-success/10 text-success";
+        return "border-success bg-success/40 text-success";
       case "warning":
-        return "border-warning bg-warning/10 text-warning";
+        return "border-warning bg-warning/40 text-warning";
       default:
         return "border-border bg-background text-text";
     }

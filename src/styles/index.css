@@ -160,7 +160,7 @@ body {
   animation: slideOutFade 300ms ease-out forwards;
 }
 
-/* Ring pulse animation - only affects box-shadow (ring), not content */
+/* Ring pulse animation */
 @keyframes ringPulse {
   0%,
   100% {
@@ -173,5 +173,5 @@ body {
 
 .shine-ring {
   --tw-ring-color: var(--shine-color, #3b82f6);
-  animation: ringPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1);
+  animation: ringPulse 1s cubic-bezier(0.4, 0, 0.6, 1);
 }
