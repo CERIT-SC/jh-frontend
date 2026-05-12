@@ -29,6 +29,17 @@ export interface QuickStartOptions {
   onError?: (error: Error) => void;
   spawnOptions?: Record<string, unknown>;
 }
+
+/**
+ * Internal configuration for SSE reconnection behavior.
+ * Matches the pattern in useEventSource hook for consistency.
+ */
+const SSE_RECONNECT_CONFIG = {
+  maxRetries: 5,
+  initialDelay: 1000,
+  maxDelay: 30000,
+  backoffMultiplier: 2,
+} as const;
 export interface UserModel {
   kind: "user" | "service";
   name: string;
@@ -166,22 +177,37 @@ export class JupyterHubApiClient {
   }
 
   /**
-   * Start a named server and track progress via SSE
-   * @param username - The username
-   * @param serverName - The server name to start
-   * @param options - Progress tracking options
-   * @returns A cleanup function to abort the progress tracking
+   * Creates an SSE connection with exponential-backoff reconnection.
+   *
+   * The reconnection strategy mirrors useEventSource hook: 5 attempts max,
+   * starting at 1s delay and doubling each time (1s → 2s → 4s → 8s → 16s),
+   * capped at 30s. This handles browser throttling of idle connections
+   * when the tab is hidden.
+   *
+   * @param username - The username for the progress endpoint
+   * @param serverName - The server name for the progress endpoint
+   * @param onProgress - Callback for progress updates
+   * @param onComplete - Callback when server is ready
+   * @param onError - Callback when all retries exhausted
+   * @returns Cleanup function to abort and close the connection
    */
-  quickStartWithProgress(
+  private createProgressConnection(
     username: string,
     serverName: string,
-    options?: QuickStartOptions,
+    onProgress?: ProgressCallback,
+    onComplete?: () => void,
+    onError?: (error: Error) => void,
   ): () => void {
-    const { onProgress, onComplete, onError, spawnOptions } = options || {};
     let eventSource: EventSource | null = null;
     let aborted = false;
+    let retryCount = 0;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
     const cleanup = () => {
+      if (retryTimer !== null) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+      }
       if (eventSource) {
         eventSource.close();
         eventSource = null;
@@ -193,48 +219,141 @@ export class JupyterHubApiClient {
       cleanup();
     };
 
-    // Start the server first
-    this.startNamedServer(username, serverName, spawnOptions)
-      .then(() => {
+    const connect = () => {
+      if (aborted) return;
+
+      eventSource = this.getSpawnProgress(username, serverName);
+
+      eventSource.onmessage = (event) => {
         if (aborted) return;
 
-        // Connect to SSE progress endpoint
-        eventSource = this.getSpawnProgress(username, serverName);
+        const data: ProgressEvent = JSON.parse(event.data);
 
-        eventSource.onmessage = (event) => {
-          if (aborted) return;
+        if (data.progress !== undefined) {
+          const progressValue =
+            data.progress > 1 ? data.progress : data.progress * 100;
+          onProgress?.(Math.round(progressValue), data);
+        }
 
-          const data: ProgressEvent = JSON.parse(event.data);
+        if (data.ready === true) {
+          cleanup();
+          onComplete?.();
+        }
+      };
 
-          if (data.progress !== undefined) {
-            // Progress might already be 0-100, or 0-1
-            const progressValue =
-              data.progress > 1 ? data.progress : data.progress * 100;
-            onProgress?.(Math.round(progressValue), data);
-          }
+      eventSource.onerror = () => {
+        if (aborted) return;
 
-          if (data.ready === true) {
-            cleanup();
-            onComplete?.();
-          }
-        };
+        eventSource?.close();
+        eventSource = null;
 
-        eventSource.onerror = () => {
-          if (aborted) return;
+        retryCount++;
 
+        if (retryCount <= SSE_RECONNECT_CONFIG.maxRetries) {
+          const delay = Math.min(
+            SSE_RECONNECT_CONFIG.initialDelay *
+              Math.pow(SSE_RECONNECT_CONFIG.backoffMultiplier, retryCount - 1),
+            SSE_RECONNECT_CONFIG.maxDelay,
+          );
+
+          retryTimer = setTimeout(() => {
+            if (!aborted) {
+              connect();
+            }
+          }, delay);
+        } else {
           cleanup();
           onError?.(
             new Error(`SSE connection error for server: ${serverName}`),
           );
-        };
+        }
+      };
+    };
+
+    connect();
+    return abort;
+  }
+
+  /**
+   * Starts a named server and tracks spawn progress via SSE.
+   *
+   * The server start is asynchronous — the SSE connection is established
+   * after the start request succeeds. If the tab becomes hidden during
+   * spawning, the connection auto-reconnects (up to 5 retries).
+   *
+   * @param username - The username
+   * @param serverName - The server name to start
+   * @param options - Progress tracking options
+   * @returns Cleanup function to abort progress tracking
+   */
+  quickStartWithProgress(
+    username: string,
+    serverName: string,
+    options?: QuickStartOptions,
+  ): () => void {
+    const { onProgress, onComplete, onError, spawnOptions } = options || {};
+
+    const abortServer = () => {
+      // No-op placeholder — server start cannot be aborted
+    };
+
+    let progressAbort: (() => void) | null = null;
+
+    // Start the server first
+    this.startNamedServer(username, serverName, spawnOptions)
+      .then(() => {
+        if (progressAbort) {
+          // Connection was aborted while waiting for server to start
+          return;
+        }
+        // Attach SSE progress listener after server start succeeds
+        progressAbort = this.createProgressConnection(
+          username,
+          serverName,
+          onProgress,
+          onComplete,
+          onError,
+        );
       })
       .catch((error) => {
-        if (aborted) return;
-
-        onError?.(error);
+        if (!progressAbort) {
+          onError?.(error);
+        }
       });
 
-    return abort;
+    // Return combined abort function
+    return () => {
+      abortServer();
+      if (progressAbort) {
+        progressAbort();
+      } else {
+        // Mark as aborted before server start completes
+        progressAbort = () => {};
+      }
+    };
+  }
+
+  /**
+   * Tracks spawn progress via SSE without starting the server.
+   *
+   * @param username - The username
+   * @param serverName - The server name to track
+   * @param options - Progress tracking options
+   * @returns Cleanup function to abort progress tracking
+   */
+  trackSpawnProgress(
+    username: string,
+    serverName: string,
+    options?: QuickStartOptions,
+  ): () => void {
+    const { onProgress, onComplete, onError } = options || {};
+    return this.createProgressConnection(
+      username,
+      serverName,
+      onProgress,
+      onComplete,
+      onError,
+    );
   }
 
   async listTokens(username: string): Promise<TokenModel[]> {

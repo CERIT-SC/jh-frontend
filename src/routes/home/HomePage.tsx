@@ -164,11 +164,98 @@ function HomePage() {
       );
     }
   };
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      getServers();
-    }
-  });
+
+  /**
+   * Attaches SSE progress tracking to a spawning server.
+   *
+   * This is called when:
+   * 1. User quick-starts a server (handleQuickStart)
+   * 2. User returns to tab after starting server via spawn page
+   *
+   * The SSE connection auto-reconnects on transient errors (e.g., tab hidden).
+   */
+  const attachProgressTracking = useCallback(
+    (name: string) => {
+      if (eventSourcesRef.current.has(name)) return;
+
+      setServerProgress((prev) => ({ ...prev, [name]: 0 }));
+
+      const abort = apiClient.trackSpawnProgress(appConfig.userName, name, {
+        onProgress: (progress) => {
+          setServerProgress((prev) => ({ ...prev, [name]: progress }));
+        },
+        onComplete: () => {
+          setSpawners((prev) => {
+            const updated = { ...prev };
+            if (updated[name]) {
+              updated[name].active = true;
+              updated[name].ready = true;
+            }
+            return updated;
+          });
+
+          setServerProgress((prev) => ({ ...prev, [name]: 100 }));
+          pushAlert(`Server ${name} started successfully`, {
+            variant: "success",
+          });
+
+          setTimeout(() => {
+            setServerProgress((prev) => {
+              const updated = { ...prev };
+              delete updated[name];
+              return updated;
+            });
+          }, 2000);
+        },
+        onError: (error) => {
+          console.error(
+            `Failed to track progress for server ${name}:`,
+            error instanceof Error ? error.message : error,
+          );
+          pushAlert(`Failed to track progress for server ${name}`, {
+            variant: "error",
+          });
+          setServerProgress((prev) => {
+            const updated = { ...prev };
+            delete updated[name];
+            return updated;
+          });
+        },
+      });
+
+      eventSourcesRef.current.set(name, { abort });
+    },
+    [pushAlert],
+  );
+
+  /**
+   * Refreshes server state on tab visibility change and attaches SSE
+   * for any servers still spawning.
+   *
+   * Rationale: When a server is started via the spawn page (new tab),
+   * the HomePage has no SSE connection. On visibility return, we fetch
+   * the latest state and attach SSE to any active-but-not-ready servers
+   * to show live progress.
+   */
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== "visible") return;
+
+      await getServers();
+
+      // Attach SSE to any spawning servers not already tracked
+      Object.entries(spawners).forEach(([name, spawner]) => {
+        if (spawner.active && !spawner.ready) {
+          setTimeout(() => attachProgressTracking(name), 0);
+        }
+      });
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [attachProgressTracking, spawners]);
 
   const handleDeleteServer = async (name: string) => {
     try {
@@ -217,14 +304,15 @@ function HomePage() {
   };
 
   /**
-   * Handle quick start - starts server and tracks progress via SSE
-   * @param name - Server name to quick start
+   * Starts a server via API and tracks spawn progress inline.
+   *
+   * Unlike handleStartServer (which opens the spawn page in a new tab),
+   * this keeps the user on the HomePage and shows live progress via SSE.
    */
   const handleQuickStart = useCallback(
     async (name: string) => {
-      // Set initial state: active but not ready, with 0 progress
-      setSpawners((prevSpawners) => {
-        const updated = { ...prevSpawners };
+      setSpawners((prev) => {
+        const updated = { ...prev };
         if (updated[name]) {
           updated[name].active = true;
           updated[name].ready = false;
@@ -238,9 +326,8 @@ function HomePage() {
           setServerProgress((prev) => ({ ...prev, [name]: progress }));
         },
         onComplete: () => {
-          // Server is ready, update spawner state
-          setSpawners((prevSpawners) => {
-            const updated = { ...prevSpawners };
+          setSpawners((prev) => {
+            const updated = { ...prev };
             if (updated[name]) {
               updated[name].active = true;
               updated[name].ready = true;
@@ -253,7 +340,6 @@ function HomePage() {
             variant: "success",
           });
 
-          // Remove progress after delay
           setTimeout(() => {
             setServerProgress((prev) => {
               const updated = { ...prev };
@@ -278,20 +364,15 @@ function HomePage() {
         },
       });
 
-      // Store abort function for cleanup if needed
       eventSourcesRef.current.set(name, { abort });
     },
     [pushAlert],
   );
 
-  // Cleanup abort functions on unmount
+  // Cleanup SSE connections on unmount
   useEffect(() => {
     return () => {
-      eventSourcesRef.current.forEach((item) => {
-        if (item.abort) {
-          item.abort();
-        }
-      });
+      eventSourcesRef.current.forEach((item) => item.abort?.());
       eventSourcesRef.current.clear();
     };
   }, []);
