@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useMemo } from "react";
-import "./Form.css";
+import { useState, useEffect, useMemo } from "react";
 
 import { JupyterHubHeader } from "@components/layout";
 
 import { gatherFormData, getS3BucketOptions } from "./utils/gatherFormData";
-import { ListObjectsCommand, S3Client } from "@aws-sdk/client-s3";
 import {
-  Content,
   ContentBody,
   ContentHeading,
   Panel,
@@ -24,15 +21,13 @@ import { ImageSelectionSectionTabs } from "./formSections/ImageSection";
 import { Alert } from "@components/ui";
 import { useAlerts } from "@hooks";
 import { Footer } from "@components/layout";
-import type { SpawnAppConfig } from "@src-types/routes/appConfig";
+import type { SpawnAppConfig } from "@src-types/appConfig";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (spawn.html).
  */
 declare const appConfig: SpawnAppConfig;
 
-// Initialize dev mode synchronously at module load time
-// This must run before gatherFormData() is called in useMemo
 if (import.meta.env.DEV) {
   initDev();
 }
@@ -66,13 +61,8 @@ interface SpawnFormData {
   migamount?: number;
   sshAccess?: boolean;
   shmsize?: string;
-  s3url?: string;
-  s3bucket?: string;
-  s3accesskey?: string;
-  s3secretkey?: string;
   s3check?: string;
   s3name?: string;
-  s3selection?: string;
   images?: string;
   customimage?: string;
   phselection?: string;
@@ -90,7 +80,6 @@ function FormPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [checkedS3Storage, setCheckedS3Storage] = useState(false);
-  const [s3SelectionType, setS3SelectionType] = useState("");
   const [s3values, setS3Values] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -110,51 +99,6 @@ function FormPage() {
     setCheckedS3Storage(checked);
   };
 
-  const validateS3Credentials = async (): Promise<boolean> => {
-    const client = new S3Client({
-      endpoint: formData.s3url,
-      forcePathStyle: true, // Required for some non-AWS S3 providers to make bucket part of path
-      region: "us-east-1", // can be anything but empty ("" not ok)
-      credentials: {
-        accessKeyId: formData.s3accesskey!,
-        secretAccessKey: formData.s3secretkey!,
-      },
-    });
-
-    let bucketName = formData.s3bucket!;
-    let prefix: string | undefined = undefined;
-
-    // Check if bucket string contains ':' or '/'
-    const separatorIndex = Math.min(
-      bucketName.indexOf(":") !== -1 ? bucketName.indexOf(":") : Infinity,
-      bucketName.indexOf("/") !== -1 ? bucketName.indexOf("/") : Infinity,
-    );
-
-    if (separatorIndex !== Infinity) {
-      // Split into bucket and prefix (key)
-      bucketName = formData.s3bucket!.substring(0, separatorIndex);
-      prefix = formData.s3bucket!.substring(separatorIndex + 1);
-
-      // Remove leading slash if present in prefix
-      prefix = prefix.replace(/^\//, "");
-    }
-
-    const command = new ListObjectsCommand({
-      Bucket: bucketName,
-      ...(prefix && { Prefix: prefix }), // Conditionally add Prefix if exists
-    });
-
-    try {
-      await client.send(command);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  // Compute defaultFormData once using useMemo
-  // Using 'any' type here because gatherFormData returns a complex structure
-  // that's compatible with StorageSelectionSection's expected defaultFormData prop
   const defaultFormData = useMemo(() => {
     const gathered = gatherFormData();
     if (gathered === null) {
@@ -189,10 +133,6 @@ function FormPage() {
     migamount: 1,
     sshAccess: false,
     shmsize: "4",
-    s3url: "https://s3.cloud.e-infra.cz",
-    s3bucket: "",
-    s3accesskey: "",
-    s3secretkey: "",
   });
 
   const submitForm = async () => {
@@ -270,22 +210,11 @@ function FormPage() {
       payload.migamount = String(formData.migamount);
     }
 
-    if (checkedS3Storage && !s3SelectionType) {
-      pushAlert(
-        "Please choose either 'New' or 'Existing' S3 bucket option or deselect S3 choice.",
-        { variant: "error" },
-      );
-      return;
-    }
-
-    if (checkedS3Storage && s3SelectionType === "existing") {
+    if (checkedS3Storage) {
       if (Object.keys(s3values).length === 0) {
-        pushAlert(
-          `No existing S3 bucket was found, please choose option 'New'`,
-          {
-            variant: "error",
-          },
-        );
+        pushAlert(`No existing S3 bucket was found.`, {
+          variant: "error",
+        });
         return;
       }
       if (!formData.s3name) {
@@ -295,44 +224,6 @@ function FormPage() {
         return;
       }
       payload.s3name = formData.s3name as string;
-    }
-
-    if (checkedS3Storage && s3SelectionType === "new") {
-      const requiredS3Fields = [
-        "s3url",
-        "s3bucket",
-        "s3accesskey",
-        "s3secretkey",
-      ];
-      const missingS3 = requiredS3Fields.filter(
-        (key) => !String(formData[key] ?? "").trim(),
-      );
-
-      if (missingS3.length > 0) {
-        pushAlert(`Please fill all S3 fields: ${missingS3.join(", ")}.`, {
-          variant: "error",
-        });
-        return;
-      }
-
-      if (!String(formData.s3url).startsWith("https://")) {
-        pushAlert("S3 URL must start with https://", { variant: "error" });
-        return;
-      }
-
-      payload.s3url = formData.s3url as string;
-      payload.s3bucket = formData.s3bucket as string;
-      payload.s3accesskey = formData.s3accesskey as string;
-      payload.s3secretkey = formData.s3secretkey as string;
-
-      const response = await validateS3Credentials();
-      if (!response) {
-        pushAlert(
-          "Invalid S3 credentials/bucket/S3 url - cannot connect to the bucket.\n\nCheck inputs are correct.",
-          { variant: "error" },
-        );
-        return;
-      }
     }
 
     const requiredKeys = [
@@ -389,7 +280,6 @@ function FormPage() {
         userName={appConfig.userName as string}
       ></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
-      {/* <Content className="container mx-auto px-4 pb-6"> */}
       <div className="container mx-auto px-4 py-8 space-y-8">
         <ContentHeading>Start a new server</ContentHeading>
         <ContentBody>
@@ -463,8 +353,6 @@ function FormPage() {
                     onS3Check={handleS3Check}
                     checkedS3Storage={checkedS3Storage}
                     setCheckedS3Storage={setCheckedS3Storage}
-                    s3SelectionType={s3SelectionType}
-                    setS3SelectionType={setS3SelectionType}
                     s3values={s3values}
                     pushAlert={(
                       message: string,
@@ -525,7 +413,6 @@ function FormPage() {
           </div>
         </ContentBody>
       </div>
-      {/* </Content> */}
       <Footer />
     </div>
   );

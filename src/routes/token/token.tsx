@@ -1,4 +1,3 @@
-import React from "react";
 import TokenPage from "./TokenPage";
 import { createRoot } from "react-dom/client";
 import "@fontsource/montserrat/600.css";

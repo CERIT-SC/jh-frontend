@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useId } from "react";
 import { P } from "@e-infra/design-system";
 
-// ============================================================================
+// ==============================================================================
 // Type Definitions
-// ============================================================================
+// ==============================================================================
 
 interface BaseTileSelectorProps {
   selectionText?: string;
@@ -29,9 +29,9 @@ interface StringTileSelectorProps extends BaseTileSelectorProps {
 
 type TileSelectorProps = NumericTileSelectorProps | StringTileSelectorProps;
 
-// ============================================================================
+// ==============================================================================
 // Helper Functions
-// ============================================================================
+// ==============================================================================
 
 function isNumericProps(
   props: TileSelectorProps,
@@ -55,9 +55,9 @@ function isStringProps(
   );
 }
 
-// ============================================================================
+// ==============================================================================
 // Main Component
-// ============================================================================
+// ==============================================================================
 
 export const TileSelector: React.FC<TileSelectorProps> = (props) => {
   const { selectionText, className, disabled = false, ariaLabel } = props;
@@ -273,9 +273,9 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
   );
 };
 
-// ============================================================================
+// ==============================================================================
 // Convenience Wrapper for String Options
-// ============================================================================
+// ==============================================================================
 
 interface StringTileSelectorWrapperProps {
   selectionText?: string;

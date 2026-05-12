@@ -126,7 +126,6 @@ export function OverviewPanel({
   const phSelection = formData?.phselection || "new";
   const metaCentrumEnabled = formData?.storageCheck === "yes";
   const s3Enabled = formData?.s3check === "yes";
-  const s3SelectionType = formData?.s3selection || "";
 
   return (
     <Panel title={"overview"} className={className}>
@@ -244,15 +243,8 @@ export function OverviewPanel({
                 {s3Enabled && (
                   <>
                     <Small className="block mt-1 truncate">
-                      {s3SelectionType === "new"
-                        ? formData?.s3bucket || "New bucket"
-                        : formData?.s3name || "Existing bucket"}
+                      {formData?.s3name || "Existing bucket"}
                     </Small>
-                    {s3SelectionType === "new" && formData?.s3url && (
-                      <span className="block text-xs text-gray-500 mt-0.5 truncate">
-                        {formData.s3url}
-                      </span>
-                    )}
                   </>
                 )}
               </div>

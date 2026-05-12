@@ -18,10 +18,6 @@ declare const appConfig: {
   userName: string;
 };
 
-/**
- * StopPendingPage — displays server stop progress with auto-refresh.
- * Based on the original Jinja2 template structure.
- */
 const StopPendingPage: React.FC = () => {
   const userName = appConfig.userName ?? "";
 

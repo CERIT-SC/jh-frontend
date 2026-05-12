@@ -25,19 +25,17 @@ import {
 import { AlertTriangle, HardDrive, Cloud, Server } from "lucide-react";
 import { cn } from "@utils";
 
-// ============================================================================
+// ==============================================================================
 // Type Definitions
-// ============================================================================
+// ==============================================================================
 
 type FormState = Record<string, unknown>;
 type FormUpdater = (prev: FormState) => FormState;
 
 interface StorageFormData extends FormState {
   home?: string;
-  s3url?: string;
-  s3bucket?: string;
-  s3accesskey?: string;
-  s3secretkey?: string;
+  s3check?: string;
+  s3name?: string;
 }
 
 interface StorageDefaultFormData {
@@ -54,14 +52,7 @@ interface StorageDefaultFormData {
   };
   s3Storage?: {
     enabled?: boolean;
-    type?: string;
     existings3?: { value?: string };
-    news3?: {
-      s3Url?: string;
-      s3Bucket?: string;
-      s3AccessKey?: string;
-      s3SecretKey?: string;
-    };
   };
 }
 
@@ -74,17 +65,15 @@ interface StorageSelectionSectionProps {
   onS3Check: (checked: boolean) => void;
   checkedS3Storage: boolean;
   setCheckedS3Storage: (checked: boolean) => void;
-  s3SelectionType: string;
-  setS3SelectionType: (selectionType: string) => void;
   s3values: Record<string, string>;
   pushAlert: (message: string, variant?: "success" | "error" | "info") => void;
 }
 
 declare const appConfig: { userName?: string };
 
-// ============================================================================
+// ==============================================================================
 // Reusable Section Container Component (Compound Pattern)
-// ============================================================================
+// ==============================================================================
 
 interface SectionContainerContextValue {
   enabled: boolean;
@@ -242,9 +231,9 @@ function SectionContainer({
 SectionContainer.Header = SectionHeader;
 SectionContainer.Content = SectionContent;
 
-// ============================================================================
+// ==============================================================================
 // Constants
-// ============================================================================
+// ==============================================================================
 
 const PERSISTENT_HOME_OPTIONS = [
   {
@@ -258,7 +247,7 @@ const PERSISTENT_HOME_OPTIONS = [
     description: "Use an existing persistent home",
   },
 ];
-// @deprecated
+/** @deprecated S3 options are no longer used - S3 selection is now handled via dropdown */
 // const S3_OPTIONS = [
 //   {
 //     value: "existing",
@@ -268,9 +257,9 @@ const PERSISTENT_HOME_OPTIONS = [
 //   { value: "new", label: "New", description: "Configure a new S3 bucket" },
 // ];
 
-// ============================================================================
+// ==============================================================================
 // Main Component
-// ============================================================================
+// ==============================================================================
 
 export default function StorageSelectionSection({
   defaultFormData,
@@ -281,8 +270,6 @@ export default function StorageSelectionSection({
   onS3Check,
   checkedS3Storage,
   setCheckedS3Storage,
-  s3SelectionType,
-  setS3SelectionType,
   s3values,
 }: StorageSelectionSectionProps): React.ReactElement {
   // State management
@@ -293,7 +280,7 @@ export default function StorageSelectionSection({
   const [checkedDirectories, setCheckedDirectories] = useState(false);
   const [checkedStorage, setCheckedStorage] = useState(false);
   const [checkedMount, setCheckedMount] = useState(false);
-  // @deprecated
+  /** @deprecated Access key visibility toggle is no longer used */
   // const [showAccessKey, setShowAccessKey] = useState(false);
   // const [showSecretKey, setShowSecretKey] = useState(false);
 
@@ -391,7 +378,7 @@ export default function StorageSelectionSection({
       }
     }
 
-    // S3 Storage
+    // S3 Storage - Only existing buckets are now supported
     if (defaultFormData.s3Storage) {
       const enabled = defaultFormData.s3Storage.enabled ?? false;
       setCheckedS3Storage(enabled);
@@ -403,30 +390,13 @@ export default function StorageSelectionSection({
         }));
       }
 
-      const s3Type =
-        defaultFormData.s3Storage.type === "new" ? "new" : "existing";
-      setS3SelectionType(s3Type);
-      onS3Change((prev) => ({
-        ...prev,
-        s3selection: s3Type,
-      }));
-
+      // Only handle existing S3 buckets
       if (defaultFormData.s3Storage.existings3?.value) {
         const name = defaultFormData.s3Storage.existings3.value;
         setDefaultOptionS3name([name, name]);
         onS3Change((prev) => ({
           ...prev,
           s3name: name,
-        }));
-      }
-
-      if (defaultFormData.s3Storage.news3) {
-        onS3Change((prev) => ({
-          ...prev,
-          s3url: defaultFormData.s3Storage!.news3!.s3Url,
-          s3bucket: defaultFormData.s3Storage!.news3!.s3Bucket,
-          s3accesskey: defaultFormData.s3Storage!.news3!.s3AccessKey,
-          s3secretkey: defaultFormData.s3Storage!.news3!.s3SecretKey,
         }));
       }
     }
@@ -440,18 +410,9 @@ export default function StorageSelectionSection({
     }));
   }, [phSelectionType]);
 
-  // Sync S3 selection to formData
-  useEffect(() => {
-    setS3SelectionType(s3SelectionType);
-    onS3Change((prev) => ({
-      ...prev,
-      s3selection: s3SelectionType,
-    }));
-  }, [s3SelectionType]);
-
-  // ============================================================================
+  // ==============================================================================
   // Event Handlers
-  // ============================================================================
+  // ==============================================================================
 
   const handleStorage = useCallback(
     (storage: string) => {
@@ -547,7 +508,7 @@ export default function StorageSelectionSection({
     [onS3Change],
   );
 
-  // @deprecated
+  /** @deprecated S3 change handlers are no longer used - simplified to direct handlers */
   // const createS3ChangeHandler = useCallback(
   //   (field: "s3url" | "s3bucket" | "s3accesskey" | "s3secretkey") =>
   //     (value: string) => {
@@ -576,9 +537,9 @@ export default function StorageSelectionSection({
   //   [createS3ChangeHandler],
   // );
 
-  // ============================================================================
+  // ==============================================================================
   // Render
-  // ============================================================================
+  // ==============================================================================
 
   return (
     <div className="flex flex-col gap-4">
@@ -769,13 +730,23 @@ export default function StorageSelectionSection({
                 .
               </span>
             </Alert>
-            <DropDownMenu
-              formSelect={handleS3Buckets}
-              title="Select S3 Bucket"
-              menuOptions={s3values}
-              defaultOption={defaultOptionS3name}
-              className="bg-surface"
-            />
+            {Object.keys(s3values).length > 0 ? (
+              <DropDownMenu
+                formSelect={handleS3Buckets}
+                title="Select S3 Bucket"
+                menuOptions={s3values}
+                defaultOption={defaultOptionS3name}
+                className="bg-surface"
+              />
+            ) : (
+              <Alert variant="warning" className="mt-2">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-xs">
+                  No existing S3 buckets are available. Please create a bucket
+                  first using the link above.
+                </span>
+              </Alert>
+            )}
           </div>
         </SectionContainer.Content>
       </SectionContainer>

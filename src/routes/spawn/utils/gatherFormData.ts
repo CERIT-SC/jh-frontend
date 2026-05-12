@@ -65,22 +65,25 @@ export function gatherFormData() {
       metaCentrumHome: {
         enabled: opts.home !== null,
         selectedHome: opts.home ? { value: opts.home, text: opts.home } : null,
-        // Depending on your API, map `mountToStorage` if it's stored in `user_options`
         mountToStorage: false,
       },
       projectDirectories: Boolean(opts.mountprojects),
       persistentHome: {
-        // Example mapping based on "remain", "new", or specific volume names
         type:
-          opts.phome === "new" || opts.phome === "remain" ? "new" : "existing",
-        eraseIfExists: false,
+          opts.phome === "new" ||
+          opts.phome === "remain" ||
+          opts.phome === "delete"
+            ? "new"
+            : "existing",
+        eraseIfExists: opts.phome === "delete",
         selectedHome:
-          opts.phome !== "new" && opts.phome !== "remain"
+          opts.phome !== "new" &&
+          opts.phome !== "remain" &&
+          opts.phome !== "delete"
             ? { value: opts.phome, text: opts.phome }
             : null,
       },
 
-      // Map other storages as needed or set to null if not in user_options yet
       s3Storage: null,
 
       // Image & Access
@@ -195,7 +198,7 @@ export function getPersistentHomeOptions() {
 
 export function getS3BucketOptions() {
   if (!spawnOptions || !Array.isArray(spawnOptions.s3buckets)) {
-    return { testing: "s3testing" };
+    return {};
   }
 
   const mapped = spawnOptions.s3buckets.reduce(
@@ -215,5 +218,5 @@ export function getS3BucketOptions() {
     {},
   );
 
-  return Object.keys(mapped).length > 0 ? mapped : { testing: "s3testing" };
+  return mapped;
 }

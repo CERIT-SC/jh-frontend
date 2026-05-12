@@ -1,5 +1,4 @@
 import React from "react";
-// import "./JupyterHubHeader.css";
 import {
   Header,
   Button,
@@ -101,52 +100,5 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
         </HeaderContent>
       </Header>
     </>
-    // <nav className="navbar">
-    //   <span id="jupyterhub-logo" className="navbar-brand">
-    //     <a href="/hub/home">
-    //       <img
-    //         src={jh_logo}
-    //         height={"28px"}
-    //         alt="JupyterHub logo"
-    //         className="jpy-logo"
-    //         title="Home"
-    //       />
-    //     </a>
-    //   </span>
-
-    //   <button className="navbar-toggler" onClick={toggleMenu}>
-    //     <FontAwesomeIcon icon={faBars} />
-    //   </button>
-
-    //   {isMobile ? (
-    //     <div className={`menu ${menuOpen ? "open" : ""}`}>
-    //       <a className="home" href="/hub/home">
-    //         Home
-    //       </a>
-    //       <a className="token" href="/hub/token">
-    //         Token
-    //       </a>
-    //       <span className="me">{userName}</span>
-    //       <a className="logout" href="/hub/logout">
-    //         <FontAwesomeIcon icon={faSignOut} className="icon" />
-    //         Logout
-    //       </a>
-    //     </div>
-    //   ) : (
-    //     <>
-    //       <a className="home" href="/hub/home">
-    //         Home
-    //       </a>
-    //       <a className="token" href="/hub/token">
-    //         Token
-    //       </a>
-    //       <span className="me">{userName}</span>
-    //       <a className="logout" href="/hub/logout">
-    //         <FontAwesomeIcon icon={faSignOut} className="icon" />
-    //         &nbsp;Logout
-    //       </a>
-    //     </>
-    //   )}
-    // </nav>
   );
 };

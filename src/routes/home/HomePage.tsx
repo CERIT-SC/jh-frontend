@@ -29,7 +29,7 @@ import {
   cn,
 } from "@e-infra/design-system";
 import { LayoutGrid, LayoutList, Plus, AlertCircle } from "lucide-react";
-import type { HomeAppConfig } from "@src-types/routes/appConfig";
+import type { HomeAppConfig } from "@src-types/appConfig";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (home.html).
@@ -297,7 +297,7 @@ function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
-      <div className="container grow  mx-auto px-4 py-8 space-y-8">
+      <div className="container grow  mx-auto py-8 space-y-8">
         <div className="named-servers">
           <Panel className="bg-transparent border-0 shadow-none">
             <div className="flex items-center">

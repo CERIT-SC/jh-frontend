@@ -36,8 +36,6 @@ export function useAlerts(): UseAlertsReturn {
         `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
       setAlerts((prev) => {
-        // When the visible limit is reached, drop the oldest alert to
-        // prevent the screen from being overwhelmed during error spamming.
         const current =
           prev.length >= MAX_VISIBLE_ALERTS ? prev.slice(1) : prev;
 

@@ -50,13 +50,11 @@ export function useEventSource({
   const [error, setError] = useState<Error | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
-  // Refs for values that shouldn't trigger re-renders or re-create the effect
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isDisposedRef = useRef(false);
   const attemptCountRef = useRef(0);
 
-  // Stable callback refs so the effect doesn't re-run on callback identity changes
   const onMessageRef = useRef(onMessage);
   const onErrorRef = useRef(onError);
   const onOpenRef = useRef(onOpen);

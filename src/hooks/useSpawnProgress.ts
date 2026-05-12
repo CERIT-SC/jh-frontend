@@ -67,8 +67,6 @@ export function useSpawnProgress({
   const internalDisconnectRef = useRef<(() => void) | null>(null);
 
   // ── Render trigger ──────────────────────────────────────────────────
-  // Incrementing a counter is the lightest way to force React to re-render
-  // with the latest ref values without creating intermediate state objects.
   const [renderTick, setRenderTick] = useState(0);
 
   const scheduleRender = useCallback(() => {
@@ -149,10 +147,8 @@ export function useSpawnProgress({
       onError: handleError,
     });
 
-  // Store disconnect in ref to call from handleMessage without re-creating handler
   internalDisconnectRef.current = disconnect;
 
-  // Suppress the unused-variable warning — renderTick drives re-renders
   void renderTick;
 
   return {

@@ -1,3 +1,4 @@
+// Fallback options
 export const selectOptionsStorage = {
   "brno12-cerit": "brno12-cerit",
   "brno11-elixir": "brno11-elixir",

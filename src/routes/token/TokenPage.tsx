@@ -27,7 +27,7 @@ import {
 } from "@e-infra/design-system";
 import React, { useState, useRef, useEffect } from "react";
 import { JupyterHubHeader, Footer } from "@components/layout";
-import type { TokenAppConfig } from "@src-types/routes/appConfig";
+import type { TokenAppConfig } from "@src-types/appConfig";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (token.html).
@@ -465,7 +465,7 @@ function TokenPage() {
                           .filter(Boolean) || [];
                       const uniqueScopes = [...new Set(allScopes)];
 
-                      // Decode URL-encoded description (e.g., %3A -> :) // fix doesnt work
+                      // Decode URL-encoded description (e.g., %3A -> :)
                       const decodedDescription = client.description
                         ? (() => {
                             try {

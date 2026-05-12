@@ -12,7 +12,7 @@ import {
   Badge,
 } from "@e-infra/design-system";
 import { Footer, JupyterHubHeader } from "@components/layout";
-import type { NotRunningAppConfig } from "@src-types/routes/appConfig";
+import type { NotRunningAppConfig } from "@src-types/appConfig";
 import { Server, Play } from "lucide-react";
 
 /**

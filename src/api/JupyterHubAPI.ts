@@ -162,7 +162,6 @@ export class JupyterHubApiClient {
     const path = serverName
       ? `/hub/api/users/${username}/servers/${serverName}/progress?_xsrf=${this.xsrf}`
       : `/hub/api/users/${username}/server/progress?_xsrf=${this.xsrf}`;
-    // EventSource with credentials - uses withCredentials internally for same-origin
     return new EventSource(path, { withCredentials: true });
   }
 

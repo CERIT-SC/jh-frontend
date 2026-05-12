@@ -34,11 +34,9 @@ export function triggerShineById(
       return;
     }
 
-    // Set color via CSS variable and add shine class
     element.style.setProperty("--shine-color", color);
     element.classList.add("shine-ring");
 
-    // Remove after duration
     setTimeout(() => {
       element.classList.remove("shine-ring");
       element.style.removeProperty("--shine-color");
