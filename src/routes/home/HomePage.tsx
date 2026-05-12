@@ -27,6 +27,7 @@ import {
   Button,
   Input,
   cn,
+  Small,
 } from "@e-infra/design-system";
 import { LayoutGrid, LayoutList, Plus, AlertCircle } from "lucide-react";
 import type { HomeAppConfig } from "@src-types/appConfig";
@@ -67,6 +68,11 @@ interface ServerProgress {
 interface EventSourceItem {
   abort: () => void;
 }
+
+/**
+ * Maximum number of servers a user can create.
+ */
+const maxServers = 15;
 
 function HomePage() {
   if (import.meta.env.DEV) {
@@ -300,10 +306,23 @@ function HomePage() {
       <div className="container grow  mx-auto py-8 space-y-8">
         <div className="named-servers">
           <Panel className="bg-transparent border-0 shadow-none">
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               {/* <H1 className="grow">My servers</H1> */}
               <div className="flex items-center gap-4 my-0 grow">
-                <Badge className="px-4 py-2 text-md">My servers</Badge>
+                <Badge className="px-4 py-2 text-md justify-center text-center">
+                  My servers
+                  <Small
+                    className={cn(
+                      Object.keys(spawners).length >= maxServers
+                        ? "text-error/80"
+                        : Object.keys(spawners).length >= maxServers - 2
+                          ? "text-warning-600"
+                          : "text-text-muted",
+                    )}
+                  >
+                    {Object.keys(spawners).length} / {maxServers}
+                  </Small>
+                </Badge>
                 <Dialog
                   open={isAddServerModalOpen}
                   onOpenChange={setIsAddServerModalOpen}
@@ -312,83 +331,97 @@ function HomePage() {
                     <Badge
                       variant={"outline"}
                       className={cn(
-                        "px-4 py-2 text-md",
+                        "px-4 py-2 text-md justify-center text-center",
                         "cursor-pointer transition-all duration-200 bg-tertiary",
                         " hover:border-primary dark:hover:border-primary/50 ",
                       )}
                       onClick={() => setIsAddServerModalOpen(true)}
                     >
-                      + New Server
+                      + New Server{" "}
                     </Badge>
                   </DialogTrigger>
                   <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Name Your Server</DialogTitle>
-                      <DialogDescription>
-                        Choose a unique name for your new server. This name will
-                        be used to identify your server in the list.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col gap-4 py-4">
-                      <Input
-                        type="text"
-                        id="newServerName"
-                        value={serverName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setServerName(e.target.value)
-                        }
-                        placeholder="e.g. ml-experiment, thesis-analysis"
-                        className={cn(
-                          "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
-                          "placeholder:text-muted-foreground/70",
-                          isNameDuplicate &&
-                            "border-error focus-visible:ring-error",
-                        )}
-                        aria-invalid={isNameDuplicate}
-                        aria-describedby={
-                          isNameDuplicate ? "server-name-error" : undefined
-                        }
-                        autoFocus
-                      />
-                      {isNameDuplicate && (
-                        <div
-                          id="server-name-error"
-                          className="flex items-center gap-2 text-sm text-error"
-                          role="alert"
-                        >
-                          <AlertCircle size={16} />
-                          <span>
-                            Server name &ldquo;{serverName}&rdquo; is already in
-                            use
-                          </span>
+                    {Object.keys(spawners).length >= maxServers ? (
+                      <DialogHeader>
+                        <DialogTitle>Server Limit Reached</DialogTitle>
+                        <DialogDescription>
+                          You have reached the maximum number of servers (
+                          {maxServers}). Please delete an existing server before
+                          creating a new one.
+                        </DialogDescription>
+                      </DialogHeader>
+                    ) : (
+                      <>
+                        <DialogHeader>
+                          <DialogTitle>Name Your Server</DialogTitle>
+                          <DialogDescription>
+                            Choose a unique name for your new server. This name
+                            will be used to identify your server in the list.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex flex-col gap-4 py-4">
+                          <Input
+                            type="text"
+                            id="newServerName"
+                            value={serverName}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>,
+                            ) => setServerName(e.target.value)}
+                            placeholder="e.g. ml-experiment, thesis-analysis"
+                            className={cn(
+                              "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
+                              "placeholder:text-muted-foreground/70",
+                              isNameDuplicate &&
+                                "border-error focus-visible:ring-error",
+                            )}
+                            aria-invalid={isNameDuplicate}
+                            aria-describedby={
+                              isNameDuplicate ? "server-name-error" : undefined
+                            }
+                            autoFocus
+                          />
+                          {isNameDuplicate && (
+                            <div
+                              id="server-name-error"
+                              className="flex items-center gap-2 text-sm text-error"
+                              role="alert"
+                            >
+                              <AlertCircle size={16} />
+                              <span>
+                                Server name &ldquo;{serverName}&rdquo; is
+                                already in use
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="secondary"
-                        onClick={() => {
-                          setIsAddServerModalOpen(false);
-                          setServerName("");
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        variant={isInvalid ? "outline" : "default"}
-                        className={cn(
-                          isInvalid && "opacity-50 cursor-not-allowed",
-                        )}
-                        onClick={handleAddServer}
-                        disabled={isInvalid}
-                      >
-                        <Plus size={16} strokeWidth={3} />
-                        Add Server
-                      </Button>
-                    </DialogFooter>
+                        <DialogFooter>
+                          <Button
+                            variant="secondary"
+                            onClick={() => {
+                              setIsAddServerModalOpen(false);
+                              setServerName("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant={isInvalid ? "outline" : "default"}
+                            className={cn(
+                              isInvalid && "opacity-50 cursor-not-allowed",
+                            )}
+                            onClick={handleAddServer}
+                            disabled={isInvalid}
+                          >
+                            <Plus size={16} strokeWidth={3} />
+                            Add Server
+                          </Button>
+                        </DialogFooter>
+                      </>
+                    )}
                   </DialogContent>
                 </Dialog>
               </div>
+
               <TileSelector
                 options={[1, 2]}
                 defaultValue={1}
@@ -434,23 +467,32 @@ function HomePage() {
                   }
                   showDeleteButton={false}
                 /> */}
-                {Object.entries(spawners).map(([name, spawner]) => (
-                  <ServerCardType
-                    title={name}
-                    key={name}
-                    spawnerUrl={spawner.url}
-                    lastActivity={spawner.last_activity}
-                    isActive={spawner.active}
-                    isReady={spawner.ready}
-                    handleOpen={() => handleOpenServer(spawner.url!)}
-                    handleStop={() => handleStopServer(name)}
-                    handleDelete={() => handleDeleteServer(name)}
-                    handleStart={() => handleStartServer(name)}
-                    handleQuickStart={() => handleQuickStart(name)}
-                    progress={serverProgress[name]}
-                  />
-                ))}
-                {Object.keys(spawners).length < 15 && (
+                {Object.entries(spawners)
+                  .sort(([, a], [, b]) => {
+                    if (!a.last_activity) return 1;
+                    if (!b.last_activity) return -1;
+                    return (
+                      new Date(b.last_activity).getTime() -
+                      new Date(a.last_activity).getTime()
+                    );
+                  })
+                  .map(([name, spawner]) => (
+                    <ServerCardType
+                      title={name}
+                      key={name}
+                      spawnerUrl={spawner.url}
+                      lastActivity={spawner.last_activity}
+                      isActive={spawner.active}
+                      isReady={spawner.ready}
+                      handleOpen={() => handleOpenServer(spawner.url!)}
+                      handleStop={() => handleStopServer(name)}
+                      handleDelete={() => handleDeleteServer(name)}
+                      handleStart={() => handleStartServer(name)}
+                      handleQuickStart={() => handleQuickStart(name)}
+                      progress={serverProgress[name]}
+                    />
+                  ))}
+                {Object.keys(spawners).length < maxServers && (
                   <EmptyServerCard
                     onClick={() => setIsAddServerModalOpen(true)}
                     variant={gridType === 1 ? "default" : "inline"}
