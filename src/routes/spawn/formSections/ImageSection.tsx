@@ -181,11 +181,11 @@ export function ImageSelectionSectionTabs({
       </div>
       {sshChecked && (
         <>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-text-muted">
             Connection will be available at{" "}
             <strong>{defaultFormData?.sshName || "your SSH name"}</strong>
           </div>
-          <div className="text-xs text-gray-500 mt-1">
+          <div className="text-xs text-text-muted mt-1">
             In the notebooks, the name is stored as environment variable
             SSH_ADDRESS
           </div>
