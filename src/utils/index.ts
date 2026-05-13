@@ -1,2 +1,7 @@
-export { cn, dateFormat, dateFormatRelative } from "./utils";
+export {
+  cn,
+  dateFormat,
+  dateFormatRelative,
+  validateServerName,
+} from "./utils";
 export { triggerShineById, triggerShineMultiple } from "./shine";

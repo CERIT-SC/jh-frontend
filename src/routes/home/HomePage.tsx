@@ -31,6 +31,7 @@ import {
 } from "@e-infra/design-system";
 import { LayoutGrid, LayoutList, Plus, AlertCircle } from "lucide-react";
 import type { HomeAppConfig } from "@src-types/appConfig";
+import { validateServerName } from "@utils";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (home.html).
@@ -87,14 +88,27 @@ function HomePage() {
   const [serverProgress, setServerProgress] = useState<ServerProgress>({});
   const [isAddServerModalOpen, setIsAddServerModalOpen] = useState(false);
 
-  const isNameDuplicate = useMemo(() => {
-    if (!serverName.trim()) return false;
-    return Object.keys(spawners).some(
-      (name) => name.toLowerCase() === serverName.trim().toLowerCase(),
-    );
+  // Validate server name for URL safety and duplicates
+  const nameValidation = useMemo(() => {
+    if (!serverName.trim()) {
+      return { isValid: false, isDuplicate: false, errorMessage: "" };
+    }
+
+    const validation = validateServerName(serverName);
+    const isDuplicate = validation.isValid
+      ? Object.keys(spawners).some(
+          (name) => name.toLowerCase() === serverName.trim().toLowerCase(),
+        )
+      : false;
+
+    return {
+      isValid: validation.isValid && !isDuplicate,
+      isDuplicate,
+      errorMessage: validation.errorMessage,
+    };
   }, [serverName, spawners]);
 
-  const isInvalid = serverName === "" || isNameDuplicate;
+  const isInvalid = !nameValidation.isValid;
 
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
   const eventSourcesRef = useRef<Map<string, EventSourceItem>>(new Map());
@@ -167,12 +181,6 @@ function HomePage() {
 
   /**
    * Attaches SSE progress tracking to a spawning server.
-   *
-   * This is called when:
-   * 1. User quick-starts a server (handleQuickStart)
-   * 2. User returns to tab after starting server via spawn page
-   *
-   * The SSE connection auto-reconnects on transient errors (e.g., tab hidden).
    */
   const attachProgressTracking = useCallback(
     (name: string) => {
@@ -231,11 +239,6 @@ function HomePage() {
   /**
    * Refreshes server state on tab visibility change and attaches SSE
    * for any servers still spawning.
-   *
-   * Rationale: When a server is started via the spawn page (new tab),
-   * the HomePage has no SSE connection. On visibility return, we fetch
-   * the latest state and attach SSE to any active-but-not-ready servers
-   * to show live progress.
    */
   useEffect(() => {
     const handleVisibilityChange = async () => {
@@ -288,12 +291,16 @@ function HomePage() {
 
   const handleAddServer = () => {
     if (isInvalid) return;
+
+    // Double-check validation before opening spawn URL
+    const validation = validateServerName(serverName);
+    if (!validation.isValid) return;
+
     window
-      .open(`/spawn/${appConfig.userName}/${serverName}`, "_blank")
+      .open(`/spawn/${appConfig.userName}/${serverName.trim()}`, "_blank")
       ?.focus();
     setServerName("");
     setIsAddServerModalOpen(false);
-    // Reload after a short delay to allow the new server to be created
     setTimeout(() => {
       window.location.reload();
     }, 500);
@@ -305,9 +312,6 @@ function HomePage() {
 
   /**
    * Starts a server via API and tracks spawn progress inline.
-   *
-   * Unlike handleStartServer (which opens the spawn page in a new tab),
-   * this keeps the user on the HomePage and shows live progress via SSE.
    */
   const handleQuickStart = useCallback(
     async (name: string) => {
@@ -438,6 +442,7 @@ function HomePage() {
                           <DialogDescription>
                             Choose a unique name for your new server. This name
                             will be used to identify your server in the list.
+                            Must be lowercase letters, numbers, and dashes only.
                           </DialogDescription>
                         </DialogHeader>
                         <div className="flex flex-col gap-4 py-4">
@@ -449,19 +454,19 @@ function HomePage() {
                               e: React.ChangeEvent<HTMLInputElement>,
                             ) => setServerName(e.target.value)}
                             placeholder="e.g. ml-experiment, thesis-analysis"
+                            pattern="[a-z0-9]([a-z0-9-]*[a-z0-9])?"
+                            title="Must start and end with a letter or number, and can only contain lowercase letters, numbers, and dashes"
                             className={cn(
                               "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
                               "placeholder:text-muted-foreground/70",
-                              isNameDuplicate &&
+                              isInvalid &&
                                 "border-error focus-visible:ring-error",
                             )}
-                            aria-invalid={isNameDuplicate}
-                            aria-describedby={
-                              isNameDuplicate ? "server-name-error" : undefined
-                            }
+                            aria-invalid={isInvalid}
+                            aria-describedby="server-name-error"
                             autoFocus
                           />
-                          {isNameDuplicate && (
+                          {isInvalid && serverName.trim() && (
                             <div
                               id="server-name-error"
                               className="flex items-center gap-2 text-sm text-error"
@@ -469,8 +474,9 @@ function HomePage() {
                             >
                               <AlertCircle size={16} />
                               <span>
-                                Server name &ldquo;{serverName}&rdquo; is
-                                already in use
+                                {nameValidation.isDuplicate
+                                  ? `Server name "${serverName}" is already in use`
+                                  : nameValidation.errorMessage}
                               </span>
                             </div>
                           )}
