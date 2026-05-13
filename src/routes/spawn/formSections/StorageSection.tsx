@@ -21,8 +21,20 @@ import {
   P,
   Link,
   H4,
+  Input,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
 } from "@e-infra/design-system";
-import { AlertTriangle, HardDrive, Cloud, Server } from "lucide-react";
+import {
+  AlertTriangle,
+  HardDrive,
+  Cloud,
+  Server,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { cn } from "@utils";
 
 // ==============================================================================
@@ -36,6 +48,10 @@ interface StorageFormData extends FormState {
   home?: string;
   s3check?: string;
   s3name?: string;
+  s3url?: string;
+  s3bucket?: string;
+  s3accesskey?: string;
+  s3secretkey?: string;
 }
 
 interface StorageDefaultFormData {
@@ -247,15 +263,18 @@ const PERSISTENT_HOME_OPTIONS = [
     description: "Use an existing persistent home",
   },
 ];
-/** @deprecated S3 options are no longer used - S3 selection is now handled via dropdown */
-// const S3_OPTIONS = [
-//   {
-//     value: "existing",
-//     label: "Existing",
-//     description: "Mount an existing S3 bucket",
-//   },
-//   { value: "new", label: "New", description: "Configure a new S3 bucket" },
-// ];
+const S3_OPTIONS = [
+  {
+    value: "existing",
+    label: "Mounted",
+    description: "Mount an existing S3 bucket",
+  },
+  {
+    value: "new",
+    label: "Link Bucket",
+    description: "Configure a new S3 bucket",
+  },
+];
 
 // ==============================================================================
 // Main Component
@@ -280,9 +299,11 @@ export default function StorageSelectionSection({
   const [checkedDirectories, setCheckedDirectories] = useState(false);
   const [checkedStorage, setCheckedStorage] = useState(false);
   const [checkedMount, setCheckedMount] = useState(false);
-  /** @deprecated Access key visibility toggle is no longer used */
-  // const [showAccessKey, setShowAccessKey] = useState(false);
-  // const [showSecretKey, setShowSecretKey] = useState(false);
+  const [s3SelectionType, setS3SelectionType] = useState<"existing" | "new">(
+    "existing",
+  );
+  const [showAccessKey, setShowAccessKey] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
 
   const [defaultOptionPhname, setDefaultOptionPhname] = useState<
     [string, string] | undefined
@@ -508,34 +529,33 @@ export default function StorageSelectionSection({
     [onS3Change],
   );
 
-  /** @deprecated S3 change handlers are no longer used - simplified to direct handlers */
-  // const createS3ChangeHandler = useCallback(
-  //   (field: "s3url" | "s3bucket" | "s3accesskey" | "s3secretkey") =>
-  //     (value: string) => {
-  //       onS3Change((prev) => ({
-  //         ...prev,
-  //         [field]: value,
-  //       }));
-  //     },
-  //   [onS3Change],
-  // );
+  const createS3ChangeHandler = useCallback(
+    (field: "s3url" | "s3bucket" | "s3accesskey" | "s3secretkey") =>
+      (value: string) => {
+        onS3Change((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+      },
+    [onS3Change],
+  );
 
-  // const handleS3UrlChange = useMemo(
-  //   () => createS3ChangeHandler("s3url"),
-  //   [createS3ChangeHandler],
-  // );
-  // const handleS3BucketChange = useMemo(
-  //   () => createS3ChangeHandler("s3bucket"),
-  //   [createS3ChangeHandler],
-  // );
-  // const handleS3AccessKeyChange = useMemo(
-  //   () => createS3ChangeHandler("s3accesskey"),
-  //   [createS3ChangeHandler],
-  // );
-  // const handleS3SecretKeyChange = useMemo(
-  //   () => createS3ChangeHandler("s3secretkey"),
-  //   [createS3ChangeHandler],
-  // );
+  const handleS3UrlChange = useMemo(
+    () => createS3ChangeHandler("s3url"),
+    [createS3ChangeHandler],
+  );
+  const handleS3BucketChange = useMemo(
+    () => createS3ChangeHandler("s3bucket"),
+    [createS3ChangeHandler],
+  );
+  const handleS3AccessKeyChange = useMemo(
+    () => createS3ChangeHandler("s3accesskey"),
+    [createS3ChangeHandler],
+  );
+  const handleS3SecretKeyChange = useMemo(
+    () => createS3ChangeHandler("s3secretkey"),
+    [createS3ChangeHandler],
+  );
 
   // ==============================================================================
   // Render
@@ -548,7 +568,7 @@ export default function StorageSelectionSection({
         <SectionContainer.Header
           icon={<HardDrive className="w-5 h-5 mt-0.5" aria-hidden="true" />}
         >
-          <H4>PersistentNotebook Home</H4>
+          <H4>Persistent Notebook Home</H4>
           <P>
             Persistent home ensures your data persists even when the notebook is
             deleted. Mounted to <Code>/home/jovyan</Code>
@@ -716,37 +736,161 @@ export default function StorageSelectionSection({
           </P>
         </SectionContainer.Header>
         <SectionContainer.Content>
-          <div className="pl-4 animate-in fade-in-0 duration-200">
-            <Alert variant="default" className="mb-4">
-              <Cloud className="h-4 w-4" />
-              <span className="text-xs">
-                To create bucket go to{" "}
-                <Link
-                  href="https://s3-ui.cloud.e-infra.cz/"
-                  target="_blank"
-                  className="underline"
-                >
-                  https://s3-ui.cloud.e-infra.cz/
-                </Link>
-                .
-              </span>
-            </Alert>
-            {Object.keys(s3values).length > 0 ? (
-              <DropDownMenu
-                formSelect={handleS3Buckets}
-                title="Select S3 Bucket"
-                menuOptions={s3values}
-                defaultOption={defaultOptionS3name}
-                className="bg-surface"
-              />
-            ) : (
-              <Alert variant="warning" className="mt-2">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="text-xs">
-                  No existing S3 buckets are available. Please create a bucket
-                  first using the link above.
-                </span>
-              </Alert>
+          <div className="space-y-4 pl-4">
+            {/* S3 Type Selection */}
+            <div className="space-y-2">
+              <P>Select Bucket Type</P>
+              <div className="flex flex-wrap gap-2">
+                {S3_OPTIONS.map((option) => {
+                  const isActive = s3SelectionType === option.value;
+                  const isExistingDisabled =
+                    option.value === "existing" &&
+                    Object.keys(s3values).length === 0;
+                  return (
+                    <TooltipProvider key={option.value}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant={isActive ? "default" : "outline"}
+                            className={cn(
+                              "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                              "bg-surface",
+                              "hover:bg-primary/10 hover:border-primary",
+                              isActive &&
+                                "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
+                              isExistingDisabled &&
+                                "opacity-50 cursor-not-allowed",
+                            )}
+                            onClick={() => {
+                              if (!isExistingDisabled) {
+                                setS3SelectionType(
+                                  option.value as "existing" | "new",
+                                );
+                              }
+                            }}
+                          >
+                            {option.label}
+                          </Badge>
+                        </TooltipTrigger>
+                        {isExistingDisabled && (
+                          <TooltipContent>
+                            <p>No buckets mounted</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Existing S3 Bucket */}
+            {s3SelectionType === "existing" && (
+              <div className="animate-in fade-in-0 duration-200">
+                {Object.keys(s3values).length > 0 ? (
+                  <DropDownMenu
+                    formSelect={handleS3Buckets}
+                    title="Select S3 Bucket"
+                    menuOptions={s3values}
+                    defaultOption={defaultOptionS3name}
+                    className="bg-surface"
+                  />
+                ) : (
+                  <Alert variant="warning" className="mt-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-xs">
+                      No existing S3 buckets are available. Please create a
+                      bucket first using the link above.
+                    </span>
+                  </Alert>
+                )}
+              </div>
+            )}
+
+            {/* New S3 Bucket */}
+            {s3SelectionType === "new" && (
+              <div className="space-y-4 animate-in fade-in-0 duration-200">
+                <Alert variant="default" className="mb-4">
+                  <Cloud className="h-4 w-4" />
+                  <span className="text-xs">
+                    To create bucket go to{" "}
+                    <Link
+                      href="https://s3-ui.cloud.e-infra.cz/"
+                      target="_blank"
+                      className="underline"
+                    >
+                      https://s3-ui.cloud.e-infra.cz/
+                    </Link>
+                    .
+                  </span>
+                </Alert>
+
+                <div className="space-y-2">
+                  <Label htmlFor="s3-url">S3 URL</Label>
+                  <Input
+                    id="s3-url"
+                    type="text"
+                    value={formData.s3url ?? ""}
+                    placeholder="https://s3.cloud.e-infra.cz"
+                    onChange={(e) => handleS3UrlChange(e.target.value)}
+                    className="w-full bg-surface"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="s3-bucket">Bucket Name</Label>
+                  <Input
+                    id="s3-bucket"
+                    type="text"
+                    value={formData.s3bucket ?? ""}
+                    placeholder="example-bucket"
+                    onChange={(e) => handleS3BucketChange(e.target.value)}
+                    className="w-full bg-surface"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="s3-access-key">Access Key</Label>
+                  <div className="relative">
+                    <Input
+                      id="s3-access-key"
+                      type={showAccessKey ? "text" : "password"}
+                      value={formData.s3accesskey ?? ""}
+                      placeholder="s3AccessKey"
+                      onChange={(e) => handleS3AccessKeyChange(e.target.value)}
+                      className="w-full pr-10 bg-surface"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAccessKey(!showAccessKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
+                    >
+                      {showAccessKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="s3-secret-key">Secret Key</Label>
+                  <div className="relative">
+                    <Input
+                      id="s3-secret-key"
+                      type={showSecretKey ? "text" : "password"}
+                      value={formData.s3secretkey ?? ""}
+                      placeholder="s3SecretKey"
+                      onChange={(e) => handleS3SecretKeyChange(e.target.value)}
+                      className="w-full pr-10 bg-surface"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSecretKey(!showSecretKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
+                    >
+                      {showSecretKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </SectionContainer.Content>
