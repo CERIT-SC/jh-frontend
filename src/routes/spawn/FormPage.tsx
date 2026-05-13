@@ -63,6 +63,11 @@ interface SpawnFormData {
   shmsize?: string;
   s3check?: string;
   s3name?: string;
+  s3selection?: string;
+  s3url?: string;
+  s3bucket?: string;
+  s3accesskey?: string;
+  s3secretkey?: string;
   images?: string;
   customimage?: string;
   phselection?: string;
@@ -211,19 +216,36 @@ function FormPage() {
     }
 
     if (checkedS3Storage) {
-      if (Object.keys(s3values).length === 0) {
-        pushAlert(`No existing S3 bucket was found.`, {
-          variant: "error",
-        });
-        return;
+      payload.s3check = "yes";
+      payload.s3selection = formData.s3selection || "existing";
+      const s3Sel = formData.s3selection || "existing";
+      if (s3Sel === "existing") {
+        if (Object.keys(s3values).length === 0) {
+          pushAlert(`No existing S3 bucket was found.`, {
+            variant: "error",
+          });
+          return;
+        }
+        if (!formData.s3name) {
+          pushAlert(`Existing S3 bucket was not selected, please choose some`, {
+            variant: "error",
+          });
+          return;
+        }
+        payload.s3name = formData.s3name as string;
+      } else {
+        // New/linked bucket
+        if (!formData.s3url || !formData.s3bucket) {
+          pushAlert(`S3 URL and bucket name are required.`, {
+            variant: "error",
+          });
+          return;
+        }
+        payload.s3url = formData.s3url as string;
+        payload.s3bucket = formData.s3bucket as string;
+        payload.s3accesskey = (formData.s3accesskey as string) || "";
+        payload.s3secretkey = (formData.s3secretkey as string) || "";
       }
-      if (!formData.s3name) {
-        pushAlert(`Existing S3 bucket was not selected, please choose some`, {
-          variant: "error",
-        });
-        return;
-      }
-      payload.s3name = formData.s3name as string;
     }
 
     const requiredKeys = [

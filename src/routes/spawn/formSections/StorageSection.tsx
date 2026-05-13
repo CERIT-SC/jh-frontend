@@ -431,12 +431,21 @@ export default function StorageSelectionSection({
     }));
   }, [phSelectionType]);
 
+  // Sync S3 selection type to formData
+  useEffect(() => {
+    onS3Change((prev) => ({
+      ...prev,
+      s3selection: s3SelectionType,
+    }));
+  }, [s3SelectionType]);
+
   // ==============================================================================
   // Event Handlers
   // ==============================================================================
 
   const handleStorage = useCallback(
     (storage: string) => {
+      setDefaultHome([storage, storage]);
       onMetaCentrumChange((prev) => ({
         ...prev,
         home: storage,
@@ -447,6 +456,7 @@ export default function StorageSelectionSection({
 
   const handlePersistentHome = useCallback(
     (val: string) => {
+      setDefaultOptionPhname([val, val]);
       onPersistentHomeChange((prev) => ({
         ...prev,
         phname: val,
@@ -521,6 +531,7 @@ export default function StorageSelectionSection({
 
   const handleS3Buckets = useCallback(
     (val: string) => {
+      setDefaultOptionS3name([val, val]);
       onS3Change((prev) => ({
         ...prev,
         s3name: val,
