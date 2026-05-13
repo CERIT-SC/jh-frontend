@@ -42,7 +42,15 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
 
           {/* Right — Links with visual treatment */}
           <nav className="flex flex-wrap items-center justify-center gap-3">
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() =>
+                window.open(
+                  "https://docs.cerit.io/en/docs/web-apps/jupyterhub",
+                  "_blank",
+                )
+              }
+            >
               <FileText className="h-4 w-4" />
               <span>Documentation</span>
               <ArrowUpRight className="h-3 w-3" />

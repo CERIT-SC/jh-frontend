@@ -723,6 +723,7 @@ export default function StorageSelectionSection({
                 To create bucket go to{" "}
                 <Link
                   href="https://s3-ui.cloud.e-infra.cz/"
+                  target="_blank"
                   className="underline"
                 >
                   https://s3-ui.cloud.e-infra.cz/
