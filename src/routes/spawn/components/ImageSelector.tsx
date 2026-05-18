@@ -30,50 +30,64 @@ interface SelectingCardTabsProps {
   onCustomImageChange?: (value: string) => void;
 }
 
-// Feature configuration: abbreviation -> { fullName, style }
+// Feature configuration: abbreviation -> { fullName, style, keywords, description }
 const FEATURE_CONFIG: Record<
   string,
-  { fullName: string; style: string; keywords: string[] }
+  { fullName: string; style: string; keywords: string[]; description: string }
 > = {
   AI: {
     fullName: "Artificial Intelligence",
     style: "bg-chart-2/50 text-text",
     keywords: ["ai"],
+    description:
+      "Pre-installed AI/ML frameworks and tools for machine learning development.",
   },
   SSH: {
     fullName: "SSH Access",
     style: "bg-chart-4/50 text-text",
     keywords: ["ssh", "ssh access"],
+    description:
+      "Allows direct terminal access to the running notebook container via SSH protocol.",
   },
   GPU: {
     fullName: "GPU Support",
     style: "bg-chart-3/50 text-text",
     keywords: ["gpu"],
+    description:
+      "Includes GPU drivers and libraries (CUDA/cuDNN). Requires selecting a GPU instance in Resource Options.",
   },
   CPU: {
     fullName: "CPU Only",
     style: "bg-chart-2/50 text-text",
     keywords: ["cpu only"],
+    description: "Optimized for CPU-only workloads without GPU acceleration.",
   },
   TB: {
     fullName: "TensorBoard",
     style: "bg-chart-5/50 text-text",
     keywords: ["tensorboard"],
+    description:
+      "Includes TensorBoard for visualizing machine learning experiments and model training.",
   },
   RSAT: {
     fullName: "RSAT Tools",
     style: "bg-chart-1/50 text-text",
     keywords: ["rsat"],
+    description:
+      "Regulatory Sequence Analysis Tools for bioinformatics research.",
   },
   VSC: {
     fullName: "Integrated VS Code",
     style: "bg-chart-3/50 text-text",
     keywords: ["vs code", "integrated vs code"],
+    description: "Integrated Visual Studio Code editor.",
   },
   NI: {
     fullName: "Notebook Intelligence",
     style: "bg-chart-2/50 text-text",
     keywords: ["notebook-intelligence", "intelligence"],
+    description:
+      "AI-powered code assistance and suggestions within Jupyter notebooks.",
   },
 };
 
@@ -196,7 +210,14 @@ function extractImageBadge(
               {feature.abbr}
             </Badge>
           </TooltipTrigger>
-          <TooltipContent side="top">{feature.fullName}</TooltipContent>
+          <TooltipContent side="top" className="max-w-xs">
+            <p className="font-semibold">{feature.fullName}</p>
+            {FEATURE_CONFIG[feature.abbr]?.description && (
+              <p className="text-xs mt-1 text-muted-foreground">
+                {FEATURE_CONFIG[feature.abbr].description}
+              </p>
+            )}
+          </TooltipContent>
         </Tooltip>
       ))}
     </span>
@@ -231,17 +252,13 @@ export function SelectingCardsTabs({
     setSelectCategory?.(category);
     setSearchQuery(""); // Reset search when changing category
 
-    // Only notify parent for non-custom categories
     // Custom category should only trigger update when user types in the input
     if (category !== "custom" && category !== "all") {
-      // Don't select any image, just update the category
-      // User needs to click on an image to select it
     }
   };
 
   // Filter images based on search query
   const filteredImages = useMemo(() => {
-    // Don't show images for custom category
     if (activeCategory === "custom") {
       return [];
     }
@@ -279,7 +296,6 @@ export function SelectingCardsTabs({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const newValue = e.target.value;
     setSearchQuery(newValue);
-    // Automatically switch to ALL category when user starts typing
     if (newValue.trim() && activeCategory !== "all") {
       setActiveCategory("all");
       setSelectCategory?.("all");
@@ -330,9 +346,9 @@ export function SelectingCardsTabs({
                 "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
                 "bg-surface-raised border-surface-raised text-text",
                 "hover:bg-primary/10 hover:border-primary",
+                isCustomCategory && "bg-tertiary",
                 isActive &&
                   "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
-                isCustomCategory && "bg-tertiary",
               )}
               onClick={() => handleCategoryChange(category)}
             >

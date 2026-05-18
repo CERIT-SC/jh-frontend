@@ -1,7 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { formImagesName } from "../data/formData";
 import { SelectingCardsTabs } from "@components/features";
-import { Separator, Switch, Label } from "@e-infra/design-system";
+import {
+  Separator,
+  Switch,
+  Label,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@e-infra/design-system";
+import { cn } from "@utils";
 import { getImageOptions } from "../utils/gatherFormData";
 
 type ImageOption = { value: string; name: string };
@@ -41,6 +49,26 @@ function findImage(
   }
   return [null, null];
 }
+
+/**
+ * Checks if the given image value corresponds to an SSH-capable image
+ * by looking for SSH keywords in the image name.
+ */
+function imageHasSSHSupport(
+  imageValue: string | null,
+  images: ImageOptionsByCategory,
+): boolean {
+  if (!imageValue) return false;
+
+  for (const catImages of Object.values(images)) {
+    const found = catImages.find((img) => img.value === imageValue);
+    if (found) {
+      const nameLower = found.name.toLowerCase();
+      return nameLower.includes("ssh");
+    }
+  }
+  return false;
+}
 export function ImageSelectionSectionTabs({
   defaultFormData,
   onImageChange,
@@ -52,6 +80,21 @@ export function ImageSelectionSectionTabs({
 }: ImageSelectionProps) {
   const [sshChecked, setSshChecked] = useState(false);
   const [customImageValue, setCustomImageValue] = useState("");
+
+  const images = getImageOptions() as unknown as ImageOptionsByCategory;
+
+  const isSSHAvailable = useMemo(() => {
+    if (!selectedImage && selectedCategory !== "custom") return false;
+    if (selectedCategory === "custom") return true;
+    return imageHasSSHSupport(selectedImage, images);
+  }, [selectedImage, selectedCategory, images]);
+
+  useEffect(() => {
+    if (!isSSHAvailable && sshChecked) {
+      setSshChecked(false);
+      onSshChange?.(false);
+    }
+  }, [isSSHAvailable]);
 
   useEffect(() => {
     if (defaultFormData?.notebookImage) {
@@ -71,7 +114,6 @@ export function ImageSelectionSectionTabs({
         return;
       }
 
-      const images = getImageOptions() as unknown as ImageOptionsByCategory;
       const imgVal = defaultFormData.notebookImage.containerImage;
       const strippedVal = imgVal?.replace("cerit.io/hubs/", "");
 
@@ -165,20 +207,38 @@ export function ImageSelectionSectionTabs({
       <Separator />
 
       {/* SSH Option */}
-      <div className="flex items-center space-x-3">
-        <Switch
-          id="sshCheckBox"
-          checked={sshChecked}
-          onCheckedChange={handleSshToggle}
-          className="data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
-        />
-        <Label
-          htmlFor="sshCheckBox"
-          className="text-sm font-medium cursor-pointer"
-        >
-          Ensure SSH access into the notebook
-        </Label>
-      </div>
+      <Tooltip>
+        <div className="flex items-center space-x-3">
+          <Switch
+            id="sshCheckBox"
+            checked={sshChecked}
+            onCheckedChange={handleSshToggle}
+            disabled={!isSSHAvailable}
+            className={cn(
+              "data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary",
+              !isSSHAvailable && "opacity-50 cursor-not-allowed",
+            )}
+          />
+          <TooltipTrigger>
+            <Label
+              htmlFor="sshCheckBox"
+              className={cn(
+                "text-sm font-medium",
+                isSSHAvailable
+                  ? "cursor-pointer"
+                  : "cursor-not-allowed text-muted-foreground",
+              )}
+            >
+              Ensure SSH access into the notebook
+            </Label>
+          </TooltipTrigger>
+        </div>
+        {!isSSHAvailable && (
+          <TooltipContent side="top">
+            <p>SSH access is only available for images with the SSH support.</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
       {sshChecked && (
         <>
           <div className="text-sm text-text-muted">

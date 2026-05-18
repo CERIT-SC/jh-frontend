@@ -10,7 +10,7 @@ import {
   Button,
   P,
 } from "@e-infra/design-system";
-import React, { JSX } from "react";
+import React, { JSX, useMemo } from "react";
 import {
   Cpu,
   Gpu,
@@ -82,6 +82,61 @@ function StatusIndicator({ enabled }: { enabled: boolean }): JSX.Element {
   );
 }
 
+/**
+ * Status indicator component for showing enabled/disabled/N/A state
+ */
+function SSHStatusIndicator({
+  enabled,
+  available,
+}: {
+  enabled: boolean;
+  available: boolean;
+}): JSX.Element {
+  if (!available) {
+    return (
+      <Badge
+        variant="outline"
+        className="bg-muted text-muted-foreground flex items-center gap-1 mt-1"
+      >
+        <X className="w-3 h-3" />
+        <span className="text-xs">Not Supported</span>
+      </Badge>
+    );
+  }
+  return enabled ? (
+    <Badge
+      variant="outline"
+      className="bg-[var(--color-success-100)] text-[var(--color-success-700)] border-[var(--color-success-200)] flex items-center gap-1 mt-1"
+    >
+      <Check className="w-3 h-3" />
+      <span className="text-xs">Enabled</span>
+    </Badge>
+  ) : (
+    <Badge variant="secondary" className=" flex items-center gap-1 mt-1">
+      <X className="w-3 h-3" />
+      <span className="text-xs">Disabled</span>
+    </Badge>
+  );
+}
+
+/**
+ * Checks if the given image value corresponds to an SSH-capable image
+ */
+function imageHasSSHSupport(
+  imageValue: string | null,
+  imageOptions: Record<string, Array<{ value: string; name: string }>>,
+): boolean {
+  if (!imageValue) return false;
+  for (const catImages of Object.values(imageOptions)) {
+    const found = catImages.find((img) => img.value === imageValue);
+    if (found) {
+      const nameLower = found.name.toLowerCase();
+      return nameLower.includes("ssh");
+    }
+  }
+  return false;
+}
+
 export function OverviewPanel({
   children,
   className,
@@ -119,6 +174,16 @@ export function OverviewPanel({
 
   const sshAccessEnabled = formData?.sshAccess === true;
 
+  // Compute if SSH is available for the selected image
+  const isSSHAvailable = useMemo(() => {
+    // Custom images always allow SSH (user may have configured it)
+    if (isCustomImage) return true;
+    // No image selected → SSH not available
+    if (!selectedImage) return false;
+    // Check if the selected image has SSH tag
+    return imageHasSSHSupport(selectedImage, imageOptions);
+  }, [selectedImage, isCustomImage, imageOptions]);
+
   const selectedGpu = String(formData?.gpuselection ?? "");
   const selectedGpuLabel = gpuOptions[selectedGpu] || selectedGpu || "None";
 
@@ -139,32 +204,35 @@ export function OverviewPanel({
       <PanelContent className="flex flex-col gap-4">
         <Separator />
         {/* Image Section */}
-        {(selectedImage || (isCustomImage && hasCustomImageValue)) && (
-          <>
-            <div className="px-6">
+        <>
+          <div className="px-6">
+            <div className="flex items-center justify-between">
+              <H4>Environment Configuration</H4>
+              <EditButton sectionId="image-section" />
+            </div>
+            <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <H4>Environment Configuration</H4>
-                <EditButton sectionId="image-section" />
+                <P>Name</P>
+                <Strong className="text-right">
+                  {displayImageName || "-"}
+                </Strong>
               </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between">
-                  <P>Name</P>
-                  <Strong className="text-right">{displayImageName}</Strong>
-                </div>
-                <div className="flex items-center justify-between">
-                  <P>Tag</P>
-                  <Small className="truncate text-right">
-                    {displayImageTag || "-"}
-                  </Small>
-                </div>
-                <div className="flex items-center justify-between">
-                  <P>SSH Access</P>
-                  <StatusIndicator enabled={sshAccessEnabled} />
-                </div>
+              <div className="flex items-center justify-between">
+                <P>Tag</P>
+                <Small className="truncate text-right">
+                  {displayImageTag || "-"}
+                </Small>
+              </div>
+              <div className="flex items-center justify-between">
+                <P>SSH Access</P>
+                <SSHStatusIndicator
+                  enabled={sshAccessEnabled}
+                  available={isSSHAvailable}
+                />
               </div>
             </div>
-          </>
-        )}
+          </div>
+        </>
         <Separator />
 
         {/* Storage Section */}
