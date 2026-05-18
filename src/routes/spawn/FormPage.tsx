@@ -295,6 +295,11 @@ function FormPage() {
         console.error("Network error:", error);
       });
   };
+  const serverName = useMemo(() => {
+    const pathParts = window.location.pathname.split("/");
+    // /spawn/{userName}/{serverName} → last segment
+    return pathParts[pathParts.length - 1] || null;
+  }, []);
 
   return (
     <div className="">
@@ -303,7 +308,9 @@ function FormPage() {
       ></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
       <div className="container mx-auto px-4 py-8 space-y-8">
-        <ContentHeading>Start a new server</ContentHeading>
+        <ContentHeading>
+          {serverName ? `Configure: ${serverName}` : "Start a new server"}
+        </ContentHeading>
         <ContentBody>
           <div className="flex flex-row gap-4 xl:gap-12 w-full h-full relative">
             {/* Left side: Scrollable content */}
