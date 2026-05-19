@@ -96,7 +96,7 @@ function HomePage() {
     );
   }, [serverName, spawners]);
 
-  const isInvalid = isDuplicate;
+  const isEmpty = !serverName.trim();
 
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
   const eventSourcesRef = useRef<Map<string, EventSourceItem>>(new Map());
@@ -430,7 +430,7 @@ function HomePage() {
                             will be used to identify your server in the list.
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="flex flex-col gap-4 py-4">
+                        <div className="flex flex-col gap-1">
                           <Input
                             type="text"
                             id="newServerName"
@@ -442,25 +442,26 @@ function HomePage() {
                             className={cn(
                               "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
                               "placeholder:text-muted-foreground/70",
-                              isInvalid &&
+                              isDuplicate &&
                                 "border-error focus-visible:ring-error",
                             )}
-                            aria-invalid={isInvalid}
+                            aria-invalid={isDuplicate}
                             aria-describedby="server-name-error"
                             autoFocus
                           />
-                          {isDuplicate && (
-                            <div
-                              id="server-name-error"
-                              className="flex items-center gap-2 text-sm text-error"
-                              role="alert"
-                            >
-                              <AlertCircle size={16} />
-                              <span>
-                                {`Server name "${serverName}" is already in use`}
-                              </span>
-                            </div>
-                          )}
+                          <div
+                            id="server-name-error"
+                            className={`flex items-center gap-2 text-sm text-error min-h-[1.25rem] ${isDuplicate ? "visible" : "invisible"}`}
+                            role="alert"
+                            aria-live="polite"
+                          >
+                            <AlertCircle size={16} className="flex-shrink-0" />
+                            <span className="truncate">
+                              {isDuplicate
+                                ? `Server name "${serverName}" is already in use`
+                                : "\u00A0"}
+                            </span>
+                          </div>
                         </div>
                         <DialogFooter>
                           <Button
@@ -472,14 +473,7 @@ function HomePage() {
                           >
                             Cancel
                           </Button>
-                          <Button
-                            variant={isInvalid ? "outline" : "default"}
-                            className={cn(
-                              isInvalid && "opacity-50 cursor-not-allowed",
-                            )}
-                            onClick={handleAddServer}
-                            disabled={isInvalid}
-                          >
+                          <Button onClick={handleAddServer} disabled={isEmpty}>
                             <Plus size={16} strokeWidth={3} />
                             Add Server
                           </Button>
