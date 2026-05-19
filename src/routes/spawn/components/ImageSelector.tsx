@@ -425,9 +425,14 @@ export function SelectingCardsTabs({
                 />
               </div>
               <CardHeader>
-                <CardTitle className="flex-shrink-0 text-xl">
-                  {extractBaseName(name)}
-                </CardTitle>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CardTitle className="truncate text-xl">
+                      {extractBaseName(name)}
+                    </CardTitle>
+                  </TooltipTrigger>
+                  <TooltipContent>{extractBaseName(name)}</TooltipContent>
+                </Tooltip>
                 <CardDescription>
                   {extractImageBadge(name, value)}
                 </CardDescription>

@@ -206,7 +206,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
           >
             {/* Animated highlight background */}
             <div
-              className="absolute top-0 h-full bg-surface rounded-lg transition-all duration-500 ease-out"
+              className="absolute top-0 h-full bg-surface rounded-lg transition-all duration-300 ease-out"
               style={{
                 left: `${highlightStyle.left}px`,
                 width: `${highlightStyle.width}px`,
@@ -254,7 +254,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
 
                   {isSelected && (
                     <span
-                      className="absolute bottom-0 left-0 h-1 animate-in duration-500"
+                      className="absolute bottom-0 left-0 h-1 animate-in duration-300"
                       style={{
                         width: "100%",
                         animation:

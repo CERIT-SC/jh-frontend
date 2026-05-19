@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -14,7 +14,6 @@ import {
   TooltipContent,
   TooltipTrigger,
   Badge,
-  Input,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -32,8 +31,6 @@ import {
   Power,
   Trash,
   Terminal,
-  Plus,
-  AlertCircle,
   Rocket,
   Activity,
   Circle,
@@ -66,7 +63,6 @@ interface ServerActionButtonsProps {
   isActive: boolean;
   handleOpen?: () => void;
   handleStop?: () => void;
-  handleDelete?: () => void;
   handleStart?: () => void;
   handleQuickStart?: () => void;
   buttonClassName: string;
@@ -116,42 +112,29 @@ const LastActivityInfo: React.FC<LastActivityProps> = ({ lastActivity }) => {
   );
 };
 
-const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
+const ServerActionButtons: React.FC<
+  ServerActionButtonsProps & { loading: ServerActionButtonsState }
+> = ({
   isActive,
   handleOpen = () => {},
   handleStop = () => {},
-  handleDelete = () => {},
   handleStart = () => {},
   handleQuickStart = () => {},
   buttonClassName,
+  loading,
 }) => {
-  const [loading, setLoading] = React.useState<ServerActionButtonsState>({
-    open: false,
-    stop: false,
-    delete: false,
-    start: false,
-    quickStart: false,
-  });
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
   const handleAsyncClick = async (
     action: keyof ServerActionButtonsState,
     handler: () => void | Promise<void>,
   ) => {
-    setLoading((prev) => ({ ...prev, [action]: true }));
     try {
       const result = handler();
       if (result instanceof Promise) {
         await result;
       }
-    } finally {
-      setLoading((prev) => ({ ...prev, [action]: false }));
+    } catch (error) {
+      console.error(`Action ${action} failed:`, error);
     }
-  };
-
-  const confirmDelete = async () => {
-    setShowDeleteDialog(false);
-    await handleAsyncClick("delete", handleDelete);
   };
 
   if (isActive) {
@@ -229,7 +212,7 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
           <Button
             className={buttonClassName}
             title="Quick Start"
-            variant={"tertiary"}
+            variant="tertiary"
             size="sm"
             disabled={loading.quickStart}
             onClick={() => handleAsyncClick("quickStart", handleQuickStart)}
@@ -238,7 +221,6 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
             {loading.quickStart ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              // <Play className="fill-current" strokeWidth={2} />
               <Rocket className="fill-current" strokeWidth={2} />
             )}
           </Button>
@@ -247,29 +229,6 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
           <p>QuickStart with last used configuration</p>
         </TooltipContent>
       </Tooltip>
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent showCloseButton>
-          <DialogHeader>
-            <DialogTitle>Delete Server</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this server? This action cannot be
-              undone and all associated data will be permanently removed.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowDeleteDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="error" onClick={confirmDelete}>
-              {loading.delete && <Loader2 className="h-4 w-4 animate-spin" />}
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
@@ -318,6 +277,34 @@ const StatusIndicator: React.FC<{
   );
 };
 
+const DeleteDialog: React.FC<{
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  loading: boolean;
+}> = ({ open, onOpenChange, onConfirm, loading }) => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent showCloseButton>
+      <DialogHeader>
+        <DialogTitle>Delete Server</DialogTitle>
+        <DialogDescription>
+          Are you sure you want to delete this server? This action cannot be
+          undone and all associated data will be permanently removed.
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button variant="secondary" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button variant="error" onClick={onConfirm}>
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          Delete
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+
 const BaseServerCard: React.FC<BaseServerCardProps> = ({
   variant,
   title,
@@ -332,163 +319,210 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   handleStart = () => {},
   handleQuickStart = () => {},
 }) => {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [loading, setLoading] = useState<ServerActionButtonsState>({
+    open: false,
+    stop: false,
+    delete: false,
+    start: false,
+    quickStart: false,
+  });
+
+  const handleAsyncClick = async (
+    action: keyof ServerActionButtonsState,
+    handler: () => void | Promise<void>,
+  ) => {
+    setLoading((prev) => ({ ...prev, [action]: true }));
+    try {
+      const result = handler();
+      if (result instanceof Promise) {
+        await result;
+      }
+    } finally {
+      setLoading((prev) => ({ ...prev, [action]: false }));
+    }
+  };
+
+  const confirmDelete = async () => {
+    setShowDeleteDialog(false);
+    await handleAsyncClick("delete", handleDelete);
+  };
+
+  const renderDeleteDialog = () => (
+    <DeleteDialog
+      open={showDeleteDialog}
+      onOpenChange={setShowDeleteDialog}
+      onConfirm={confirmDelete}
+      loading={loading.delete}
+    />
+  );
+
   if (variant === "inline") {
     return (
-      <Card
-        className={cn(
-          "transition-colors duration-200",
-          "border-0",
-          "relative",
-          "dark:bg-surface-raised",
-          isReady
-            ? "border-l-2 border-success"
-            : !isActive
-              ? "border-l-2 border-slate-400"
-              : "border-l-2 border-warning/30 before:absolute before:inset-x-[-2px] before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
-        )}
-        style={{ "--before-height": `${progress}%` } as React.CSSProperties}
-      >
-        <div className="flex items-center w-full justify-between gap-2 px-6">
-          <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
-            <Terminal className="hidden sm:block h-5 w-5 shrink-0 text-muted-foreground" />
-            <div className="min-w-0 flex-1">
-              <H4 className="truncate">{title}</H4>
-              <div className="flex items-center gap-3 text-xs">
-                {description && (
-                  <Muted className="truncate">{description}</Muted>
-                )}
-                <Badge
-                  variant={isActive ? "default" : "secondary"}
-                  className={cn(
-                    "hidden sm:flex",
-                    progress !== undefined && progress > 0 && progress < 100
-                      ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
-                      : isActive &&
-                          "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
-                    isReady &&
-                      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+      <>
+        <Card
+          className={cn(
+            "transition-colors duration-200",
+            "border-0",
+            "relative",
+            "dark:bg-surface-raised",
+            isReady
+              ? "border-l-2 border-success"
+              : !isActive
+                ? "border-l-2 border-slate-400"
+                : "border-l-2 border-warning/30 before:absolute before:inset-x-[-2px] before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
+          )}
+          style={{ "--before-height": `${progress}%` } as React.CSSProperties}
+        >
+          <div className="flex items-center w-full justify-between gap-2 px-6">
+            <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
+              <Terminal className="hidden sm:block h-5 w-5 shrink-0 text-muted-foreground" />
+              <div className="min-w-0 flex-1">
+                <H4 className="truncate">{title}</H4>
+                <div className="flex items-center gap-3 text-xs">
+                  {description && (
+                    <Muted className="truncate">{description}</Muted>
                   )}
-                >
-                  <StatusIndicator
-                    isActive={isActive}
-                    isReady={isReady}
-                    progress={progress}
-                    size="lg"
-                  />
-                  {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
-                </Badge>
-                <LastActivityInfo lastActivity={lastActivity} />
+                  <Badge
+                    variant={isActive ? "default" : "secondary"}
+                    className={cn(
+                      "hidden sm:flex",
+                      progress !== undefined && progress > 0 && progress < 100
+                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
+                        : isActive &&
+                            "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
+                      isReady &&
+                        "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+                    )}
+                  >
+                    <StatusIndicator
+                      isActive={isActive}
+                      isReady={isReady}
+                      progress={progress}
+                      size="lg"
+                    />
+                    {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
+                  </Badge>
+                  <LastActivityInfo lastActivity={lastActivity} />
+                </div>
               </div>
             </div>
+            <ServerActionButtons
+              isActive={isActive}
+              handleOpen={handleOpen}
+              handleStop={handleStop}
+              handleStart={handleStart}
+              handleQuickStart={handleQuickStart}
+              buttonClassName="flex-1 grow-2"
+              loading={loading}
+            />
+            <Separator
+              className="data-[orientation=vertical]:h-6"
+              orientation="vertical"
+              decorative={true}
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="group  hover:bg-surface-raised"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash
+                    className=" group-hover:text-error transition-colors duration-400"
+                    size={16}
+                    strokeWidth={2.5}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Delete server</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
-          <ServerActionButtons
-            isActive={isActive}
-            handleOpen={handleOpen}
-            handleStop={handleStop}
-            handleStart={handleStart}
-            handleQuickStart={handleQuickStart}
-            buttonClassName="flex-1 grow-2"
-          />
-          <Separator
-            className="data-[orientation=vertical]:h-6"
-            orientation="vertical"
-            decorative={true}
-          />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="group  hover:bg-surface-raised"
-                variant="ghost"
-                size="icon"
-                onClick={handleDelete}
-              >
-                <Trash
-                  className=" group-hover:text-error transition-colors duration-400"
-                  size={16}
-                  strokeWidth={2.5}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              <p>Delete server</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </Card>
+        </Card>
+        {renderDeleteDialog()}
+      </>
     );
   }
 
   if (variant === "compact") {
     return (
-      <Card
-        className={cn(
-          "transition-colors duration-200",
-          "border-0",
-          "relative",
-          "dark:bg-surface-raised",
-          isReady
-            ? "border-l-2 border-success"
-            : !isActive
-              ? "border-l-2 border-slate-400"
-              : "border-l-2 border-warning/30 before:absolute before:inset-x-[-2px] before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
-        )}
-        style={{ "--before-height": `${progress}%` } as React.CSSProperties}
-      >
-        <div className="flex items-center w-full justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
-            <Terminal className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <div className="min-w-0 flex-1">
-              <H4 className="truncate">{title}</H4>
-              <div className="flex items-center gap-3 text-xs">
-                {description && (
-                  <Muted className="truncate">{description}</Muted>
-                )}
-                <LastActivityInfo lastActivity={lastActivity} />
+      <>
+        <Card
+          className={cn(
+            "transition-colors duration-200",
+            "border-0",
+            "relative",
+            "dark:bg-surface-raised",
+            isReady
+              ? "border-l-2 border-success"
+              : !isActive
+                ? "border-l-2 border-slate-400"
+                : "border-l-2 border-warning/30 before:absolute before:inset-x-[-2px] before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
+          )}
+          style={{ "--before-height": `${progress}%` } as React.CSSProperties}
+        >
+          <div className="flex items-center w-full justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
+              <Terminal className="h-5 w-5 shrink-0 text-muted-foreground" />
+              <div className="min-w-0 flex-1">
+                <H4 className="truncate">{title}</H4>
+                <div className="flex items-center gap-3 text-xs">
+                  {description && (
+                    <Muted className="truncate">{description}</Muted>
+                  )}
+                  <LastActivityInfo lastActivity={lastActivity} />
+                </div>
               </div>
             </div>
+            <ServerActionButtons
+              isActive={isActive}
+              handleOpen={handleOpen}
+              handleStop={handleStop}
+              handleStart={handleStart}
+              handleQuickStart={handleQuickStart}
+              buttonClassName="flex-1 grow-2"
+              loading={loading}
+            />
+            <Separator
+              className="data-[orientation=vertical]:h-6"
+              orientation="vertical"
+              decorative={true}
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="group  hover:bg-surface-raised"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash
+                    className=" group-hover:text-error transition-colors duration-400"
+                    size={16}
+                    strokeWidth={2.5}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Delete server</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
-          <ServerActionButtons
-            isActive={isActive}
-            handleOpen={handleOpen}
-            handleStop={handleStop}
-            handleStart={handleStart}
-            handleQuickStart={handleQuickStart}
-            buttonClassName="flex-1 grow-2"
-          />
-          <Separator
-            className="data-[orientation=vertical]:h-6"
-            orientation="vertical"
-            decorative={true}
-          />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="group  hover:bg-surface-raised"
-                variant="ghost"
-                size="icon"
-                onClick={handleDelete}
-              >
-                <Trash
-                  className=" group-hover:text-error transition-colors duration-400"
-                  size={16}
-                  strokeWidth={2.5}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              <p>Delete server</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </Card>
+        </Card>
+        {renderDeleteDialog()}
+      </>
     );
   }
 
   return (
     <Card
+      variant="default"
       className={cn(
         "relative w-full transition-colors duration-200 ease-in-out",
-        "bg-surface dark:bg-surface-raised flex flex-col justify-center gap-6 rounded-md py-6 drop-shadow-md hover:drop-shadow-lg",
+        "flex flex-col justify-center gap-6 rounded-md py-6 bg-background dark:bg-surface-raised",
         isReady
           ? "border-t-2 border-success"
           : !isActive
@@ -507,7 +541,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                   className="group  hover:bg-surface-raised"
                   variant="ghost"
                   size="icon"
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteDialog(true)}
                 >
                   <Trash
                     className=" group-hover:text-error transition-colors duration-400"
@@ -553,12 +587,13 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           isActive={isActive}
           handleOpen={handleOpen}
           handleStop={handleStop}
-          handleDelete={handleDelete}
           handleStart={handleStart}
           handleQuickStart={handleQuickStart}
           buttonClassName="flex-1 gap"
+          loading={loading}
         />
       </CardFooter>
+      {renderDeleteDialog()}
     </Card>
   );
 };

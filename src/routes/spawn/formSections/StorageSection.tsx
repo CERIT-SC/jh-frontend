@@ -266,12 +266,12 @@ const PERSISTENT_HOME_OPTIONS = [
 const S3_OPTIONS = [
   {
     value: "existing",
-    label: "Mounted",
+    label: "Previously Mounted Buckets",
     description: "Mount an existing S3 bucket",
   },
   {
     value: "new",
-    label: "Link Bucket",
+    label: "Mount New Bucket",
     description: "Configure a new S3 bucket",
   },
 ];
@@ -750,7 +750,6 @@ export default function StorageSelectionSection({
           <div className="space-y-4 pl-4">
             {/* S3 Type Selection */}
             <div className="space-y-2">
-              <P>Select Bucket Type</P>
               <div className="flex flex-wrap gap-2">
                 {S3_OPTIONS.map((option) => {
                   const isActive = s3SelectionType === option.value;
