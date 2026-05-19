@@ -31,7 +31,6 @@ import {
 } from "@e-infra/design-system";
 import { LayoutGrid, LayoutList, Plus, AlertCircle } from "lucide-react";
 import type { HomeAppConfig } from "@src-types/appConfig";
-import { validateServerName } from "@utils";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (home.html).
@@ -88,27 +87,16 @@ function HomePage() {
   const [serverProgress, setServerProgress] = useState<ServerProgress>({});
   const [isAddServerModalOpen, setIsAddServerModalOpen] = useState(false);
 
-  // Validate server name for URL safety and duplicates
-  const nameValidation = useMemo(() => {
+  const isDuplicate = useMemo(() => {
     if (!serverName.trim()) {
-      return { isValid: false, isDuplicate: false, errorMessage: "" };
+      return false;
     }
-
-    const validation = validateServerName(serverName);
-    const isDuplicate = validation.isValid
-      ? Object.keys(spawners).some(
-          (name) => name.toLowerCase() === serverName.trim().toLowerCase(),
-        )
-      : false;
-
-    return {
-      isValid: validation.isValid && !isDuplicate,
-      isDuplicate,
-      errorMessage: validation.errorMessage,
-    };
+    return Object.keys(spawners).some(
+      (name) => name.toLowerCase() === serverName.trim().toLowerCase(),
+    );
   }, [serverName, spawners]);
 
-  const isInvalid = !nameValidation.isValid;
+  const isInvalid = isDuplicate;
 
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
   const eventSourcesRef = useRef<Map<string, EventSourceItem>>(new Map());
@@ -290,11 +278,8 @@ function HomePage() {
   };
 
   const handleAddServer = () => {
-    if (isInvalid) return;
-
-    // Double-check validation before opening spawn URL
-    const validation = validateServerName(serverName);
-    if (!validation.isValid) return;
+    // No format validation - JupyterHub backend handles validation
+    // Only duplicate check is performed
 
     window
       .open(`/spawn/${appConfig.userName}/${serverName.trim()}`, "_blank")
@@ -398,11 +383,12 @@ function HomePage() {
                   My servers
                   <Small
                     className={cn(
+                      "pl-2",
                       Object.keys(spawners).length >= maxServers
                         ? "text-error/80"
                         : Object.keys(spawners).length >= maxServers - 2
                           ? "text-warning-600"
-                          : "text-text-muted",
+                          : "",
                     )}
                   >
                     {Object.keys(spawners).length} / {maxServers}
@@ -442,7 +428,6 @@ function HomePage() {
                           <DialogDescription>
                             Choose a unique name for your new server. This name
                             will be used to identify your server in the list.
-                            Must be lowercase letters, numbers, and dashes only.
                           </DialogDescription>
                         </DialogHeader>
                         <div className="flex flex-col gap-4 py-4">
@@ -454,8 +439,6 @@ function HomePage() {
                               e: React.ChangeEvent<HTMLInputElement>,
                             ) => setServerName(e.target.value)}
                             placeholder="e.g. ml-experiment, thesis-analysis"
-                            pattern="[a-z0-9]([a-z0-9-]*[a-z0-9])?"
-                            title="Must start and end with a letter or number, and can only contain lowercase letters, numbers, and dashes"
                             className={cn(
                               "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
                               "placeholder:text-muted-foreground/70",
@@ -466,7 +449,7 @@ function HomePage() {
                             aria-describedby="server-name-error"
                             autoFocus
                           />
-                          {isInvalid && serverName.trim() && (
+                          {isDuplicate && (
                             <div
                               id="server-name-error"
                               className="flex items-center gap-2 text-sm text-error"
@@ -474,9 +457,7 @@ function HomePage() {
                             >
                               <AlertCircle size={16} />
                               <span>
-                                {nameValidation.isDuplicate
-                                  ? `Server name "${serverName}" is already in use`
-                                  : nameValidation.errorMessage}
+                                {`Server name "${serverName}" is already in use`}
                               </span>
                             </div>
                           )}

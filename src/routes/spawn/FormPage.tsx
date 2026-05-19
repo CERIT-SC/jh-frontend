@@ -298,7 +298,11 @@ function FormPage() {
   const serverName = useMemo(() => {
     const pathParts = window.location.pathname.split("/");
     // /spawn/{userName}/{serverName} → last segment
-    return pathParts[pathParts.length - 1] || null;
+    try {
+      return decodeURIComponent(pathParts[pathParts.length - 1]) || null;
+    } catch {
+      return pathParts[pathParts.length - 1] || null;
+    }
   }, []);
 
   return (

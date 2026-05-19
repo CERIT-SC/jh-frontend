@@ -33,7 +33,13 @@ import { ConnectionStatusIndicator } from "@components/features/EventLog";
 function getServerName(): string {
   const path = window.location.pathname;
   const match = path.match(/\/hub\/spawn-pending\/[^/]+\/([^/?]+)/);
-  if (match?.[1]) return match[1];
+  if (match?.[1]) {
+    try {
+      return decodeURIComponent(match[1]);
+    } catch {
+      return match[1];
+    }
+  }
 
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get("server_name") ?? "default";
@@ -44,7 +50,6 @@ function getServerName(): string {
  */
 const SpawnPending: React.FC = () => {
   const [logOpen, setLogOpen] = useState(false);
-  /** Tracks whether the user has manually closed the log — prevents auto-expand from overriding their choice */
   const userClosedRef = useRef(false);
   const serverName = getServerName();
 
@@ -74,15 +79,14 @@ const SpawnPending: React.FC = () => {
     onFailed: handleFailed,
   });
 
-  // Auto-expand the event log when events start arriving,
-  // but only if the user hasn't manually closed it
+  // Auto-expand
   useEffect(() => {
     if (eventLog.length > 0 && !logOpen && !userClosedRef.current) {
       setLogOpen(true);
     }
   }, [eventLog.length, logOpen]);
 
-  // Handle collapsible open/close — mark when user manually closes
+  // Handle collapsible
   const handleLogOpenChange = useCallback((open: boolean) => {
     setLogOpen(open);
     if (!open) {
@@ -90,7 +94,7 @@ const SpawnPending: React.FC = () => {
     }
   }, []);
 
-  // Handle page refresh via button
+  // Handle page refresh
   const handleRefresh = useCallback(() => {
     window.location.reload();
   }, []);
