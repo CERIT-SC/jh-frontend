@@ -25,7 +25,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@e-infra/design-system";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { JupyterHubHeader, Footer } from "@components/layout";
 import type { TokenAppConfig } from "@src-types/appConfig";
 
@@ -66,6 +66,21 @@ function TokenPage() {
   const [_oauthClients, setOauthClients] = useState<OAuthClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const formRef = useRef<HTMLFormElement>(null);
+
+  /**
+   * Parse token expiration options HTML into structured data.
+   */
+  const expiryOptions = useMemo(() => {
+    if (!appConfig.token_expires_in_options_html) return [];
+    const doc = new DOMParser().parseFromString(
+      appConfig.token_expires_in_options_html,
+      "text/html",
+    );
+    return [...doc.querySelectorAll("option")].map((opt) => ({
+      value: opt.getAttribute("value") ?? "",
+      label: opt.textContent ?? "",
+    }));
+  }, []);
 
   // Fetch tokens from API
   const fetchTokens = async () => {
@@ -214,7 +229,6 @@ function TokenPage() {
         formRef.current?.reset();
 
         // Fetch updated list to get complete token data including scopes
-        // (POST response doesn't include all fields like scopes)
         await fetchUpdatedTokens();
       })
       .catch((error) => {
@@ -283,10 +297,13 @@ function TokenPage() {
                       name="token-expiration-seconds"
                       className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring focus:ring-opacity-50"
                       defaultValue=""
-                      dangerouslySetInnerHTML={{
-                        __html: appConfig.token_expires_in_options_html || "",
-                      }}
-                    />
+                    >
+                      {expiryOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
                     <Small className="text-gray-500">
                       You can configure when your token will expire.
                     </Small>
