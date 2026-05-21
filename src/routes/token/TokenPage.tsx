@@ -58,6 +58,17 @@ interface OAuthClient {
   created?: string;
 }
 
+/**
+ * Decodes URL-encoded string
+ */
+function decodeString(str: string): string {
+  try {
+    return decodeURIComponent(str);
+  } catch {
+    return str;
+  }
+}
+
 function TokenPage() {
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [showTokenDialog, setShowTokenDialog] = useState(false);
@@ -265,7 +276,7 @@ function TokenPage() {
           <ContentHeading>Manage JupyterHub Tokens</ContentHeading>
           <ContentBody>
             {/* Request Token Form */}
-            <Panel>
+            <Panel className="bg-background">
               <PanelHeader>Request New API Token</PanelHeader>
               <PanelContent>
                 <form
@@ -373,7 +384,7 @@ function TokenPage() {
               <P className="text-center text-gray-500">Loading tokens...</P>
             ) : (
               apiTokens.length > 0 && (
-                <Panel className="mb-8">
+                <Panel className="mb-8 bg-background">
                   <PanelHeader>Active API Tokens</PanelHeader>
                   <PanelContent>
                     <P className="text-gray-600 mb-4">
@@ -396,7 +407,9 @@ function TokenPage() {
                       <TableBody>
                         {apiTokens.map((token) => (
                           <TableRow key={token.id}>
-                            <TableCell>{token.note || "—"}</TableCell>
+                            <TableCell>
+                              {token.note ? decodeString(token.note) : "—"}
+                            </TableCell>
                             <TableCell>
                               {token.scopes && token.scopes.length > 0 ? (
                                 <details>
