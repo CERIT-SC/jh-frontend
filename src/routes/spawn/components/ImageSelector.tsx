@@ -252,8 +252,9 @@ export function SelectingCardsTabs({
     setSelectCategory?.(category);
     setSearchQuery(""); // Reset search when changing category
 
-    // Custom category should only trigger update when user types in the input
-    if (category !== "custom" && category !== "all") {
+    // When switching away from custom, clear the custom image input
+    if (category !== "custom") {
+      onCustomImageChange?.("");
     }
   };
 

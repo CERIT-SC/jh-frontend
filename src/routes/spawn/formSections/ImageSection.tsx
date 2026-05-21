@@ -164,13 +164,24 @@ export function ImageSelectionSectionTabs({
       return;
     }
 
+    // When selecting from the "all" tab, resolve to the image's actual category
+    let actualCategory = categoryKey;
+    if (categoryKey === "all") {
+      for (const [catKey, catImages] of Object.entries(images)) {
+        if (catImages.some((img: ImageOption) => img.value === imageValue)) {
+          actualCategory = catKey;
+          break;
+        }
+      }
+    }
+
     const formImagesMap = formImagesName as Record<string, string>;
-    const formImageKey = formImagesMap[categoryKey] || categoryKey;
+    const formImageKey = formImagesMap[actualCategory] || actualCategory;
     setSelectedImage(imageValue);
-    setSelectedCategory(categoryKey);
+    setSelectedCategory(actualCategory);
 
     onImageChange?.({
-      images: categoryKey,
+      images: actualCategory,
       [formImageKey]: `cerit.io/hubs/${imageValue}`,
       customimage: "",
     });
