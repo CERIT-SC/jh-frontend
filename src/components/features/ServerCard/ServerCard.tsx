@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Card,
   CardHeader,
@@ -37,6 +37,32 @@ import {
 } from "lucide-react";
 import { dateFormat, dateFormatRelative } from "@utils";
 
+type AsyncAction = () => void | Promise<void>;
+
+/**
+ * Hook that wraps an async handler with loading state tracking.
+ * Returns a tuple of [wrappedHandler, isLoading].
+ */
+function useAsyncAction(handler: AsyncAction): [() => void, boolean] {
+  const [loading, setLoading] = useState(false);
+
+  const execute = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = handler();
+      if (result instanceof Promise) {
+        await result;
+      }
+    } catch (error) {
+      console.error("Action failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [handler]);
+
+  return [execute, loading];
+}
+
 interface CardProps {
   /** Main title of the card */
   title: string;
@@ -66,14 +92,6 @@ interface ServerActionButtonsProps {
   handleStart?: () => void;
   handleQuickStart?: () => void;
   buttonClassName: string;
-}
-
-interface ServerActionButtonsState {
-  open: boolean;
-  stop: boolean;
-  delete: boolean;
-  start: boolean;
-  quickStart: boolean;
 }
 
 interface LastActivityProps {
@@ -112,30 +130,18 @@ const LastActivityInfo: React.FC<LastActivityProps> = ({ lastActivity }) => {
   );
 };
 
-const ServerActionButtons: React.FC<
-  ServerActionButtonsProps & { loading: ServerActionButtonsState }
-> = ({
+const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
   isActive,
   handleOpen = () => {},
   handleStop = () => {},
   handleStart = () => {},
   handleQuickStart = () => {},
   buttonClassName,
-  loading,
 }) => {
-  const handleAsyncClick = async (
-    action: keyof ServerActionButtonsState,
-    handler: () => void | Promise<void>,
-  ) => {
-    try {
-      const result = handler();
-      if (result instanceof Promise) {
-        await result;
-      }
-    } catch (error) {
-      console.error(`Action ${action} failed:`, error);
-    }
-  };
+  const [openHandler, isOpening] = useAsyncAction(handleOpen);
+  const [stopHandler, isStopping] = useAsyncAction(handleStop);
+  const [startHandler, isStarting] = useAsyncAction(handleStart);
+  const [quickStartHandler, isQuickStarting] = useAsyncAction(handleQuickStart);
 
   if (isActive) {
     return (
@@ -146,11 +152,11 @@ const ServerActionButtons: React.FC<
               className={buttonClassName}
               title="Open"
               size="sm"
-              disabled={loading.open}
-              onClick={() => handleAsyncClick("open", handleOpen)}
+              disabled={isOpening}
+              onClick={openHandler}
             >
               Open
-              {loading.open ? (
+              {isOpening ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <SquareArrowOutUpRight size={16} strokeWidth={2.5} />
@@ -168,11 +174,11 @@ const ServerActionButtons: React.FC<
               title="Stop"
               variant="tertiary"
               size="sm"
-              disabled={loading.stop}
-              onClick={() => handleAsyncClick("stop", handleStop)}
+              disabled={isStopping}
+              onClick={stopHandler}
             >
               Stop
-              {loading.stop ? (
+              {isStopping ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Power />
@@ -196,10 +202,10 @@ const ServerActionButtons: React.FC<
             title="Start"
             variant="default"
             size="sm"
-            disabled={loading.start}
-            onClick={() => handleAsyncClick("start", handleStart)}
+            disabled={isStarting}
+            onClick={startHandler}
           >
-            {loading.start && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isStarting && <Loader2 className="h-4 w-4 animate-spin" />}
             Start <Play className="fill-current" strokeWidth={2} />
           </Button>
         </TooltipTrigger>
@@ -214,11 +220,11 @@ const ServerActionButtons: React.FC<
             title="Quick Start"
             variant="tertiary"
             size="sm"
-            disabled={loading.quickStart}
-            onClick={() => handleAsyncClick("quickStart", handleQuickStart)}
+            disabled={isQuickStarting}
+            onClick={quickStartHandler}
           >
             Quick Start
-            {loading.quickStart ? (
+            {isQuickStarting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Rocket className="fill-current" strokeWidth={2} />
@@ -320,32 +326,11 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   handleQuickStart = () => {},
 }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [loading, setLoading] = useState<ServerActionButtonsState>({
-    open: false,
-    stop: false,
-    delete: false,
-    start: false,
-    quickStart: false,
-  });
+  const [deleteHandler, isDeleting] = useAsyncAction(handleDelete);
 
-  const handleAsyncClick = async (
-    action: keyof ServerActionButtonsState,
-    handler: () => void | Promise<void>,
-  ) => {
-    setLoading((prev) => ({ ...prev, [action]: true }));
-    try {
-      const result = handler();
-      if (result instanceof Promise) {
-        await result;
-      }
-    } finally {
-      setLoading((prev) => ({ ...prev, [action]: false }));
-    }
-  };
-
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     setShowDeleteDialog(false);
-    await handleAsyncClick("delete", handleDelete);
+    deleteHandler();
   };
 
   const renderDeleteDialog = () => (
@@ -353,7 +338,18 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
       open={showDeleteDialog}
       onOpenChange={setShowDeleteDialog}
       onConfirm={confirmDelete}
-      loading={loading.delete}
+      loading={isDeleting}
+    />
+  );
+
+  const actionButtons = (
+    <ServerActionButtons
+      isActive={isActive}
+      handleOpen={handleOpen}
+      handleStop={handleStop}
+      handleStart={handleStart}
+      handleQuickStart={handleQuickStart}
+      buttonClassName="flex-1 grow-2"
     />
   );
 
@@ -407,15 +403,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                 </div>
               </div>
             </div>
-            <ServerActionButtons
-              isActive={isActive}
-              handleOpen={handleOpen}
-              handleStop={handleStop}
-              handleStart={handleStart}
-              handleQuickStart={handleQuickStart}
-              buttonClassName="flex-1 grow-2"
-              loading={loading}
-            />
+            {actionButtons}
             <Separator
               className="data-[orientation=vertical]:h-6"
               orientation="vertical"
@@ -477,15 +465,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                 </div>
               </div>
             </div>
-            <ServerActionButtons
-              isActive={isActive}
-              handleOpen={handleOpen}
-              handleStop={handleStop}
-              handleStart={handleStart}
-              handleQuickStart={handleQuickStart}
-              buttonClassName="flex-1 grow-2"
-              loading={loading}
-            />
+            {actionButtons}
             <Separator
               className="data-[orientation=vertical]:h-6"
               orientation="vertical"
@@ -582,17 +562,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           <LastActivityInfo lastActivity={lastActivity} />
         </div>
       </CardContent>
-      <CardFooter className="gap-2">
-        <ServerActionButtons
-          isActive={isActive}
-          handleOpen={handleOpen}
-          handleStop={handleStop}
-          handleStart={handleStart}
-          handleQuickStart={handleQuickStart}
-          buttonClassName="flex-1 gap"
-          loading={loading}
-        />
-      </CardFooter>
+      <CardFooter className="gap-2">{actionButtons}</CardFooter>
       {renderDeleteDialog()}
     </Card>
   );
