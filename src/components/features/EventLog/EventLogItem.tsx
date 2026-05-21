@@ -40,6 +40,28 @@ function stripHtmlTimestampPrefix(html: string): string {
   return stripTimestampPrefix(cleaned);
 }
 
+/**
+ * Sanitizes HTML stringsto prevent XSS attacks.
+ */
+function sanitizeHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  // Strip dangerous elements
+  doc
+    .querySelectorAll("script, iframe, object, embed, link[rel=stylesheet]")
+    .forEach((el) => el.remove());
+  doc.querySelectorAll("*").forEach((el) => {
+    for (const attr of [...el.attributes]) {
+      if (
+        attr.name.startsWith("on") ||
+        attr.value.toLowerCase().includes("javascript:")
+      ) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+  return doc.body.innerHTML;
+}
+
 export const EventLogItem = memo(function EventLogItem({
   entry,
   style,
@@ -91,11 +113,11 @@ export const EventLogItem = memo(function EventLogItem({
         {entry.progress}%
       </span>
 
-      {/* Message content — timestamp prefix stripped */}
+      {/* Message content — timestamp prefix stripped and sanitized */}
       <span className="text-sm text-text break-words min-w-0">
         {cleanHtmlMessage ? (
           <span
-            dangerouslySetInnerHTML={{ __html: cleanHtmlMessage }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(cleanHtmlMessage) }}
             className="[&_a]:text-primary [&_a]:underline"
           />
         ) : (
