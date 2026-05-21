@@ -12,7 +12,7 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
   return (
     <footer
       className={cn(
-        "relative overflow-hidden bg-surface/60 backdrop-blur-xl supports-backdrop-filter:backdrop-blur-xl px-6 py-5",
+        "relative overflow-hidden bg-background/60 backdrop-blur-xl supports-backdrop-filter:backdrop-blur-xl px-6 py-5",
         className,
       )}
     >

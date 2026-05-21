@@ -32,7 +32,7 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
 
   return (
     <>
-      <Header className="bg-background/60">
+      <Header className="">
         <HeaderContent>
           <HeaderLeft>
             {/* Logo */}
@@ -79,13 +79,13 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <ModeToggle />
               </NavigationMenuList>
             </NavigationMenu>
           </HeaderLeft>
           <HeaderRight>
             <span className="ml-2">{userName}</span>
-            <Avatar>
+            <ModeToggle />
+            {/* <Avatar>
               <AvatarImage
                 src={`https://ui-avatars.com/api/?name=${userName || "User"}`}
                 alt={userName || "User"}
@@ -93,7 +93,7 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
               <AvatarFallback>
                 {(userName?.[0] || "U").toUpperCase()}
               </AvatarFallback>
-            </Avatar>
+            </Avatar> */}
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />
               <span className="sr-only">Logout</span>

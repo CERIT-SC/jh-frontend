@@ -52,32 +52,32 @@ body {
     radial-gradient(
       ellipse 600px 500px at 10% 8%,
       rgba(76, 217, 244, 0.18) 0%,
-      transparent 70%
+      transparent 90%
     ),
     /* Bottom-right purple glow */
     radial-gradient(
         ellipse 700px 550px at 90% 85%,
         rgba(134, 52, 252, 0.14) 0%,
-        transparent 70%
+        transparent 90%
       ),
     /* Center accent blend */
     radial-gradient(
         ellipse 550px 450px at 50% 50%,
         rgba(76, 217, 244, 0.1) 0%,
         rgba(134, 52, 252, 0.08) 50%,
-        transparent 80%
+        transparent 95%
       ),
     /* Subtle top-right secondary */
     radial-gradient(
         ellipse 400px 350px at 85% 15%,
         rgba(134, 52, 252, 0.1) 0%,
-        transparent 70%
+        transparent 95%
       ),
     /* Subtle bottom-left secondary */
     radial-gradient(
         ellipse 400px 350px at 15% 75%,
         rgba(76, 217, 244, 0.08) 0%,
-        transparent 70%
+        transparent 95%
       );
 }
 /* ── e-INFRA gradient background (dark mode) ── */
