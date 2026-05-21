@@ -43,6 +43,7 @@ declare const appConfig: HomeAppConfig;
 interface ApiSpawnerData {
   active: boolean;
   ready: boolean;
+  pending?: "spawn" | "stop" | null;
   url?: string;
   last_activity?: number;
   [key: string]: unknown;
@@ -53,6 +54,7 @@ interface ApiSpawnerData {
  */
 interface SpawnerData extends ApiSpawnerData {
   name?: string;
+  pending?: "spawn" | "stop" | null;
 }
 
 /**
@@ -134,7 +136,7 @@ function HomePage() {
     }
   };
 
-  const getServers = async () => {
+  const getServers = async (): Promise<Record<string, ApiSpawnerData>> => {
     try {
       const data = (await apiClient.getNamedServers(
         appConfig.userName,
@@ -142,30 +144,98 @@ function HomePage() {
 
       if (Object.keys(data).length !== 0) {
         Object.entries(data).forEach(([name, spawner]) => {
-          if (!spawners[name] || spawners[name]?.active !== spawner.active) {
-            setSpawners((prevSpawners) => {
-              const updated = {
-                ...prevSpawners,
-                [name]: {
-                  ...prevSpawners[name],
-                  active: true,
-                  ready: spawner.ready,
-                  url: spawner.url,
-                  last_activity: spawner.last_activity,
-                },
-              };
-              return updated;
-            });
-          }
+          setSpawners((prevSpawners) => {
+            const existing = prevSpawners[name];
+            const needsUpdate =
+              !existing ||
+              existing.active !== spawner.active ||
+              existing.pending !== spawner.pending ||
+              (!existing.url && spawner.url);
+
+            if (!needsUpdate) return prevSpawners;
+
+            return {
+              ...prevSpawners,
+              [name]: {
+                ...prevSpawners[name],
+                active: spawner.active ?? true,
+                pending: spawner.pending,
+                ready: spawner.ready,
+                url: spawner.url ?? prevSpawners[name]?.url,
+                last_activity: spawner.last_activity,
+              },
+            };
+          });
         });
       }
+      return data;
     } catch (error) {
       console.error(
         `Failed to fetch servers:`,
         error instanceof Error ? error.message : error,
       );
+      return {};
     }
   };
+
+  /**
+   * Creates shared progress tracking callbacks for spawn operations.
+   */
+  const createProgressCallbacks = useCallback(
+    (name: string, { showError = false }: { showError?: boolean } = {}) => ({
+      onProgress: (progress: number) => {
+        setServerProgress((prev) => ({ ...prev, [name]: progress }));
+      },
+      onComplete: () => {
+        setSpawners((prev) => {
+          const updated = { ...prev };
+          if (updated[name]) {
+            updated[name].active = true;
+            updated[name].ready = true;
+          }
+          return updated;
+        });
+
+        setServerProgress((prev) => ({ ...prev, [name]: 100 }));
+        pushAlert(`Server ${name} started successfully`, {
+          variant: "success",
+        });
+
+        // Refresh server data from API to populate URL
+        getServers();
+
+        // Clean up event source reference
+        eventSourcesRef.current.delete(name);
+
+        setTimeout(() => {
+          setServerProgress((prev) => {
+            const updated = { ...prev };
+            delete updated[name];
+            return updated;
+          });
+        }, 500);
+      },
+      onError: (error: Error) => {
+        console.error(
+          `Failed to track progress for server ${name}:`,
+          error instanceof Error ? error.message : error,
+        );
+        if (showError) {
+          pushAlert(`Failed to start server ${name}`, {
+            variant: "error",
+          });
+        }
+        setServerProgress((prev) => {
+          const updated = { ...prev };
+          delete updated[name];
+          return updated;
+        });
+        // Clean up event source reference
+        eventSourcesRef.current.delete(name);
+      },
+    }),
+    [pushAlert],
+  );
 
   /**
    * Attaches SSE progress tracking to a spawning server.
@@ -176,52 +246,15 @@ function HomePage() {
 
       setServerProgress((prev) => ({ ...prev, [name]: 0 }));
 
-      const abort = apiClient.trackSpawnProgress(appConfig.userName, name, {
-        onProgress: (progress) => {
-          setServerProgress((prev) => ({ ...prev, [name]: progress }));
-        },
-        onComplete: () => {
-          setSpawners((prev) => {
-            const updated = { ...prev };
-            if (updated[name]) {
-              updated[name].active = true;
-              updated[name].ready = true;
-            }
-            return updated;
-          });
-
-          setServerProgress((prev) => ({ ...prev, [name]: 100 }));
-          pushAlert(`Server ${name} started successfully`, {
-            variant: "success",
-          });
-
-          setTimeout(() => {
-            setServerProgress((prev) => {
-              const updated = { ...prev };
-              delete updated[name];
-              return updated;
-            });
-          }, 2000);
-        },
-        onError: (error) => {
-          console.error(
-            `Failed to track progress for server ${name}:`,
-            error instanceof Error ? error.message : error,
-          );
-          pushAlert(`Failed to track progress for server ${name}`, {
-            variant: "error",
-          });
-          setServerProgress((prev) => {
-            const updated = { ...prev };
-            delete updated[name];
-            return updated;
-          });
-        },
-      });
+      const abort = apiClient.trackSpawnProgress(
+        appConfig.userName,
+        name,
+        createProgressCallbacks(name),
+      );
 
       eventSourcesRef.current.set(name, { abort });
     },
-    [pushAlert],
+    [createProgressCallbacks],
   );
 
   /**
@@ -229,15 +262,30 @@ function HomePage() {
    * for any servers still spawning.
    */
   useEffect(() => {
+    const init = async () => {
+      const servers = await getServers();
+      // Attach SSE only to servers explicitly pending spawn.
+      // Do NOT use (active && !ready) alone — that also matches servers
+      // that are pending stop (active=true, ready=false, pending="stop").
+      Object.entries(servers).forEach(([name, spawner]) => {
+        if (spawner.pending === "spawn") {
+          attachProgressTracking(name);
+        }
+      });
+    };
+    init();
+  }, []);
+
+  useEffect(() => {
     const handleVisibilityChange = async () => {
       if (document.visibilityState !== "visible") return;
 
-      await getServers();
+      const servers = await getServers();
 
-      // Attach SSE to any spawning servers not already tracked
-      Object.entries(spawners).forEach(([name, spawner]) => {
-        if (spawner.active && !spawner.ready) {
-          setTimeout(() => attachProgressTracking(name), 0);
+      // Attach SSE only to servers explicitly pending spawn
+      Object.entries(servers).forEach(([name, spawner]) => {
+        if (spawner.pending === "spawn") {
+          attachProgressTracking(name);
         }
       });
     };
@@ -246,7 +294,25 @@ function HomePage() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [attachProgressTracking, spawners]);
+  }, [attachProgressTracking]);
+
+  /**
+   * Polls server state while any server is pending stop.
+   * SSE is not available for stop operations (returns 404/402),
+   * so we poll the API every 3 seconds until no servers are stopping.
+   */
+  useEffect(() => {
+    const hasStopping = Object.values(spawners).some(
+      (s) => s.pending === "stop",
+    );
+    if (!hasStopping) return;
+
+    const interval = setInterval(() => {
+      getServers();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [spawners]);
 
   const handleDeleteServer = async (name: string) => {
     try {
@@ -273,14 +339,15 @@ function HomePage() {
       );
     }
   };
-  const handleOpenServer = (url: string) => {
+  const handleOpenServer = (url?: string) => {
+    if (!url) {
+      pushAlert("Server URL not available yet", { variant: "warning" });
+      return;
+    }
     window.open(url, "_blank")?.focus();
   };
 
   const handleAddServer = () => {
-    // No format validation - JupyterHub backend handles validation
-    // Only duplicate check is performed
-
     window
       .open(`/spawn/${appConfig.userName}/${serverName.trim()}`, "_blank")
       ?.focus();
@@ -310,52 +377,15 @@ function HomePage() {
       });
       setServerProgress((prev) => ({ ...prev, [name]: 0 }));
 
-      const abort = apiClient.quickStartWithProgress(appConfig.userName, name, {
-        onProgress: (progress) => {
-          setServerProgress((prev) => ({ ...prev, [name]: progress }));
-        },
-        onComplete: () => {
-          setSpawners((prev) => {
-            const updated = { ...prev };
-            if (updated[name]) {
-              updated[name].active = true;
-              updated[name].ready = true;
-            }
-            return updated;
-          });
-
-          setServerProgress((prev) => ({ ...prev, [name]: 100 }));
-          pushAlert(`Server ${name} started successfully`, {
-            variant: "success",
-          });
-
-          setTimeout(() => {
-            setServerProgress((prev) => {
-              const updated = { ...prev };
-              delete updated[name];
-              return updated;
-            });
-          }, 2000);
-        },
-        onError: (error) => {
-          console.error(
-            `Failed to quick start server ${name}:`,
-            error instanceof Error ? error.message : error,
-          );
-          pushAlert(`Failed to start server ${name}`, {
-            variant: "error",
-          });
-          setServerProgress((prev) => {
-            const updated = { ...prev };
-            delete updated[name];
-            return updated;
-          });
-        },
-      });
+      const abort = apiClient.quickStartWithProgress(
+        appConfig.userName,
+        name,
+        createProgressCallbacks(name, { showError: true }),
+      );
 
       eventSourcesRef.current.set(name, { abort });
     },
-    [pushAlert],
+    [createProgressCallbacks],
   );
 
   // Cleanup SSE connections on unmount
@@ -373,7 +403,7 @@ function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
-      <div className="container grow  mx-auto py-8 space-y-8">
+      <div className="container grow  mx-auto py-2 space-y-8">
         <div className="named-servers">
           <Panel className="bg-transparent border-0 shadow-none">
             <div className="flex items-center gap-2">
@@ -546,7 +576,7 @@ function HomePage() {
                       lastActivity={spawner.last_activity}
                       isActive={spawner.active}
                       isReady={spawner.ready}
-                      handleOpen={() => handleOpenServer(spawner.url!)}
+                      handleOpen={() => handleOpenServer(spawner.url)}
                       handleStop={() => handleStopServer(name)}
                       handleDelete={() => handleDeleteServer(name)}
                       handleStart={() => handleStartServer(name)}
