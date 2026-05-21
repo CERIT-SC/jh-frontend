@@ -1,8 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 
 import { JupyterHubHeader } from "@components/layout";
+import { validateDockerImage } from "@utils";
 
-import { gatherFormData, getS3BucketOptions } from "./utils/gatherFormData";
+import {
+  gatherFormData,
+  getS3BucketOptions,
+  getImageOptions,
+} from "./utils/gatherFormData";
 import {
   ContentBody,
   ContentHeading,
@@ -31,15 +36,6 @@ declare const appConfig: SpawnAppConfig;
 if (import.meta.env.DEV) {
   initDev();
 }
-
-const IMAGE_FORM_KEYS = [
-  "simplenbname",
-  "rnbname",
-  "tfnbname",
-  "matlabnbname",
-  "varnbname",
-  "foldnbname",
-];
 
 const IMAGE_CATEGORY_KEY_MAP: Record<string, string> = {
   simple: "simplenbname",
@@ -140,24 +136,55 @@ function FormPage() {
     shmsize: "4",
   });
 
+  /**
+   * Resolve the image category from the selected image using backend data.
+   * This ensures the category sent to the backend is always valid.
+   * @param selectedImage - The selected image value (e.g., "datasciencenb:26-09-2024")
+   * @returns The resolved category key or null if not found
+   */
+  const resolveImageCategory = (
+    selectedImage: string | null,
+  ): string | null => {
+    if (!selectedImage) return null;
+
+    const imageOptions = getImageOptions();
+    for (const [category, images] of Object.entries(imageOptions)) {
+      if (images.some((img) => img.value === selectedImage)) {
+        return category;
+      }
+    }
+    return null;
+  };
+
   const submitForm = async () => {
     const isCustomImage = formData.images === "custom";
-    const imageCategory = formData.images || selectedCategory;
 
-    // Get the container image based on selection type
+    const imageCategory = isCustomImage
+      ? "custom"
+      : resolveImageCategory(selectedImage);
+
     let containerImage: string;
     if (isCustomImage) {
-      containerImage = formData.customimage || "";
+      containerImage = (formData.customimage || "").trim();
+      if (!containerImage) {
+        pushAlert("Custom image name cannot be empty.", {
+          variant: "error",
+        });
+        return;
+      }
+      if (!validateDockerImage(containerImage)) {
+        pushAlert(
+          `Invalid Docker image name: "${containerImage}". Please provide a valid image reference.`,
+          {
+            variant: "error",
+          },
+        );
+        return;
+      }
     } else if (selectedImage) {
       containerImage = `cerit.io/hubs/${selectedImage}`;
     } else {
-      const selectedStandardImage = IMAGE_FORM_KEYS.map(
-        (key) => formData[key] as string | undefined,
-      ).find(Boolean);
-      containerImage =
-        selectedStandardImage ||
-        defaultFormData?.notebookImage?.containerImage ||
-        "";
+      containerImage = defaultFormData?.notebookImage?.containerImage || "";
     }
 
     const phselection = formData.phselection || "new";
@@ -176,9 +203,20 @@ function FormPage() {
       payload.customimage = containerImage;
     } else if (imageCategory) {
       const imageFieldKey = IMAGE_CATEGORY_KEY_MAP[imageCategory];
-      if (imageFieldKey) {
-        payload[imageFieldKey] = containerImage;
+      if (!imageFieldKey) {
+        pushAlert(
+          `Invalid image category: "${imageCategory}". Please select a valid image.`,
+          {
+            variant: "error",
+          },
+        );
+        return;
       }
+      payload[imageFieldKey] = containerImage;
+    }
+
+    if (!isCustomImage) {
+      delete payload.customimage;
     }
 
     if (formData.sshAccess) {
@@ -199,7 +237,17 @@ function FormPage() {
       payload.projectCheck = "yes";
     }
 
+    // phname validation for existing homes
     if (phselection === "existing") {
+      if (!formData.phname) {
+        pushAlert(
+          "Existing persistent home selected but no home directory specified.",
+          {
+            variant: "error",
+          },
+        );
+        return;
+      }
       payload.phname = formData.phname as string;
     } else if (formData.phCheck === "yes") {
       payload.phCheck = "yes";
@@ -253,13 +301,18 @@ function FormPage() {
       "memselection",
       "gpuselection",
       "images",
+      "container_image",
     ];
     const missingRequired = requiredKeys.filter((key) => {
       if (!(key in payload)) {
         return true;
       }
       const value = payload[key];
-      return value === undefined || value === "";
+      return (
+        value === undefined ||
+        value === "" ||
+        (typeof value === "string" && !value.trim())
+      );
     });
 
     if (missingRequired.length > 0) {
