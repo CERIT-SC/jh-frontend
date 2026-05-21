@@ -1,36 +1,61 @@
 export default function initDev() {
-  (window as any).appConfig = {
-    spawners: {
-      test: {
-        last_activity: "2024-11-24T15:48:29.604740Z",
-        url: "/user/test",
-        active: true,
-        ready: false,
-      },
-      test1: {
-        last_activity: "2024-11-24T15:46:56.719146Z",
-        url: "/user/test1",
-        active: false,
-        ready: false,
-      },
-      ...Array.from({ length: 5 }, (_, i) => `spawner${i + 1}`).reduce(
-        (acc, spawner) => {
-          acc[spawner] = {
-            last_activity: new Date().toISOString(),
-            url: `/user/${spawner}`,
-            active: Math.random() < 0.5, // Randomly set active status
-            ready: Math.random() < 0.5, // Randomly set ready status
-          };
-          return acc;
+  const pathname = window.location.pathname;
+
+  if (pathname.includes("error.html")) {
+    // Dev config for error page
+    (window as any).appConfig = {
+      userName: "dev",
+      statusCode: 500,
+      statusMessage: "Internal Server Error",
+      messageHtml: undefined,
+      message: "An error occurred while processing your request.",
+      extraErrorHtml: undefined,
+    };
+  } else if (
+    pathname.includes("home.html") ||
+    pathname.includes("spawn.html") ||
+    pathname.includes("login.html")
+  ) {
+    // Dev config for home page and other pages with spawners
+    (window as any).appConfig = {
+      spawners: {
+        test: {
+          last_activity: "2024-11-24T15:48:29.604740Z",
+          url: "/user/test",
+          active: true,
+          ready: false,
         },
-        {},
-      ),
-    },
-    default_server_active: false,
-    url: "http://localhost",
-    userName: "dev",
-    xsrf: "sample-xsrf-token",
-  };
+        test1: {
+          last_activity: "2024-11-24T15:46:56.719146Z",
+          url: "/user/test1",
+          active: false,
+          ready: false,
+        },
+        ...Array.from({ length: 5 }, (_, i) => `spawner${i + 1}`).reduce(
+          (acc: Record<string, any>, spawner) => {
+            acc[spawner] = {
+              last_activity: new Date().toISOString(),
+              url: `/user/${spawner}`,
+              active: Math.random() < 0.5, // Randomly set active status
+              ready: Math.random() < 0.5, // Randomly set ready status
+            };
+            return acc;
+          },
+          {},
+        ),
+      },
+      default_server_active: false,
+      url: "http://localhost",
+      userName: "dev",
+      xsrf: "sample-xsrf-token",
+    };
+  } else {
+    // Default dev config for other pages
+    (window as any).appConfig = {
+      userName: "dev",
+      xsrf: "sample-xsrf-token",
+    };
+  }
   (window as any).spawnOptions = {
     user_options: {
       container_image: "cerit.io/hubs/datasciencenb:26-09-2024",
@@ -62,7 +87,10 @@ export default function initDev() {
       "pruhonice1-ibot",
       "vestec1-elixir",
     ],
-    s3buckets: [],
+    s3buckets: [
+      { value: "bucket-1", name: "Test Bucket 1" },
+      { value: "bucket-2", name: "Test Bucket 2" },
+    ],
     ssh_dns_domain: "jupyter-xbencs00--x-1---6b86b273.dyn.cloud.e-infra.cz",
     gpu_instances: [
       {

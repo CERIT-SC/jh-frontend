@@ -34,6 +34,7 @@ export default defineConfig({
         not_running: resolve(__dirname, "not_running.html"),
         not_found: resolve(__dirname, "404.html"),
         token: resolve(__dirname, "token.html"),
+        error: resolve(__dirname, "error.html"),
       },
       output: {
         entryFileNames: "static/custom-js/[name]-[hash].js",
