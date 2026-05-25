@@ -50,12 +50,7 @@ function EditButton({ sectionId }: { sectionId: string }): JSX.Element {
   };
 
   return (
-    <Button
-      variant="ghost"
-      onClick={handleClick}
-      className="p-1 hover:bg-gray-100 rounded transition-colors"
-      title="Edit this section"
-    >
+    <Button variant="ghost" onClick={handleClick} title="Edit this section">
       <Pencil className="w-3.5 h-3.5 text-gray-500" />
       Edit
     </Button>
