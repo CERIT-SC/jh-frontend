@@ -27,6 +27,7 @@ import { Alert } from "@components/ui";
 import { useAlerts } from "@hooks";
 import { Footer } from "@components/layout";
 import type { SpawnAppConfig } from "@src-types/appConfig";
+import { CircleQuestionMark } from "lucide-react";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (spawn.html).
@@ -374,8 +375,21 @@ function FormPage() {
             <div className=" no-scrollbar flex flex-col gap-8">
               <Panel
                 id="image-section"
-                className="scroll-mt-20 p-0 bg-background"
+                className="scroll-mt-20 p-0 bg-background relative"
               >
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="absolute top-4 right-4"
+                  onClick={() =>
+                    window.open(
+                      "https://docs.cerit.io/en/docs/web-apps/jupyterhub#choosing-image",
+                      "_blank",
+                    )
+                  }
+                >
+                  <CircleQuestionMark size={52} />
+                </Button>
                 <PanelTitle className="mb-2 px-6 pt-6">
                   Step 1: Environment Options
                 </PanelTitle>
@@ -408,8 +422,21 @@ function FormPage() {
 
               <Panel
                 id="storage-section"
-                className="scroll-mt-20 p-0 bg-background"
+                className="scroll-mt-20 p-0 bg-background relative"
               >
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="absolute top-4 right-4"
+                  onClick={() =>
+                    window.open(
+                      "https://docs.cerit.io/en/docs/web-apps/jupyterhub#choosing-storage",
+                      "_blank",
+                    )
+                  }
+                >
+                  <CircleQuestionMark size={52} />
+                </Button>
                 <PanelTitle className="mb-2 px-6 pt-6">
                   Step 2: Storage Options
                 </PanelTitle>
@@ -462,8 +489,21 @@ function FormPage() {
 
               <Panel
                 id="resources-section"
-                className="scroll-mt-20 p-0 bg-background"
+                className="scroll-mt-20 p-0 bg-background relative"
               >
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="absolute top-4 right-4"
+                  onClick={() =>
+                    window.open(
+                      "https://docs.cerit.io/en/docs/web-apps/jupyterhub#resource-allocation",
+                      "_blank",
+                    )
+                  }
+                >
+                  <CircleQuestionMark size={52} />
+                </Button>
                 <PanelTitle className="mb-2 px-6 pt-6">
                   Step 3: Resource Options
                 </PanelTitle>
