@@ -76,6 +76,12 @@ interface EventSourceItem {
  */
 const maxServers = 15;
 
+/**
+ * Maximum length for server names to comply with Kubernetes label limits.
+ * Safe limit: 30 characters for server name.
+ */
+const SERVER_NAME_MAX_LENGTH = 30;
+
 function HomePage() {
   if (import.meta.env.DEV) {
     initDev();
@@ -88,6 +94,10 @@ function HomePage() {
   const [serverName, setServerName] = useState("");
   const [serverProgress, setServerProgress] = useState<ServerProgress>({});
   const [isAddServerModalOpen, setIsAddServerModalOpen] = useState(false);
+
+  const isTooLong = useMemo(() => {
+    return serverName.trim().length > SERVER_NAME_MAX_LENGTH;
+  }, [serverName]);
 
   const isDuplicate = useMemo(() => {
     if (!serverName.trim()) {
@@ -298,8 +308,6 @@ function HomePage() {
 
   /**
    * Polls server state while any server is pending stop.
-   * SSE is not available for stop operations (returns 404/402),
-   * so we poll the API every 3 seconds until no servers are stopping.
    */
   useEffect(() => {
     const hasStopping = Object.values(spawners).some(
@@ -348,8 +356,16 @@ function HomePage() {
   };
 
   const handleAddServer = () => {
+    const trimmedName = serverName.trim();
+    if (trimmedName.length > SERVER_NAME_MAX_LENGTH) {
+      pushAlert(
+        `Server name is too long. Maximum length is ${SERVER_NAME_MAX_LENGTH} characters.`,
+        { variant: "error" },
+      );
+      return;
+    }
     window
-      .open(`/spawn/${appConfig.userName}/${serverName.trim()}`, "_blank")
+      .open(`/spawn/${appConfig.userName}/${trimmedName}`, "_blank")
       ?.focus();
     setServerName("");
     setIsAddServerModalOpen(false);
@@ -469,27 +485,42 @@ function HomePage() {
                               e: React.ChangeEvent<HTMLInputElement>,
                             ) => setServerName(e.target.value)}
                             placeholder="e.g. ml-experiment, thesis-analysis"
+                            maxLength={SERVER_NAME_MAX_LENGTH}
                             className={cn(
                               "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
                               "placeholder:text-muted-foreground/70",
-                              isDuplicate &&
+                              (isDuplicate || isTooLong) &&
                                 "border-error focus-visible:ring-error",
                             )}
-                            aria-invalid={isDuplicate}
+                            aria-invalid={isDuplicate || isTooLong}
                             aria-describedby="server-name-error"
                             autoFocus
                           />
+                          <div className="flex justify-end">
+                            <Small
+                              className={cn(
+                                "text-xs",
+                                isTooLong
+                                  ? "text-error"
+                                  : "text-muted-foreground",
+                              )}
+                            >
+                              {serverName.length} / {SERVER_NAME_MAX_LENGTH}
+                            </Small>
+                          </div>
                           <div
                             id="server-name-error"
-                            className={`flex items-center gap-2 text-sm text-error min-h-[1.25rem] ${isDuplicate ? "visible" : "invisible"}`}
+                            className={`flex items-center gap-2 text-sm text-error min-h-[1.25rem] ${isDuplicate || isTooLong ? "visible" : "invisible"}`}
                             role="alert"
                             aria-live="polite"
                           >
                             <AlertCircle size={16} className="flex-shrink-0" />
                             <span className="truncate">
-                              {isDuplicate
-                                ? `Server name "${serverName}" is already in use`
-                                : "\u00A0"}
+                              {isTooLong
+                                ? `Server name is too long (max ${SERVER_NAME_MAX_LENGTH} characters)`
+                                : isDuplicate
+                                  ? `Server name "${serverName}" is already in use`
+                                  : "\u00A0"}
                             </span>
                           </div>
                         </div>

@@ -118,7 +118,9 @@ const SpawnPending: React.FC = () => {
                 .
               </span>
             </PanelTitle>
-            <PanelDescription>Name: {serverName}</PanelDescription>
+            <PanelDescription className="truncate">
+              Name: {serverName}
+            </PanelDescription>
           </PanelHeader>
 
           <PanelContent className="space-y-4">

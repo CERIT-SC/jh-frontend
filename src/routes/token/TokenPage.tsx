@@ -38,24 +38,30 @@ declare const appConfig: TokenAppConfig;
  * Token data structure from JupyterHub API
  */
 interface ApiToken {
-  id: number | string;
-  note?: string;
-  scopes?: string[];
-  last_activity?: string;
-  created?: string;
-  expires_at?: string;
-  [key: string]: unknown;
+  user: string;
+  id: string;
+  kind: "api_token" | "oauth_token";
+  roles: string[];
+  scopes: string[];
+  created: string;
+  last_activity: string;
+  expires_at: string | null;
+  note: string;
+  session_id: string | null;
+  oauth_client: string | null;
 }
 
 /**
- * OAuth client data structure
+ * OAuth client data structure for display purposes
  */
 interface OAuthClient {
-  token_id: number | string;
+  id: string;
   description: string;
-  tokens: Array<{ scopes?: string[] }>;
-  last_activity?: string;
-  created?: string;
+  scopes: string[];
+  last_activity: string;
+  created: string;
+  expires_at: string | null;
+  session_id: string | null;
 }
 
 /**
@@ -74,7 +80,7 @@ function TokenPage() {
   const [showTokenDialog, setShowTokenDialog] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [apiTokens, setApiTokens] = useState<ApiToken[]>([]);
-  const [_oauthClients, setOauthClients] = useState<OAuthClient[]>([]);
+  const [oauthClients, setOauthClients] = useState<OAuthClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -93,86 +99,61 @@ function TokenPage() {
     }));
   }, []);
 
-  // Fetch tokens from API
+  /**
+   * Fetches all tokens and categorizes them into API tokens and OAuth clients.
+   */
   const fetchTokens = async () => {
     try {
       const response = await fetch(
         `/hub/api/users/${appConfig.userName}/tokens?_xsrf=${appConfig.xsrf}`,
       );
-      if (response.ok) {
-        const data = (await response.json()) as { api_tokens?: ApiToken[] };
-        const tokens = data.api_tokens || (Array.isArray(data) ? data : []);
-        setApiTokens(tokens);
-      } else {
+      if (!response.ok) {
         console.error("Failed to fetch tokens:", response.statusText);
+        return;
       }
+
+      const data = (await response.json()) as { api_tokens?: ApiToken[] };
+      const allTokens = data.api_tokens || (Array.isArray(data) ? data : []);
+
+      // Categorize tokens
+      const apiTokensList: ApiToken[] = [];
+      const oauthClientsMap = new Map<string, OAuthClient>();
+
+      allTokens.forEach((token) => {
+        const isOAuthToken =
+          token.oauth_client &&
+          token.oauth_client !== "JupyterHub" &&
+          token.oauth_client.startsWith("Server at ");
+
+        if (isOAuthToken) {
+          // Extract server info from oauth_client description
+          const serverMatch = token.oauth_client.match(
+            /Server at (\/user\/[^/]+\/[^/]+\/?)/,
+          );
+          const serverPath = serverMatch ? serverMatch[1] : token.oauth_client;
+
+          // Use the server path as the client ID for grouping
+          const clientId = token.id;
+
+          oauthClientsMap.set(clientId, {
+            id: token.id,
+            description: token.oauth_client,
+            scopes: token.scopes || [],
+            last_activity: token.last_activity,
+            created: token.created,
+            expires_at: token.expires_at,
+            session_id: token.session_id,
+          });
+        } else {
+          // This is a regular API token
+          apiTokensList.push(token);
+        }
+      });
+
+      setApiTokens(apiTokensList);
+      setOauthClients(Array.from(oauthClientsMap.values()));
     } catch (error) {
       console.error("Error fetching tokens:", error);
-    }
-  };
-
-  // Fetch OAuth clients from API
-  const fetchOAuthClients = async () => {
-    try {
-      // Fetch all tokens and filter for OAuth tokens
-      const response = await fetch(
-        `/hub/api/users/${appConfig.userName}/tokens?_xsrf=${appConfig.xsrf}`,
-      );
-      if (response.ok) {
-        const data = (await response.json()) as { api_tokens?: ApiToken[] };
-        const allTokens = data.api_tokens || (Array.isArray(data) ? data : []);
-        // Filter for OAuth tokens (kind === "oauth_token" or has oauth_client)
-        const oauthTokens = allTokens.filter(
-          (token) =>
-            (token as { kind?: string }).kind === "oauth_token" ||
-            (token as { oauth_client?: string }).oauth_client,
-        );
-        // Group tokens by oauth_client to show as clients
-        const clientsMap = new Map<string, OAuthClient>();
-        oauthTokens.forEach((token) => {
-          const clientId =
-            (token as { oauth_client?: string }).oauth_client ||
-            (token as { client_id?: string }).client_id;
-          if (clientId) {
-            if (!clientsMap.has(clientId)) {
-              clientsMap.set(clientId, {
-                token_id:
-                  (token as { id?: number | string }).id ||
-                  (token as { api_id?: number | string }).api_id ||
-                  0,
-                description:
-                  (token as { oauth_client?: string }).oauth_client ||
-                  (token as { client_id?: string }).client_id ||
-                  "Unknown",
-                tokens: [],
-                last_activity: (token as { last_activity?: string })
-                  .last_activity,
-                created: (token as { created?: string }).created,
-              });
-            }
-            const client = clientsMap.get(clientId)!;
-            client.tokens.push({
-              scopes: (token as { scopes?: string[] }).scopes || [],
-            });
-            // Update with most recent activity
-            if (
-              (token as { last_activity?: string }).last_activity &&
-              (!client.last_activity ||
-                (token as { last_activity?: string }).last_activity! >
-                  client.last_activity)
-            ) {
-              client.last_activity = (
-                token as { last_activity?: string }
-              ).last_activity;
-            }
-          }
-        });
-        setOauthClients(Array.from(clientsMap.values()));
-      } else {
-        console.error("Failed to fetch OAuth clients:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error fetching OAuth clients:", error);
     }
   };
 
@@ -180,16 +161,15 @@ function TokenPage() {
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
-      await Promise.all([fetchTokens(), fetchOAuthClients()]);
+      await fetchTokens();
       setIsLoading(false);
     };
     loadData();
   }, []);
 
-  // Refetch tokens (called after creating new token or revoking)
+  // Refetch tokens
   const fetchUpdatedTokens = async () => {
     await fetchTokens();
-    await fetchOAuthClients();
   };
 
   const submitForm = (e: React.FormEvent) => {
@@ -464,102 +444,99 @@ function TokenPage() {
             )}
 
             {/* OAuth Clients Table */}
-            {/* {isLoading ? (
+            {isLoading ? (
               <P className="text-center text-gray-500">
                 Loading authorized applications...
               </P>
             ) : oauthClients.length > 0 ? (
-              <div>
-                <H2>Authorized Applications</H2>
-                <P className="text-gray-600 mb-4">
-                  These are applications that use OAuth with JupyterHub to
-                  identify users (mostly notebook servers). OAuth tokens can
-                  generally only be used to identify you, not take actions on
-                  your behalf.
-                </P>
-                <Table className="w-full">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Application</TableHead>
-                      <TableHead>Permissions</TableHead>
-                      <TableHead>Last used</TableHead>
-                      <TableHead>First authorized</TableHead>
-                      <TableHead className="text-center">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {oauthClients.map((client) => {
-                      const allScopes =
-                        client.tokens
-                          ?.flatMap((t) => t.scopes || [])
-                          .filter(Boolean) || [];
-                      const uniqueScopes = [...new Set(allScopes)];
+              <Panel className="bg-background">
+                <PanelHeader>Authorized Applications (OAuth)</PanelHeader>
+                <PanelContent>
+                  <P className="text-gray-600 mb-4">
+                    These are applications that use OAuth with JupyterHub to
+                    identify users (mostly notebook servers). OAuth tokens can
+                    generally only be used to identify you, not take actions on
+                    your behalf.
+                  </P>
+                  <Table className="w-full">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Application</TableHead>
+                        <TableHead>Permissions</TableHead>
+                        <TableHead>Last used</TableHead>
+                        <TableHead>First authorized</TableHead>
+                        <TableHead>Expires</TableHead>
+                        <TableHead className="text-center">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {oauthClients.map((client) => {
+                        // Decode URL-encoded description
+                        const decodedDescription = client.description
+                          ? decodeString(client.description)
+                          : "Unknown";
 
-                      // Decode URL-encoded description (e.g., %3A -> :)
-                      const decodedDescription = client.description
-                        ? (() => {
-                            try {
-                              return decodeURIComponent(client.description);
-                            } catch (e) {
-                              // If decoding fails, return the original description
-                              return client.description;
-                            }
-                          })()
-                        : "Unknown";
-
-                      return (
-                        <TableRow key={client.token_id}>
-                          <TableCell>{decodedDescription}</TableCell>
-                          <TableCell>
-                            {uniqueScopes.length > 0 ? (
-                              <details>
-                                <summary className="cursor-pointer text-blue-600">
-                                  {uniqueScopes.length} scope
-                                  {uniqueScopes.length !== 1 ? "s" : ""}
-                                </summary>
-                                {uniqueScopes.map((scope, idx) => (
-                                  <Code
-                                    key={idx}
-                                    className="block text-xs bg-gray-100 p-1 m-1 rounded"
-                                  >
-                                    {scope}
-                                  </Code>
-                                ))}
-                              </details>
-                            ) : (
-                              <span className="text-gray-400">No scopes</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {client.last_activity
-                              ? new Date(client.last_activity).toLocaleString()
-                              : "Never"}
-                          </TableCell>
-                          <TableCell>
-                            {client.created
-                              ? new Date(client.created).toLocaleDateString()
-                              : "N/A"}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleRevokeToken(client.token_id)}
-                            >
-                              Revoke
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+                        return (
+                          <TableRow key={client.id}>
+                            <TableCell>{decodedDescription}</TableCell>
+                            <TableCell>
+                              {client.scopes.length > 0 ? (
+                                <details>
+                                  <summary className="cursor-pointer text-blue-600">
+                                    {client.scopes.length} scope
+                                    {client.scopes.length !== 1 ? "s" : ""}
+                                  </summary>
+                                  {client.scopes.map((scope, idx) => (
+                                    <Code
+                                      key={idx}
+                                      className="block text-xs bg-surface-raised p-1 m-1 rounded"
+                                    >
+                                      {scope}
+                                    </Code>
+                                  ))}
+                                </details>
+                              ) : (
+                                <span className="text-text">No scopes</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {client.last_activity
+                                ? new Date(
+                                    client.last_activity,
+                                  ).toLocaleString()
+                                : "Never"}
+                            </TableCell>
+                            <TableCell>
+                              {client.created
+                                ? new Date(client.created).toLocaleDateString()
+                                : "N/A"}
+                            </TableCell>
+                            <TableCell>
+                              {client.expires_at
+                                ? new Date(client.expires_at).toLocaleString()
+                                : "Never"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant="error"
+                                size="sm"
+                                onClick={() => handleRevokeToken(client.id)}
+                              >
+                                Revoke
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </PanelContent>
+              </Panel>
             ) : (
               <P className="text-center text-gray-500">
                 No authorized applications.
               </P>
-            )} */}
+            )}
           </ContentBody>
         </Content>
       </main>

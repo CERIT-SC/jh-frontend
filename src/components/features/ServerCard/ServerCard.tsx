@@ -502,7 +502,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
       variant="default"
       className={cn(
         "relative w-full transition-colors duration-200 ease-in-out",
-        "flex flex-col justify-center gap-6 rounded-md py-6 bg-background dark:bg-surface-raised",
+        "flex flex-col justify-center rounded-md gap-6 py-6 bg-background dark:bg-surface-raised",
         isReady
           ? "border-t-2 border-success"
           : !isActive
@@ -512,13 +512,15 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
       style={{ "--before-width": `${progress}%` } as React.CSSProperties}
     >
       <CardHeader>
-        <CardTitle>
-          <div className="flex justify-between items-center w-full">
-            <span>{title}</span>
+        <CardTitle className="min-w-0 grow">
+          <div className="flex justify-between items-center w-full gap-2">
+            <span className="break-all line-clamp-3 block flex-1 min-w-0 -mr-1 -mb-4 -mt-4">
+              {title}
+            </span>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="group  hover:bg-surface-raised"
+                  className="group  hover:bg-surface-raised flex-shrink-0"
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowDeleteDialog(true)}
@@ -583,10 +585,6 @@ interface EmptyServerCardProps {
   variant?: ServerCardVariant;
 }
 
-/**
- * EmptyServerCard - A simple card with a SquarePlus button that triggers a modal
- * The modal logic and server name input are handled by the parent component
- */
 export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
   onClick,
   variant = "default",

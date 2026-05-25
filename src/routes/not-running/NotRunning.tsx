@@ -52,7 +52,7 @@ const NotRunning: React.FC = () => {
               <div className="bg-muted/50 rounded-lg p-4">
                 <div className="text-sm">
                   <span className="text-muted-foreground">Server Name:</span>{" "}
-                  <span className="font-medium">
+                  <span className="font-medium truncate block">
                     {appConfig.serverName || "default"}
                   </span>
                 </div>

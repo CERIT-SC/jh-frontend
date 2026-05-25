@@ -351,7 +351,7 @@ function FormPage() {
   };
   const serverName = useMemo(() => {
     const pathParts = window.location.pathname.split("/");
-    // /spawn/{userName}/{serverName} → last segment
+    // /spawn/{userName}/{serverName}
     try {
       return decodeURIComponent(pathParts[pathParts.length - 1]) || null;
     } catch {
@@ -366,8 +366,14 @@ function FormPage() {
       ></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
       <div className="container mx-auto px-4 py-8 space-y-8">
-        <ContentHeading>
-          {serverName ? `Configure: ${serverName}` : "Start a new server"}
+        <ContentHeading className="max-w-full">
+          {serverName ? (
+            <span className="truncate inline-block max-w-full">
+              Configure: {serverName}
+            </span>
+          ) : (
+            "Start a new server"
+          )}
         </ContentHeading>
         <ContentBody>
           <div className="flex flex-row gap-4 xl:gap-12 w-full h-full relative">
