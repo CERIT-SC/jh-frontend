@@ -212,14 +212,14 @@ export function OverviewPanel({
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <P>Name</P>
-                <Strong className="text-right">
+                <P className="pr-1">Name</P>
+                <Strong className="min-w-0 truncate text-right">
                   {displayImageName || "-"}
                 </Strong>
               </div>
-              <div className="flex items-center justify-between">
-                <P>Tag</P>
-                <Small className="truncate text-right">
+              <div className="flex items-center justify-between min-w-0">
+                <P className="pr-1">Tag</P>
+                <Small className="min-w-0 truncate text-right">
                   {displayImageTag || "-"}
                 </Small>
               </div>
