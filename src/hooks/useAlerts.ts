@@ -7,6 +7,7 @@ export const MAX_VISIBLE_ALERTS = 4;
 /** Options for the {@link pushAlert} function. */
 export interface PushAlertOptions {
   variant?: AlertItem["variant"];
+  title?: string;
   autoDismiss?: boolean;
   duration?: number;
 }
@@ -29,7 +30,12 @@ export function useAlerts(): UseAlertsReturn {
   const pushAlert = useCallback(
     (
       message: string,
-      { variant, autoDismiss = true, duration = 4000 }: PushAlertOptions = {},
+      {
+        variant,
+        title,
+        autoDismiss = true,
+        duration = 4000,
+      }: PushAlertOptions = {},
     ): void => {
       const id: string =
         globalThis.crypto?.randomUUID?.() ??
@@ -39,7 +45,10 @@ export function useAlerts(): UseAlertsReturn {
         const current =
           prev.length >= MAX_VISIBLE_ALERTS ? prev.slice(1) : prev;
 
-        return [...current, { id, message, variant, autoDismiss, duration }];
+        return [
+          ...current,
+          { id, message, title, variant, autoDismiss, duration },
+        ];
       });
     },
     [],

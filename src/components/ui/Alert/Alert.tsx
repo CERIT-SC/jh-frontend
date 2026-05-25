@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertDescription } from "@e-infra/design-system";
-import { AlertTriangle, Check, CircleX } from "lucide-react";
+import {
+  Alert as DesignSystemAlert,
+  AlertTitle,
+  AlertDescription,
+  cn,
+} from "@e-infra/design-system";
+import { AlertTriangle, Check, CircleX, Info } from "lucide-react";
 
 export interface AlertItem {
   id: string;
   message: string;
+  title?: string;
   variant?: "error" | "success" | "warning" | "default";
   autoDismiss?: boolean;
   duration?: number;
@@ -15,8 +21,22 @@ interface AlertStackProps {
   onRemove: (id: string) => void;
 }
 
-/** Exit animation duration in ms — must match the CSS `transition-duration`. */
+/** Exit animation duration in ms */
 const EXIT_DURATION_MS = 300;
+
+/** Get icon component based on variant */
+const getIcon = (variant: AlertItem["variant"]) => {
+  switch (variant) {
+    case "error":
+      return <CircleX className="h-4 w-4 shrink-0" />;
+    case "success":
+      return <Check className="h-4 w-4 shrink-0" />;
+    case "warning":
+      return <AlertTriangle className="h-4 w-4 shrink-0" />;
+    default:
+      return <Info className="h-4 w-4 shrink-0" />;
+  }
+};
 
 function AlertCard({
   alert,
@@ -63,39 +83,14 @@ function AlertCard({
 
   const isExiting = isForcedExiting || isSelfExiting;
 
-  const getVariantStyles = (): string => {
-    switch (alert.variant) {
-      case "error":
-        return "border-error bg-error/40 text-error";
-      case "success":
-        return "border-success bg-success/40 text-success";
-      case "warning":
-        return "border-warning bg-warning/40 text-warning";
-      default:
-        return "border-border bg-background text-text";
-    }
-  };
-
-  const getIcon = () => {
-    switch (alert.variant) {
-      case "error":
-        return <CircleX className="h-4 w-4 shrink-0" />;
-      case "success":
-        return <Check className="h-4 w-4 shrink-0" />;
-      case "warning":
-        return <AlertTriangle className="h-4 w-4 shrink-0" />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div
-      className={`w-full overflow-hidden transition-all duration-300 ease-out ${
+      className={cn(
+        "w-full overflow-hidden transition-all duration-300 ease-out",
         isVisible && !isExiting
           ? "max-h-32 translate-y-0 opacity-100"
-          : "max-h-0 -translate-y-2 opacity-0"
-      }`}
+          : "max-h-0 -translate-y-2 opacity-0",
+      )}
       onClick={startDismiss}
       role="button"
       tabIndex={0}
@@ -106,31 +101,19 @@ function AlertCard({
         }
       }}
     >
-      <div
-        className={`border rounded-lg px-4 py-3 text-sm cursor-pointer flex items-start gap-3 ${getVariantStyles()}`}
-      >
-        {getIcon()}
+      <DesignSystemAlert variant={alert.variant} className="cursor-pointer">
+        {getIcon(alert.variant)}
+        {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
         <AlertDescription>{alert.message}</AlertDescription>
-      </div>
+      </DesignSystemAlert>
     </div>
   );
 }
 
 /**
- * Renders a stack of toast-style alert notifications at the top-center of the
- * viewport.
- *
- * When an alert is removed from the `alerts` prop (e.g. by the
- * `MAX_VISIBLE_ALERTS` limit in `useAlerts`), the component keeps the
- * removed alert in the DOM briefly so it can play its exit animation before
- * being unmounted.
- *
- * The container is viewport-constrained so alerts never obscure the entire
- * screen — a `max-height` with `overflow-y-auto` ensures scrollability if
- * the stack would otherwise exceed the available space.
+ * Renders a stack of alert notifications at the top-center
  */
-export function Alert({ alerts, onRemove }: AlertStackProps) {
-  /** Alerts removed from props but still playing their exit animation. */
+export function AlertStack({ alerts, onRemove }: AlertStackProps) {
   const [exitingAlerts, setExitingAlerts] = useState<AlertItem[]>([]);
   const prevAlertsRef = useRef<AlertItem[]>(alerts);
 
@@ -138,9 +121,6 @@ export function Alert({ alerts, onRemove }: AlertStackProps) {
     const prev = prevAlertsRef.current;
     const currentIds = new Set(alerts.map((a) => a.id));
 
-    // Detect alerts that were removed from props (e.g. by the
-    // MAX_VISIBLE_ALERTS limit in useAlerts) and stage them for exit
-    // animation before final unmount.
     const removed = prev.filter((a) => !currentIds.has(a.id));
 
     if (removed.length > 0) {
