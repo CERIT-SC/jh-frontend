@@ -15,12 +15,21 @@ declare const spawnOptions: {
     gpu?: string;
     home?: string | null;
     mountprojects?: boolean;
+    mounttostorage?: boolean;
     phome?: string;
     container_image?: string;
     ssh?: boolean;
     shmsize?: string;
     images?: string;
     customimage?: string;
+    s3check?: string;
+    s3url?: string;
+    s3bucket?: string;
+    s3accesskey?: string;
+    s3secretkey?: string;
+    s3name?: string;
+    s3selection?: string;
+    s3existing?: string;
   };
   ssh_dns_domain?: string;
   gpu_instances?: unknown[];
@@ -65,7 +74,7 @@ export function gatherFormData() {
       metaCentrumHome: {
         enabled: opts.home !== null,
         selectedHome: opts.home ? { value: opts.home, text: opts.home } : null,
-        mountToStorage: false,
+        mountToStorage: Boolean(opts.mounttostorage),
       },
       projectDirectories: Boolean(opts.mountprojects),
       persistentHome: {
@@ -84,7 +93,21 @@ export function gatherFormData() {
             : null,
       },
 
-      s3Storage: null,
+      s3Storage: {
+        enabled: Boolean(
+          opts.s3check || opts.s3url || opts.s3name || opts.s3existing,
+        ),
+        existings3: opts.s3existing
+          ? { value: opts.s3existing }
+          : opts.s3name
+            ? { value: opts.s3name }
+            : null,
+        s3url: opts.s3url || null,
+        s3bucket: opts.s3bucket || null,
+        s3accesskey: opts.s3accesskey || null,
+        s3secretkey: opts.s3secretkey || null,
+        s3selection: opts.s3url || opts.s3bucket ? "new" : "existing",
+      },
 
       // Image & Access
       notebookImage: {

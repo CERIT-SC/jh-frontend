@@ -69,6 +69,12 @@ interface StorageDefaultFormData {
   s3Storage?: {
     enabled?: boolean;
     existings3?: { value?: string };
+    s3url?: string | null;
+    s3bucket?: string | null;
+    s3accesskey?: string | null;
+    s3secretkey?: string | null;
+    s3selection?: string;
+    s3existing?: string;
   };
 }
 
@@ -315,6 +321,13 @@ export default function StorageSelectionSection({
     undefined,
   );
 
+  const [s3UrlValue, setS3UrlValue] = useState<string>(
+    "https://s3.cloud.e-infra.cz",
+  );
+  const [s3BucketValue, setS3BucketValue] = useState<string>("");
+  const [s3AccessKeyValue, setS3AccessKeyValue] = useState<string>("");
+  const [s3SecretKeyValue, setS3SecretKeyValue] = useState<string>("");
+
   // Memoized options
   const storageOptions = useMemo(
     () => getMetaCentrumHomeOptions(),
@@ -399,26 +412,71 @@ export default function StorageSelectionSection({
       }
     }
 
-    // S3 Storage - Only existing buckets are now supported
+    // S3 Storage initialization
     if (defaultFormData.s3Storage) {
-      const enabled = defaultFormData.s3Storage.enabled ?? false;
-      setCheckedS3Storage(enabled);
+      const s3Storage = defaultFormData.s3Storage;
+      const enabled = s3Storage.enabled ?? false;
 
-      if (enabled) {
-        onS3Change((prev) => ({
-          ...prev,
-          s3check: "yes",
-        }));
-      }
+      if (
+        enabled ||
+        s3Storage.s3url ||
+        s3Storage.existings3?.value ||
+        s3Storage.s3existing
+      ) {
+        setCheckedS3Storage(true);
+        onS3Check(true);
 
-      // Only handle existing S3 buckets
-      if (defaultFormData.s3Storage.existings3?.value) {
-        const name = defaultFormData.s3Storage.existings3.value;
-        setDefaultOptionS3name([name, name]);
-        onS3Change((prev) => ({
-          ...prev,
-          s3name: name,
-        }));
+        if (
+          s3Storage.s3selection === "new" ||
+          s3Storage.s3url ||
+          s3Storage.s3bucket
+        ) {
+          // New S3 connection - populate form fields
+          setS3SelectionType("new");
+
+          if (s3Storage.s3url) {
+            setS3UrlValue(s3Storage.s3url);
+            onS3Change((prev) => ({
+              ...prev,
+              s3url: s3Storage.s3url,
+            }));
+          }
+
+          if (s3Storage.s3bucket) {
+            setS3BucketValue(s3Storage.s3bucket);
+            onS3Change((prev) => ({
+              ...prev,
+              s3bucket: s3Storage.s3bucket,
+            }));
+          }
+
+          if (s3Storage.s3accesskey) {
+            setS3AccessKeyValue(s3Storage.s3accesskey);
+            onS3Change((prev) => ({
+              ...prev,
+              s3accesskey: s3Storage.s3accesskey,
+            }));
+          }
+
+          if (s3Storage.s3secretkey) {
+            setS3SecretKeyValue(s3Storage.s3secretkey);
+            onS3Change((prev) => ({
+              ...prev,
+              s3secretkey: s3Storage.s3secretkey,
+            }));
+          }
+        } else {
+          setS3SelectionType("existing");
+          const existingBucket =
+            s3Storage.s3existing || s3Storage.existings3?.value;
+          if (existingBucket) {
+            setDefaultOptionS3name([existingBucket, existingBucket]);
+            onS3Change((prev) => ({
+              ...prev,
+              s3name: existingBucket,
+            }));
+          }
+        }
       }
     }
   }, []);
@@ -543,6 +601,17 @@ export default function StorageSelectionSection({
   const createS3ChangeHandler = useCallback(
     (field: "s3url" | "s3bucket" | "s3accesskey" | "s3secretkey") =>
       (value: string) => {
+        if (field === "s3url") {
+          setS3UrlValue(value);
+        } else if (field === "s3bucket") {
+          setS3BucketValue(value);
+        } else if (field === "s3accesskey") {
+          setS3AccessKeyValue(value);
+        } else if (field === "s3secretkey") {
+          setS3SecretKeyValue(value);
+        }
+
+        // Update form data
         onS3Change((prev) => ({
           ...prev,
           [field]: value,
@@ -840,7 +909,7 @@ export default function StorageSelectionSection({
                   <Input
                     id="s3-url"
                     type="text"
-                    value={formData.s3url ?? "https://s3.cloud.e-infra.cz"}
+                    value={s3UrlValue}
                     placeholder="https://s3.cloud.e-infra.cz"
                     onChange={(e) => handleS3UrlChange(e.target.value)}
                     className="w-full bg-surface"
@@ -852,7 +921,7 @@ export default function StorageSelectionSection({
                   <Input
                     id="s3-bucket"
                     type="text"
-                    value={formData.s3bucket ?? ""}
+                    value={s3BucketValue}
                     placeholder="example-bucket"
                     onChange={(e) => handleS3BucketChange(e.target.value)}
                     className="w-full bg-surface"
@@ -865,7 +934,7 @@ export default function StorageSelectionSection({
                     <Input
                       id="s3-access-key"
                       type={showAccessKey ? "text" : "password"}
-                      value={formData.s3accesskey ?? ""}
+                      value={s3AccessKeyValue}
                       placeholder="s3AccessKey"
                       onChange={(e) => handleS3AccessKeyChange(e.target.value)}
                       className="w-full pr-10 bg-surface"
@@ -886,7 +955,7 @@ export default function StorageSelectionSection({
                     <Input
                       id="s3-secret-key"
                       type={showSecretKey ? "text" : "password"}
-                      value={formData.s3secretkey ?? ""}
+                      value={s3SecretKeyValue}
                       placeholder="s3SecretKey"
                       onChange={(e) => handleS3SecretKeyChange(e.target.value)}
                       className="w-full pr-10 bg-surface"
