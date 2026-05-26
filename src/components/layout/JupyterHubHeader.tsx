@@ -63,16 +63,19 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
                 </NavigationMenuItem>
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger
-                      onClick={() =>
-                        window.open(
-                          "https://docs.cerit.io/en/docs/web-apps/jupyterhub",
-                          "_blank",
-                        )
-                      }
-                      className="inline-flex items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                    >
-                      <Book className="h-4 w-4" />
+                    <TooltipTrigger>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          window.open(
+                            "https://docs.cerit.io/en/docs/web-apps/jupyterhub",
+                            "_blank",
+                          )
+                        }
+                      >
+                        <Book className="h-4 w-4" />
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Docs</p>
