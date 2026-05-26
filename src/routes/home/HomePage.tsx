@@ -352,7 +352,7 @@ function HomePage() {
       pushAlert("Server URL not available yet", { variant: "warning" });
       return;
     }
-    window.open(url, "_blank")?.focus();
+    window.open(url, "_self")?.focus();
   };
 
   const handleAddServer = () => {
@@ -365,7 +365,7 @@ function HomePage() {
       return;
     }
     window
-      .open(`/spawn/${appConfig.userName}/${trimmedName}`, "_blank")
+      .open(`/spawn/${appConfig.userName}/${trimmedName}`, "_self")
       ?.focus();
     setServerName("");
     setIsAddServerModalOpen(false);
@@ -374,8 +374,7 @@ function HomePage() {
     }, 500);
   };
   const handleStartServer = (name: string) => {
-    window.open(`/spawn/${appConfig.userName}/${name}`, "_blank")?.focus();
-    window.location.reload();
+    window.open(`/spawn/${appConfig.userName}/${name}`, "_self")?.focus();
   };
 
   /**
