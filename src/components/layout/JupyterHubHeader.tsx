@@ -63,7 +63,7 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
                 </NavigationMenuItem>
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger>
+                    <TooltipTrigger asChild>
                       <Button
                         variant="outline"
                         size="icon"
