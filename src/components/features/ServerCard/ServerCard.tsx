@@ -512,11 +512,16 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
       style={{ "--before-width": `${progress}%` } as React.CSSProperties}
     >
       <CardHeader>
-        <CardTitle className="min-w-0 grow">
+        <CardTitle className="min-w-0">
           <div className="flex justify-between items-center w-full gap-2">
-            <span className="break-all line-clamp-3 block flex-1 min-w-0 -mr-1 -mb-4 -mt-4">
-              {title}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate block">{title}</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{title}</p>
+              </TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
