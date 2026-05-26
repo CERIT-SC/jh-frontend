@@ -8,6 +8,7 @@ import {
   getS3BucketOptions,
   getImageOptions,
 } from "./utils/gatherFormData";
+import { validateS3Credentials } from "./utils/validateS3Credentials";
 import {
   ContentBody,
   ContentHeading,
@@ -83,6 +84,7 @@ function FormPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [checkedS3Storage, setCheckedS3Storage] = useState(false);
   const [s3values, setS3Values] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setS3Values(getS3BucketOptions());
@@ -294,6 +296,63 @@ function FormPage() {
         payload.s3bucket = formData.s3bucket as string;
         payload.s3accesskey = (formData.s3accesskey as string) || "";
         payload.s3secretkey = (formData.s3secretkey as string) || "";
+
+        // Validate S3 credentials before submission
+        setIsSubmitting(true);
+        try {
+          await validateS3Credentials({
+            s3url: formData.s3url as string,
+            s3bucket: formData.s3bucket as string,
+            s3accesskey: formData.s3accesskey as string,
+            s3secretkey: formData.s3secretkey as string,
+          });
+        } catch (error) {
+          setIsSubmitting(false);
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
+          let userMessage =
+            "Invalid S3 credentials/bucket/S3 url — cannot connect to the bucket.\n\nCheck your inputs are correct.";
+
+          if (
+            errorMessage.includes("Access Denied") ||
+            errorMessage.includes("403") ||
+            errorMessage.includes("Forbidden")
+          ) {
+            userMessage =
+              "S3 Access Denied — please check your access key and secret key.";
+          } else if (
+            errorMessage.includes("404") ||
+            errorMessage.includes("NoSuchBucket") ||
+            errorMessage.includes("Not Found")
+          ) {
+            userMessage = "S3 bucket not found — please check the bucket name.";
+          } else if (
+            errorMessage.includes("ECONNREFUSED") ||
+            errorMessage.includes("ENOTFOUND") ||
+            errorMessage.includes("getaddrinfo") ||
+            errorMessage.includes("NetworkError")
+          ) {
+            userMessage = "Cannot reach S3 endpoint — please check the S3 URL.";
+          } else if (errorMessage.includes("SignatureDoesNotMatch")) {
+            userMessage =
+              "S3 secret key is incorrect — please verify your secret key.";
+          } else if (errorMessage.includes("InvalidAccessKeyId")) {
+            userMessage =
+              "S3 access key is invalid — please verify your access key.";
+          } else if (
+            errorMessage.includes("timeout") ||
+            errorMessage.includes("ETIMEDOUT")
+          ) {
+            userMessage =
+              "S3 connection timed out — please check the S3 URL and try again.";
+          }
+
+          pushAlert(userMessage, {
+            variant: "error",
+          });
+          return;
+        }
+        setIsSubmitting(false);
       }
     }
 
@@ -536,8 +595,12 @@ function FormPage() {
                   categoryImage={selectedCategory}
                   className="p-0 bg-background"
                 >
-                  <Button className="w-full" onClick={submitForm}>
-                    Start
+                  <Button
+                    className="w-full"
+                    onClick={submitForm}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Validating..." : "Start"}
                   </Button>
                 </OverviewPanel>
               </div>

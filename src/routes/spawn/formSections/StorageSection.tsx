@@ -88,7 +88,7 @@ interface StorageSelectionSectionProps {
 declare const appConfig: { userName?: string };
 
 // ==============================================================================
-// Reusable Section Container Component (Compound Pattern)
+// Section Container Component
 // ==============================================================================
 
 interface SectionContainerContextValue {
@@ -840,7 +840,7 @@ export default function StorageSelectionSection({
                   <Input
                     id="s3-url"
                     type="text"
-                    value={formData.s3url ?? ""}
+                    value={formData.s3url ?? "https://s3.cloud.e-infra.cz"}
                     placeholder="https://s3.cloud.e-infra.cz"
                     onChange={(e) => handleS3UrlChange(e.target.value)}
                     className="w-full bg-surface"
