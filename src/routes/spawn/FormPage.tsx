@@ -227,10 +227,17 @@ function FormPage() {
     }
 
     if (storageEnabled) {
-      payload.storageCheck = "yes";
-      if (formData.home) {
-        payload.home = formData.home as string;
+      if (!formData.home) {
+        pushAlert(
+          "MetaCentrum storage enabled but no home directory selected.",
+          {
+            variant: "error",
+          },
+        );
+        return;
       }
+      payload.storageCheck = "yes";
+      payload.home = formData.home as string;
       if (formData.locationStorageCheck === "yes") {
         payload.locationStorageCheck = "yes";
       }

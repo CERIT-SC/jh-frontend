@@ -497,6 +497,28 @@ export default function StorageSelectionSection({
     }));
   }, [s3SelectionType]);
 
+  useEffect(() => {
+    if (s3SelectionType === "new" && !formData.s3url) {
+      onS3Change((prev) => ({
+        ...prev,
+        s3url: "https://s3.cloud.e-infra.cz",
+      }));
+    }
+  }, [s3SelectionType]);
+
+  useEffect(() => {
+    if (checkedStorage && !formData.home) {
+      const firstKey = Object.keys(storageOptions)[0];
+      if (firstKey) {
+        setDefaultHome([firstKey, firstKey]);
+        onMetaCentrumChange((prev) => ({
+          ...prev,
+          home: firstKey,
+        }));
+      }
+    }
+  }, [checkedStorage]);
+
   // ==============================================================================
   // Event Handlers
   // ==============================================================================
