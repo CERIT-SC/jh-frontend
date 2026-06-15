@@ -1,6 +1,7 @@
 import "../../styles/index.css";
 import "./HomePage.css";
-import { JupyterHubApiClient } from "@api";
+import { JupyterHubApiClient, fetchResourceUsage } from "@api";
+import type { ResourceUsageData } from "@api";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import {
@@ -112,6 +113,53 @@ function HomePage() {
 
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
   const eventSourcesRef = useRef<Map<string, EventSourceItem>>(new Map());
+
+  // Resource usage fetch + poll (inline pattern, same as GPU indicators)
+  const resourceUsageRef = useRef<ResourceUsageData>({});
+  const [resourceUsage, setResourceUsage] = useState<ResourceUsageData>({});
+
+  const fetchUsage = useCallback(async () => {
+    try {
+      const data = await fetchResourceUsage(appConfig.userName);
+      // Only update if data changed (shallow key compare)
+      const prev = resourceUsageRef.current;
+      const sameKeys =
+        Object.keys(data).length === Object.keys(prev).length &&
+        Object.keys(data).every((k) => k in prev);
+      if (!sameKeys) {
+        resourceUsageRef.current = data;
+        setResourceUsage(data);
+        return;
+      }
+      // Deep compare values to avoid unnecessary re-renders
+      const changed = Object.entries(data).some(
+        ([k, v]) =>
+          prev[k]?.cpu_usage_ratio !== v.cpu_usage_ratio ||
+          prev[k]?.memory_usage_bytes !== v.memory_usage_bytes,
+      );
+      if (changed) {
+        resourceUsageRef.current = data;
+        setResourceUsage(data);
+      }
+    } catch (err) {
+      console.error(
+        "Resource usage fetch error:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }, [appConfig.userName]);
+
+  // Poll every 30s, only when there are active+ready servers
+  useEffect(() => {
+    const hasActiveServers = Object.values(spawners).some(
+      (s) => s.active && s.ready,
+    );
+    if (!hasActiveServers) return;
+
+    fetchUsage();
+    const interval = setInterval(fetchUsage, 30000);
+    return () => clearInterval(interval);
+  }, [fetchUsage, spawners]);
 
   const handleStopServer = async (name: string) => {
     console.log(`Stopping server: ${name}`);
@@ -612,6 +660,9 @@ function HomePage() {
                       handleStart={() => handleStartServer(name)}
                       handleQuickStart={() => handleQuickStart(name)}
                       progress={serverProgress[name]}
+                      cpuUsage={resourceUsage[name]?.cpu_usage_ratio}
+                      memoryUsed={resourceUsage[name]?.memory_usage_bytes}
+                      memoryLimit={resourceUsage[name]?.memory_limit_bytes}
                     />
                   ))}
                 {Object.keys(spawners).length < maxServers && (

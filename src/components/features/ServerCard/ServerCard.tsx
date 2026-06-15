@@ -34,8 +34,15 @@ import {
   Rocket,
   Activity,
   Circle,
+  Cpu,
+  Database,
 } from "lucide-react";
 import { dateFormat, dateFormatRelative } from "@utils";
+import {
+  ResourceUsageBadge,
+  formatCpuDisplay,
+  formatMemoryDisplay,
+} from "../ResourceUsageBadge";
 
 type AsyncAction = () => void | Promise<void>;
 
@@ -73,6 +80,12 @@ interface CardProps {
   isReady?: boolean;
   /** Progress value (0-100) for spawn progress indication */
   progress?: number;
+  /** CPU usage ratio (0-1), only shown when server is active+ready */
+  cpuUsage?: number;
+  /** Memory usage in bytes, only shown when server is active+ready */
+  memoryUsed?: number;
+  /** Memory limit in bytes, only shown when server is active+ready */
+  memoryLimit?: number;
 
   handleOpen?: () => void;
 
@@ -117,13 +130,11 @@ const LastActivityInfo: React.FC<LastActivityProps> = ({ lastActivity }) => {
 
   return (
     <Tooltip>
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80">
+      <Badge variant="outline">
         <Activity className="h-3 w-3" />
-        <TooltipTrigger className="cursor-pointer hover:text-foreground transition-colors duration-200">
-          {dateFormatRelative(lastActivity)}
-        </TooltipTrigger>
-      </div>
-      <TooltipContent side="bottom" className="text-xs">
+        <TooltipTrigger>{dateFormatRelative(lastActivity)}</TooltipTrigger>
+      </Badge>
+      <TooltipContent side="top">
         <p>Last activity: {dateFormat(lastActivity)}</p>
       </TooltipContent>
     </Tooltip>
@@ -319,6 +330,9 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   isActive = false,
   isReady = false,
   progress,
+  cpuUsage,
+  memoryUsed,
+  memoryLimit,
   handleOpen = () => {},
   handleStop = () => {},
   handleDelete = () => {},
@@ -352,6 +366,52 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
       buttonClassName="flex-1 grow-2"
     />
   );
+
+  const canShowUsage = isActive && isReady;
+
+  const memoryRatio =
+    memoryLimit && memoryLimit > 0 ? (memoryUsed ?? 0) / memoryLimit : 0;
+
+  const showCpuBadge = canShowUsage && cpuUsage !== undefined;
+  const showMemBadge =
+    canShowUsage &&
+    memoryUsed !== undefined &&
+    memoryLimit !== undefined &&
+    memoryLimit > 0;
+
+  const usageBadges =
+    showCpuBadge || showMemBadge ? (
+      <>
+        {showCpuBadge && (
+          <Tooltip>
+            <TooltipTrigger>
+              <ResourceUsageBadge
+                label={<Cpu />}
+                ratio={cpuUsage!}
+                displayValue={formatCpuDisplay(cpuUsage!)}
+              />
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>CPU Usage</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {showMemBadge && (
+          <Tooltip>
+            <TooltipTrigger>
+              <ResourceUsageBadge
+                label={<Database />}
+                ratio={memoryRatio}
+                displayValue={formatMemoryDisplay(memoryUsed!, memoryLimit!)}
+              />
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Memory Usage</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </>
+    ) : null;
 
   if (variant === "inline") {
     return (
@@ -399,7 +459,10 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                     />
                     {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
                   </Badge>
-                  <LastActivityInfo lastActivity={lastActivity} />
+                  <LastActivityInfo
+                    lastActivity={!isActive ? lastActivity : undefined}
+                  />
+                  {usageBadges}
                 </div>
               </div>
             </div>
@@ -461,8 +524,11 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                   {description && (
                     <Muted className="truncate">{description}</Muted>
                   )}
-                  <LastActivityInfo lastActivity={lastActivity} />
+                  <LastActivityInfo
+                    lastActivity={!isActive ? lastActivity : undefined}
+                  />
                 </div>
+                {usageBadges}
               </div>
             </div>
             {actionButtons}
@@ -502,7 +568,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
       variant="default"
       className={cn(
         "relative w-full transition-colors duration-200 ease-in-out",
-        "flex flex-col justify-center rounded-md gap-6 py-6 bg-background dark:bg-surface-raised",
+        "flex flex-col justify-center rounded-md py-4 bg-background dark:bg-surface-raised gap-2 min-h-[190px]",
         isReady
           ? "border-t-2 border-success"
           : !isActive
@@ -545,8 +611,8 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         </CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3">
+      <CardContent className="flex-1 content-center">
+        <div className="flex flex-wrap items-center gap-3">
           <Badge
             variant={isActive ? "default" : "secondary"}
             className={cn(
@@ -566,7 +632,10 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             />
             {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
           </Badge>
-          <LastActivityInfo lastActivity={lastActivity} />
+          <LastActivityInfo
+            lastActivity={!isActive ? lastActivity : undefined}
+          />
+          {usageBadges}
         </div>
       </CardContent>
       <CardFooter className="gap-2">{actionButtons}</CardFooter>
@@ -604,7 +673,7 @@ export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
         )}
         onClick={onClick}
       >
-        <div className="flex items-center w-full justify-center gap-3 py-4">
+        <div className="flex items-center w-full justify-center">
           <SquarePlus
             className="w-12 h-12 text-border group-hover:text-primary/80 transition-colors duration-200 dark:text-primary/30"
             strokeWidth={2}
@@ -639,13 +708,13 @@ export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
   return (
     <Card
       className={cn(
-        "group w-full flex items-center justify-center border-2 border-dashed bg-transparent transition-all duration-200 dark:border-primary/30",
+        "group w-full flex items-center justify-center border-2 border-dashed bg-transparent transition-all duration-200 dark:border-primary/30 py-4",
         " hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02]",
-        "cursor-pointer min-h-[200px]",
+        "cursor-pointer",
       )}
       onClick={onClick}
     >
-      <CardContent className="flex flex-col items-center justify-center gap-4 w-full h-full text-center py-8 px-6">
+      <CardContent className="flex flex-col items-center justify-center w-full h-full text-center">
         <SquarePlus
           className="w-16 h-16 text-border group-hover:text-primary/80 transition-colors duration-200 dark:text-base-500"
           strokeWidth={2}
