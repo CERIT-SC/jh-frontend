@@ -364,7 +364,7 @@ function TokenPage() {
               <P className="text-center text-gray-500">Loading tokens...</P>
             ) : (
               apiTokens.length > 0 && (
-                <Panel className="mb-8 bg-background">
+                <Panel className="bg-background">
                   <PanelHeader>Active API Tokens</PanelHeader>
                   <PanelContent>
                     <P className="text-gray-600 mb-4">
