@@ -1,7 +1,7 @@
 import React from "react";
 import { einfraLogo } from "../../../public/static/custom-images";
 import { einfraLogoDark } from "../../../public/static/custom-images";
-import { Button, cn, Link } from "@e-infra/design-system";
+import { Button, cn } from "@e-infra/design-system";
 import { Mail, FileText, ArrowUpRight } from "lucide-react";
 
 interface FooterProps {

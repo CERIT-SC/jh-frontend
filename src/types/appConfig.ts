@@ -13,6 +13,8 @@
 export interface AppConfigBase {
   /** Current authenticated user's username */
   userName: string;
+  /** Announcement message to be displayed on the page */
+  announcement?: string;
 }
 
 /**

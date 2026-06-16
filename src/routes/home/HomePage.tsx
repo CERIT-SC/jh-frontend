@@ -10,11 +10,9 @@ import {
   EmptyServerCard,
 } from "@components/features";
 import initDev from "../../dev-setup";
-import { Alert } from "@components/ui";
+import { Alert, Announcement, TileSelector } from "@components/ui";
 import { useAlerts } from "@hooks";
-import { TileSelector } from "@components/ui";
 import {
-  H1,
   Panel,
   PanelContent,
   Badge,
@@ -484,6 +482,12 @@ function HomePage() {
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="container grow  mx-auto py-2 space-y-8">
+        {appConfig.announcement && (
+          <Announcement
+            message={appConfig.announcement}
+            variant="warning"
+          />
+        )}
         <div className="named-servers">
           <Panel className="bg-transparent border-0 shadow-none">
             <div className="flex items-center gap-2">

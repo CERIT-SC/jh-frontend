@@ -126,13 +126,7 @@ function TokenPage() {
           token.oauth_client.startsWith("Server at ");
 
         if (isOAuthToken) {
-          // Extract server info from oauth_client description
-          const serverMatch = token.oauth_client.match(
-            /Server at (\/user\/[^/]+\/[^/]+\/?)/,
-          );
-          const serverPath = serverMatch ? serverMatch[1] : token.oauth_client;
-
-          // Use the server path as the client ID for grouping
+          // Use the token id as the client ID for grouping
           const clientId = token.id;
 
           oauthClientsMap.set(clientId, {
@@ -332,7 +326,7 @@ function TokenPage() {
                 <DialogHeader>
                   <DialogTitle>Your new API Token</DialogTitle>
                   <DialogDescription>
-                    Copy this token. You won't be able to see it again, but you
+                    Copy this token. You won&apos;t be able to see it again, but you
                     can always come back here to get a new one.
                   </DialogDescription>
                 </DialogHeader>

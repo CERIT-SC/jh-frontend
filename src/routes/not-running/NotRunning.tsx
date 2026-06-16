@@ -7,13 +7,11 @@ import {
   P,
   Panel,
   PanelContent,
-  PanelTitle,
   Separator,
-  Badge,
 } from "@e-infra/design-system";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import type { NotRunningAppConfig } from "@src-types/appConfig";
-import { Server, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (not_running.html).

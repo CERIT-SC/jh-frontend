@@ -100,6 +100,7 @@ interface CardProps {
 
 interface ServerActionButtonsProps {
   isActive: boolean;
+  lastActivity?: number;
   handleOpen?: () => void;
   handleStop?: () => void;
   handleStart?: () => void;
@@ -143,12 +144,15 @@ const LastActivityInfo: React.FC<LastActivityProps> = ({ lastActivity }) => {
 
 const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
   isActive,
+  lastActivity,
   handleOpen = () => {},
   handleStop = () => {},
   handleStart = () => {},
   handleQuickStart = () => {},
   buttonClassName,
 }) => {
+  const canQuickStart =
+    lastActivity !== undefined && dateFormat(lastActivity) !== "Never";
   const [openHandler, isOpening] = useAsyncAction(handleOpen);
   const [stopHandler, isStopping] = useAsyncAction(handleStop);
   const [startHandler, isStarting] = useAsyncAction(handleStart);
@@ -231,7 +235,7 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
             title="Quick Start"
             variant="tertiary"
             size="sm"
-            disabled={isQuickStarting}
+            disabled={!canQuickStart || isQuickStarting}
             onClick={quickStartHandler}
           >
             Quick Start
@@ -359,6 +363,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   const actionButtons = (
     <ServerActionButtons
       isActive={isActive}
+      lastActivity={lastActivity}
       handleOpen={handleOpen}
       handleStop={handleStop}
       handleStart={handleStart}

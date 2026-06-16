@@ -23,6 +23,7 @@
         postUrl: "{{ url | safe }}",
         userName: "{{ for_user.name }}",
         spawner: "{{ spawner.user_options }}",
+        announcement: "{{ announcement | safe }}",
       };
     </script>
     {{spawner_options_form | safe}}

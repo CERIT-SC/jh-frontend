@@ -47,6 +47,7 @@ export default function initDev() {
       default_server_active: false,
       url: "http://localhost",
       userName: "dev",
+      announcement: "This is a development environment.",
       xsrf: "sample-xsrf-token",
     };
   } else {

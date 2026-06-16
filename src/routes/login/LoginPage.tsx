@@ -11,8 +11,6 @@ import {
 } from "@e-infra/design-system";
 import { LogIn, BookOpen, Users } from "lucide-react";
 import React from "react";
-import HubLogo from "../../../public/static/custom-images/hub-rectangle.svg";
-import HubLogoDark from "../../../public/static/custom-images/hub-rectangle-dark.svg";
 
 interface LoginPageProps {
   /** Text to display on the login button */

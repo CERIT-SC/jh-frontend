@@ -24,7 +24,7 @@ import initDev from "../../dev-setup";
 import StorageSelectionSection from "./formSections/StorageSection";
 import ResourceSelectionSection from "./formSections/ResourceSection";
 import { ImageSelectionSectionTabs } from "./formSections/ImageSection";
-import { Alert } from "@components/ui";
+import { Alert, Announcement } from "@components/ui";
 import { useAlerts } from "@hooks";
 import { Footer } from "@components/layout";
 import type { SpawnAppConfig } from "@src-types/appConfig";
@@ -431,7 +431,10 @@ function FormPage() {
         userName={appConfig.userName as string}
       ></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="mx-auto px-4 py-8 space-y-8 lg:container">
+        {appConfig.announcement && (
+          <Announcement message={appConfig.announcement} variant="warning" />
+        )}
         <ContentHeading className="max-w-full">
           {serverName ? (
             <span className="truncate inline-block max-w-full">

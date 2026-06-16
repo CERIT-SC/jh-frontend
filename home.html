@@ -40,6 +40,7 @@
         default_server_active: {{ "true" if default_server.active else "false" }},
         url: "{{ url }}",
         userName: "{{ user.name }}",
+        announcement: "{{ announcement | safe }}",
         xsrf: "{{ xsrf_token }}",
       };
     </script>
