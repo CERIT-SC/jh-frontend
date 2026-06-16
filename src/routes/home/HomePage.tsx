@@ -149,16 +149,33 @@ function HomePage() {
     }
   }, [appConfig.userName]);
 
-  // Poll every 30s, only when there are active+ready servers
   useEffect(() => {
     const hasActiveServers = Object.values(spawners).some(
       (s) => s.active && s.ready,
     );
     if (!hasActiveServers) return;
 
-    fetchUsage();
-    const interval = setInterval(fetchUsage, 30000);
-    return () => clearInterval(interval);
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      await fetchUsage();
+      // Check if any active server has incomplete data (memoryLimit still 0)
+      const hasIncompleteData = Object.entries(resourceUsageRef.current).some(
+        ([name, metrics]) => {
+          const spawner = spawners[name];
+          return (
+            spawner?.active &&
+            spawner?.ready &&
+            (!metrics || metrics.memory_limit_bytes === 0)
+          );
+        },
+      );
+      const delay = hasIncompleteData ? 5000 : 30000;
+      timeoutId = setTimeout(poll, delay);
+    };
+
+    poll();
+    return () => clearTimeout(timeoutId);
   }, [fetchUsage, spawners]);
 
   const handleStopServer = async (name: string) => {
