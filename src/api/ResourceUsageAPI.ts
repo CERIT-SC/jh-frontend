@@ -6,7 +6,6 @@ import axios from "axios";
 export interface ServerResourceUsage {
   cpu_usage_ratio: number;
   memory_usage_bytes: number;
-  memory_request_bytes: number;
   memory_limit_bytes: number;
 }
 
