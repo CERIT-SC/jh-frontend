@@ -708,7 +708,7 @@ export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
   return (
     <Card
       className={cn(
-        "group w-full flex items-center justify-center border-2 border-dashed bg-transparent transition-all duration-200 dark:border-primary/30 py-4",
+        "min-h-[190px] group w-full flex items-center justify-center border-2 border-dashed bg-transparent transition-all duration-200 dark:border-primary/30 py-4",
         " hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02]",
         "cursor-pointer",
       )}
