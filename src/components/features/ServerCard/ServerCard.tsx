@@ -309,8 +309,9 @@ const DeleteDialog: React.FC<{
       <DialogHeader>
         <DialogTitle>Delete Server</DialogTitle>
         <DialogDescription>
-          Are you sure you want to delete this server? This action cannot be
-          undone and all associated data will be permanently removed.
+          Are you sure you want to delete this server? This will stop the server
+          and remove it from your list. Any unsaved work and running processes
+          will be lost, but your persistent data will not be removed.
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
