@@ -13,6 +13,8 @@ export interface SpawnProgressEvent {
   ready?: boolean;
   /** Spawn has failed — show error state */
   failed?: boolean;
+  /** Spawn has a non-fatal warning — show warning state */
+  warning?: boolean;
   /** Allow additional JupyterHub-specific fields */
   [key: string]: unknown;
 }
@@ -26,7 +28,7 @@ export interface EventLogEntry {
   id: string;
   /** Monotonic index for stable ordering */
   index: number;
-  /** Client-side timestamp when the event was received */
+  /** Event timestamp in milliseconds (from message prefix or raw_event.eventTime) */
   timestamp: number;
   /** The raw progress value at this point */
   progress: number;
@@ -38,6 +40,10 @@ export interface EventLogEntry {
   isFailed: boolean;
   /** Whether this event marked spawn completion */
   isReady: boolean;
+  /** Whether this event carries a non-fatal warning */
+  isWarning: boolean;
+  /** Kubernetes pod UID this event belongs to (null for synthetic events) */
+  podUid: string | null;
 }
 
 /** Connection states for the SSE stream */

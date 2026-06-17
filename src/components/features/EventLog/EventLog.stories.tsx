@@ -13,6 +13,7 @@ function createMockEntry(
   htmlMessage?: string,
   isFailed?: boolean,
   isReady?: boolean,
+  isWarning?: boolean,
 ): EventLogEntry {
   return {
     id: `event-${index}`,
@@ -23,6 +24,8 @@ function createMockEntry(
     htmlMessage: htmlMessage || null,
     isFailed: isFailed || false,
     isReady: isReady || false,
+    isWarning: isWarning || false,
+    podUid: null,
   };
 }
 
@@ -44,6 +47,22 @@ const mockFailedEntries: EventLogEntry[] = [
   createMockEntry(1, 10, "Pulling image custom-ml-image:dev"),
   createMockEntry(2, 25, "Image pull progress: 30%"),
   createMockEntry(3, 25, "Error: Image not found", undefined, true, false),
+];
+
+const mockWarningEntries: EventLogEntry[] = [
+  createMockEntry(0, 0, "Spawn request received"),
+  createMockEntry(1, 10, "Pulling image jupyter/scipy-notebook:latest"),
+  createMockEntry(
+    2,
+    50,
+    "[Warning] Image size exceeds recommended limit",
+    undefined,
+    false,
+    false,
+    true,
+  ),
+  createMockEntry(3, 75, "Continuing spawn despite warning"),
+  createMockEntry(4, 100, "Server ready", undefined, false, true),
 ];
 // ── Main Meta (EventLogList) ────────────────────────────────────────────
 
@@ -116,6 +135,13 @@ export const Failed: Story = {
   },
 };
 
+export const Warning: Story = {
+  name: "EventLogList - Warning Spawn",
+  args: {
+    entries: mockWarningEntries,
+  },
+};
+
 export const SingleItem: Story = {
   name: "EventLogList - Single Item",
   args: {
@@ -148,6 +174,15 @@ export const ItemFailed: StoryObj<typeof EventLogItem> = {
   render: () => (
     <div className="w-[600px]">
       <EventLogItem entry={mockFailedEntries[3]} />
+    </div>
+  ),
+};
+
+export const ItemWarning: StoryObj<typeof EventLogItem> = {
+  name: "EventLogItem - Warning State",
+  render: () => (
+    <div className="w-[600px]">
+      <EventLogItem entry={mockWarningEntries[2]} />
     </div>
   ),
 };

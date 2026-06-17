@@ -5,7 +5,28 @@ import type {
   SpawnProgressEvent,
 } from "../types/spawnProgress";
 import { MAX_EVENT_LOG_ENTRIES } from "../types/spawnProgress";
+import { extractEventTimestamp } from "../utils/message";
 import { useEventSource } from "./useEventSource";
+
+function isKubernetesWarning(event: SpawnProgressEvent): boolean {
+  const rawEvent = event.raw_event as Record<string, unknown> | undefined;
+  return rawEvent?.type === "Warning";
+}
+
+function getPodUid(event: SpawnProgressEvent): string | null {
+  const rawEvent = event.raw_event as Record<string, unknown> | undefined;
+  const involvedObject = rawEvent?.involvedObject as
+    | Record<string, unknown>
+    | undefined;
+  const uid = involvedObject?.uid;
+  return typeof uid === "string" ? uid : null;
+}
+
+function isSchedulingEvent(event: SpawnProgressEvent): boolean {
+  const rawEvent = event.raw_event as Record<string, unknown> | undefined;
+  const reason = rawEvent?.reason;
+  return reason === "Scheduled" || reason === "FailedScheduling";
+}
 
 interface UseSpawnProgressOptions {
   /** SSE progress endpoint URL */
@@ -56,6 +77,7 @@ export function useSpawnProgress({
   const isReadyRef = useRef(false);
   const isFailedRef = useRef(false);
   const eventIndexRef = useRef(0);
+  const currentPodUidRef = useRef<string | null>(null);
 
   // Stable callback refs
   const onReadyRef = useRef(onReady);
@@ -93,15 +115,25 @@ export function useSpawnProgress({
         messageRef.current = evt.message;
       }
 
+      const podUid = getPodUid(evt);
+
+      // A new scheduling event (Scheduled or FailedScheduling) means a fresh
+      // pod/retry; switch to its UID — the filter below handles cleanup.
+      if (isSchedulingEvent(evt) && podUid) {
+        currentPodUidRef.current = podUid;
+      }
+
       const entry: EventLogEntry = {
         id: `${Date.now()}-${eventIndexRef.current}`,
         index: eventIndexRef.current,
-        timestamp: Date.now(),
+        timestamp: extractEventTimestamp(evt),
         progress: progressRef.current,
         message: messageRef.current,
         htmlMessage: evt.html_message ?? null,
         isFailed: evt.failed === true,
         isReady: evt.ready === true,
+        isWarning: evt.warning === true || isKubernetesWarning(evt),
+        podUid,
       };
       eventIndexRef.current += 1;
 
@@ -109,6 +141,24 @@ export function useSpawnProgress({
       eventLogRef.current = [...eventLogRef.current, entry].slice(
         -MAX_EVENT_LOG_ENTRIES,
       );
+
+      // Keep the synthetic "Server requested" entry from appearing later than
+      // the first real event by backdating it to the earliest known timestamp.
+      const firstEntry = eventLogRef.current[0];
+      if (firstEntry?.message === "Server requested") {
+        eventLogRef.current[0] = {
+          ...firstEntry,
+          timestamp: Math.min(firstEntry.timestamp, entry.timestamp),
+        };
+      }
+
+      // Drop events from pods other than the current one.
+      // Synthetic events without a pod UID (e.g. "Server requested") are kept.
+      if (currentPodUidRef.current !== null) {
+        eventLogRef.current = eventLogRef.current.filter(
+          (e) => e.podUid === null || e.podUid === currentPodUidRef.current,
+        );
+      }
 
       if (evt.ready) {
         isReadyRef.current = true;

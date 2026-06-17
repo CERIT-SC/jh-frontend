@@ -1,5 +1,5 @@
 import "./SpawnPending.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (spawn_pending.html).
@@ -24,6 +24,7 @@ import {
 import { ChevronDown, RotateCcw } from "lucide-react";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import { useSpawnProgress } from "@hooks/useSpawnProgress";
+import { stripMessagePrefix } from "@utils/message";
 import { EventLogList } from "@components/features/EventLog";
 import { ConnectionStatusIndicator } from "@components/features/EventLog";
 
@@ -79,6 +80,12 @@ const SpawnPending: React.FC = () => {
     onFailed: handleFailed,
   });
 
+  // Strip server-side timestamp and level prefixes to avoid duplication with our own UI
+  const cleanMessage = useMemo(
+    () => (message ? stripMessagePrefix(message) : message),
+    [message],
+  );
+
   // Auto-expand
   useEffect(() => {
     if (eventLog.length > 0 && !logOpen && !userClosedRef.current) {
@@ -127,7 +134,7 @@ const SpawnPending: React.FC = () => {
             {/* ── Progress section ──────────────────────────────── */}
             <div className="flex justify-between items-center">
               <span className="text-sm text-text truncate mr-4">
-                {message || "Initializing…"}
+                {cleanMessage || "Initializing…"}
               </span>
               <P className="shrink-0 tabular-nums font-mono">{progress}%</P>
             </div>
@@ -155,12 +162,12 @@ const SpawnPending: React.FC = () => {
             <Separator />
 
             {/* ── Failure details ───────────────────────────────── */}
-            {isFailed && (
+            {/*{isFailed && (
               <div className="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
                 Server spawn failed. Check the event log below for details, or
                 try refreshing the page.
               </div>
-            )}
+            )}*/}
 
             {/* ── Event log (collapsible + virtualized) ─────────── */}
             <Collapsible open={logOpen} onOpenChange={handleLogOpenChange}>

@@ -1,6 +1,8 @@
 import { memo, useMemo } from "react";
 import type { EventLogEntry } from "../../../types/spawnProgress";
 import { cn } from "@e-infra/design-system";
+import { stripLevelPrefix, stripTimestampPrefix } from "../../../utils/message";
+import { TriangleAlert, CircleX } from "lucide-react";
 
 interface EventLogItemProps {
   entry: EventLogEntry;
@@ -8,27 +10,9 @@ interface EventLogItemProps {
 }
 
 /**
- * Strips JupyterHub's leading timestamp prefix from message strings.
- *
- * Matches patterns:
- * - `2026-04-28T11:11:56Z`       (ISO 8601 with Z timezone)
- * - `2026-04-28T11:11:56.123Z`   (ISO 8601 with milliseconds)
- * - `2026-04-28T11:11:56+02:00`  (ISO 8601 with offset)
- * - `[12:34:56]`                  (bracketed time-only)
- * - `12:34:56.`                   (dotted with milliseconds)
- * - `2024-01-01 12:34:56`        (full datetime without T)
+ * Strips timestamp and level HTML wrappers from html_message strings.
  */
-const TIMESTAMP_PREFIX_RE =
-  /^\s*(?:\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?|\[?\d{2}:\d{2}:\d{2}(?:\.\d+)?\]?)\s*/;
-
-function stripTimestampPrefix(text: string): string {
-  return text.replace(TIMESTAMP_PREFIX_RE, "").trim();
-}
-
-/**
- * Strips timestamp HTML from html_message strings.
- */
-function stripHtmlTimestampPrefix(html: string): string {
+function stripHtmlMessagePrefix(html: string): string {
   // Remove <span class="timestamp">...</span> and similar wrappers
   const cleaned = html
     .replace(
@@ -36,8 +20,8 @@ function stripHtmlTimestampPrefix(html: string): string {
       "",
     )
     .replace(/<time[^>]*>[\s\S]*?<\/time>/gi, "");
-  // Also strip any remaining bare-text timestamp prefix after HTML cleanup
-  return stripTimestampPrefix(cleaned);
+  // Also strip any remaining bare-text timestamp/level prefix after HTML cleanup
+  return stripLevelPrefix(stripTimestampPrefix(cleaned));
 }
 
 /**
@@ -72,14 +56,14 @@ export const EventLogItem = memo(function EventLogItem({
     second: "2-digit",
   });
 
-  // Strip server-side timestamp prefix to avoid duplication with our own column
+  // Strip server-side timestamp and level prefixes to avoid duplication
   const cleanMessage = useMemo(
-    () => stripTimestampPrefix(entry.message),
+    () => stripLevelPrefix(stripTimestampPrefix(entry.message)),
     [entry.message],
   );
   const cleanHtmlMessage = useMemo(
     () =>
-      entry.htmlMessage ? stripHtmlTimestampPrefix(entry.htmlMessage) : null,
+      entry.htmlMessage ? stripHtmlMessagePrefix(entry.htmlMessage) : null,
     [entry.htmlMessage],
   );
 
@@ -87,34 +71,58 @@ export const EventLogItem = memo(function EventLogItem({
     <div
       className={cn(
         "flex items-start gap-3 px-3 py-2 border-b border-border last:border-b-0",
-        entry.isFailed && "bg-error/5",
-        entry.isReady && "bg-success/5",
+        entry.isFailed && "bg-error-100",
+        entry.isReady && "bg-success-100",
+        entry.isWarning && "bg-warning-100 dark:bg-warning-200",
       )}
       style={style}
       role="listitem"
       aria-label={`Event at ${formattedTime}: ${cleanMessage}`}
     >
       {/* Timestamp */}
-      <span className="shrink-0 text-xs text-text-muted font-mono tabular-nums pt-0.5 select-none">
+      <span className="shrink-0 text-xs text-text-muted  tabular-nums pt-0.5 select-none">
         {formattedTime}
       </span>
 
       {/* Progress badge */}
       <span
         className={cn(
-          "shrink-0 text-xs font-mono tabular-nums px-1.5 py-0.5 rounded-sm min-w-[3ch] text-center",
-          entry.progress >= 100
-            ? "bg-success/15 text-success"
+          "shrink-0 text-xs tabular-nums px-1.5 py-0.5 rounded-sm min-w-[3ch] text-center",
+          entry.isReady
+            ? "bg-success-500 text-success-50"
             : entry.isFailed
-              ? "bg-error/15 text-error"
-              : "bg-primary/10 text-primary",
+              ? "bg-error-600 text-error-50"
+              : entry.isWarning
+                ? "bg-warning-600 text-warning-50"
+                : "bg-primary-100 text-text-muted",
         )}
       >
         {entry.progress}%
       </span>
 
+      {entry.isWarning && (
+        <TriangleAlert
+          size={20}
+          className="shrink-0"
+          color="var(--color-warning-700)"
+        />
+      )}
+      {entry.isFailed && (
+        <CircleX
+          size={20}
+          className="shrink-0"
+          color="var(--color-error-700)"
+        />
+      )}
       {/* Message content — timestamp prefix stripped and sanitized */}
-      <span className="text-sm text-text break-words min-w-0">
+      <span
+        className={cn(
+          "text-sm text-text wrap-break-word min-w-0",
+          entry.isFailed && "text-error-700",
+          entry.isReady && "text-success-700",
+          entry.isWarning && "text-warning-700",
+        )}
+      >
         {cleanHtmlMessage ? (
           <span
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(cleanHtmlMessage) }}
