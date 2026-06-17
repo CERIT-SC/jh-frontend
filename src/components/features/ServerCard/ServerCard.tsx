@@ -267,9 +267,7 @@ const StatusIndicator: React.FC<{
   };
 
   // Determine status color based on progress and server state
-  const isPending =
-    (progress !== undefined && progress > 0 && progress < 100) ||
-    (isActive && !isReady);
+  const isPending = isActive && !isReady;
   const isComplete = progress === 100 || isReady;
 
   return (
@@ -279,7 +277,7 @@ const StatusIndicator: React.FC<{
           className={cn(
             "absolute inline-flex rounded-full opacity-75 animate-ping",
             sizeClasses[size],
-            isComplete ? "bg-emerald-400" : "bg-orange-400",
+            isComplete ? "bg-emerald-400" : isPending ? "bg-orange-400" : "",
           )}
         />
       )}
@@ -289,7 +287,7 @@ const StatusIndicator: React.FC<{
           sizeClasses[size],
           isComplete
             ? "fill-emerald-500 text-emerald-500"
-            : isPending || (isActive && !isReady)
+            : isPending
               ? "fill-orange-500 text-orange-500"
               : "fill-slate-400 text-slate-400",
         )}
@@ -449,10 +447,8 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                     variant={isActive ? "default" : "secondary"}
                     className={cn(
                       "hidden sm:flex",
-                      progress !== undefined && progress > 0 && progress < 100
-                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
-                        : isActive &&
-                            "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
+                      isActive &&
+                        "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
                       isReady &&
                         "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
                     )}
@@ -622,10 +618,8 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           <Badge
             variant={isActive ? "default" : "secondary"}
             className={cn(
-              progress !== undefined && progress > 0 && progress < 100
-                ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300"
-                : isActive &&
-                    "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
+              isActive &&
+                "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
               isReady &&
                 "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
             )}

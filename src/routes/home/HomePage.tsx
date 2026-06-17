@@ -110,6 +110,14 @@ function HomePage() {
   const apiClient = new JupyterHubApiClient("/hub/api", appConfig.xsrf);
   const eventSourcesRef = useRef<Map<string, EventSourceItem>>(new Map());
 
+  /**
+   * Aborts a server's spawn-progress SSE and removes its reference.
+   */
+  const abortProgressTracking = (name: string) => {
+    eventSourcesRef.current.get(name)?.abort();
+    eventSourcesRef.current.delete(name);
+  };
+
   // Resource usage fetch + poll (inline pattern, same as GPU indicators)
   const resourceUsageRef = useRef<ResourceUsageData>({});
   const [resourceUsage, setResourceUsage] = useState<ResourceUsageData>({});
@@ -176,6 +184,8 @@ function HomePage() {
 
   const handleStopServer = async (name: string) => {
     console.log(`Stopping server: ${name}`);
+    abortProgressTracking(name);
+
     try {
       await apiClient
         .stopNamedServer(appConfig.userName, name, false)
@@ -258,6 +268,9 @@ function HomePage() {
         setServerProgress((prev) => ({ ...prev, [name]: progress }));
       },
       onComplete: () => {
+        // Ignore stale completion callbacks after stop/delete aborted the SSE.
+        if (!eventSourcesRef.current.has(name)) return;
+
         setSpawners((prev) => {
           const updated = { ...prev };
           if (updated[name]) {
@@ -384,6 +397,8 @@ function HomePage() {
   }, [spawners]);
 
   const handleDeleteServer = async (name: string) => {
+    abortProgressTracking(name);
+
     try {
       await apiClient.stopNamedServer(appConfig.userName, name, true);
 
