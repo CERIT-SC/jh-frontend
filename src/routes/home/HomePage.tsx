@@ -13,8 +13,6 @@ import initDev from "../../dev-setup";
 import { Alert, Announcement, TileSelector } from "@components/ui";
 import { useAlerts } from "@hooks";
 import {
-  Panel,
-  PanelContent,
   Badge,
   Dialog,
   DialogTrigger,
@@ -481,172 +479,167 @@ function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
-      <div className="container grow  mx-auto py-2 space-y-8">
+      <div className="container grow  mx-auto py-4 space-y-4">
         {appConfig.announcement && (
-          <Announcement
-            message={appConfig.announcement}
-            variant="warning"
-          />
+          <Announcement message={appConfig.announcement} variant="warning" />
         )}
         <div className="named-servers">
-          <Panel className="bg-transparent border-0 shadow-none">
-            <div className="flex items-center gap-2">
-              {/* <H1 className="grow">My servers</H1> */}
-              <div className="flex items-center gap-4 my-0 grow">
-                <Badge className="px-4 py-2 text-md justify-center text-center">
-                  My servers
-                  <Small
-                    className={cn(
-                      "pl-2",
-                      Object.keys(spawners).length >= maxServers
-                        ? "text-error/80"
-                        : Object.keys(spawners).length >= maxServers - 2
-                          ? "text-warning-600"
-                          : "",
-                    )}
-                  >
-                    {Object.keys(spawners).length} / {maxServers}
-                  </Small>
-                </Badge>
-                <Dialog
-                  open={isAddServerModalOpen}
-                  onOpenChange={setIsAddServerModalOpen}
+          <div className="flex items-center gap-2">
+            {/* <H1 className="grow">My servers</H1> */}
+            <div className="flex items-center gap-4 my-0 grow">
+              <Badge className="px-4 py-2 text-md justify-center text-center">
+                My servers
+                <Small
+                  className={cn(
+                    "pl-2",
+                    Object.keys(spawners).length >= maxServers
+                      ? "text-error/80"
+                      : Object.keys(spawners).length >= maxServers - 2
+                        ? "text-warning-600"
+                        : "",
+                  )}
                 >
-                  <DialogTrigger asChild>
-                    <Badge
-                      variant={"outline"}
-                      className={cn(
-                        "px-4 py-2 text-md justify-center text-center",
-                        "cursor-pointer transition-all duration-200 bg-tertiary",
-                        " hover:border-primary dark:hover:border-primary/50 ",
-                      )}
-                      onClick={() => setIsAddServerModalOpen(true)}
-                    >
-                      + New Server{" "}
-                    </Badge>
-                  </DialogTrigger>
-                  <DialogContent>
-                    {Object.keys(spawners).length >= maxServers ? (
+                  {Object.keys(spawners).length} / {maxServers}
+                </Small>
+              </Badge>
+              <Dialog
+                open={isAddServerModalOpen}
+                onOpenChange={setIsAddServerModalOpen}
+              >
+                <DialogTrigger asChild>
+                  <Badge
+                    variant={"outline"}
+                    className={cn(
+                      "px-4 py-2 text-md justify-center text-center",
+                      "cursor-pointer transition-all duration-200 bg-tertiary",
+                      " hover:border-primary dark:hover:border-primary/50 ",
+                    )}
+                    onClick={() => setIsAddServerModalOpen(true)}
+                  >
+                    + New Server{" "}
+                  </Badge>
+                </DialogTrigger>
+                <DialogContent>
+                  {Object.keys(spawners).length >= maxServers ? (
+                    <DialogHeader>
+                      <DialogTitle>Server Limit Reached</DialogTitle>
+                      <DialogDescription>
+                        You have reached the maximum number of servers (
+                        {maxServers}). Please delete an existing server before
+                        creating a new one.
+                      </DialogDescription>
+                    </DialogHeader>
+                  ) : (
+                    <>
                       <DialogHeader>
-                        <DialogTitle>Server Limit Reached</DialogTitle>
+                        <DialogTitle>Name Your Server</DialogTitle>
                         <DialogDescription>
-                          You have reached the maximum number of servers (
-                          {maxServers}). Please delete an existing server before
-                          creating a new one.
+                          Choose a unique name for your new server. This name
+                          will be used to identify your server in the list.
                         </DialogDescription>
                       </DialogHeader>
-                    ) : (
-                      <>
-                        <DialogHeader>
-                          <DialogTitle>Name Your Server</DialogTitle>
-                          <DialogDescription>
-                            Choose a unique name for your new server. This name
-                            will be used to identify your server in the list.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="flex flex-col gap-1">
-                          <Input
-                            type="text"
-                            id="newServerName"
-                            value={serverName}
-                            onChange={(
-                              e: React.ChangeEvent<HTMLInputElement>,
-                            ) => setServerName(e.target.value)}
-                            placeholder="e.g. ml-experiment, thesis-analysis"
-                            maxLength={SERVER_NAME_MAX_LENGTH}
+                      <div className="flex flex-col gap-1">
+                        <Input
+                          type="text"
+                          id="newServerName"
+                          value={serverName}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setServerName(e.target.value)
+                          }
+                          placeholder="e.g. ml-experiment, thesis-analysis"
+                          maxLength={SERVER_NAME_MAX_LENGTH}
+                          className={cn(
+                            "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
+                            "placeholder:text-muted-foreground/70",
+                            (isDuplicate || isTooLong) &&
+                              "border-error focus-visible:ring-error",
+                          )}
+                          aria-invalid={isDuplicate || isTooLong}
+                          aria-describedby="server-name-error"
+                          autoFocus
+                        />
+                        <div className="flex justify-end">
+                          <Small
                             className={cn(
-                              "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
-                              "placeholder:text-muted-foreground/70",
-                              (isDuplicate || isTooLong) &&
-                                "border-error focus-visible:ring-error",
+                              "text-xs",
+                              isTooLong
+                                ? "text-error"
+                                : "text-muted-foreground",
                             )}
-                            aria-invalid={isDuplicate || isTooLong}
-                            aria-describedby="server-name-error"
-                            autoFocus
-                          />
-                          <div className="flex justify-end">
-                            <Small
-                              className={cn(
-                                "text-xs",
-                                isTooLong
-                                  ? "text-error"
-                                  : "text-muted-foreground",
-                              )}
-                            >
-                              {serverName.length} / {SERVER_NAME_MAX_LENGTH}
-                            </Small>
-                          </div>
-                          <div
-                            id="server-name-error"
-                            className={`flex items-center gap-2 text-sm text-error min-h-[1.25rem] ${isDuplicate || isTooLong ? "visible" : "invisible"}`}
-                            role="alert"
-                            aria-live="polite"
                           >
-                            <AlertCircle size={16} className="flex-shrink-0" />
-                            <span className="truncate">
-                              {isTooLong
-                                ? `Server name is too long (max ${SERVER_NAME_MAX_LENGTH} characters)`
-                                : isDuplicate
-                                  ? `Server name "${serverName}" is already in use`
-                                  : "\u00A0"}
-                            </span>
-                          </div>
+                            {serverName.length} / {SERVER_NAME_MAX_LENGTH}
+                          </Small>
                         </div>
-                        <DialogFooter>
-                          <Button
-                            variant="secondary"
-                            onClick={() => {
-                              setIsAddServerModalOpen(false);
-                              setServerName("");
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button onClick={handleAddServer} disabled={isEmpty}>
-                            <Plus size={16} strokeWidth={3} />
-                            Add Server
-                          </Button>
-                        </DialogFooter>
-                      </>
-                    )}
-                  </DialogContent>
-                </Dialog>
-              </div>
-
-              <TileSelector
-                options={[1, 2]}
-                defaultValue={1}
-                onChange={setGridType}
-                className="w-24 h-10"
-                renderOptionLabel={(value) =>
-                  value === 1 ? (
-                    <span
-                      className="inline-flex justify-center"
-                      aria-label="Grid view"
-                    >
-                      <LayoutGrid size={14} />
-                    </span>
-                  ) : (
-                    <span
-                      className="inline-flex justify-center"
-                      aria-label="List view"
-                    >
-                      <LayoutList size={14} />
-                    </span>
-                  )
-                }
-              />
+                        <div
+                          id="server-name-error"
+                          className={`flex items-center gap-2 text-sm text-error min-h-[1.25rem] ${isDuplicate || isTooLong ? "visible" : "invisible"}`}
+                          role="alert"
+                          aria-live="polite"
+                        >
+                          <AlertCircle size={16} className="flex-shrink-0" />
+                          <span className="truncate">
+                            {isTooLong
+                              ? `Server name is too long (max ${SERVER_NAME_MAX_LENGTH} characters)`
+                              : isDuplicate
+                                ? `Server name "${serverName}" is already in use`
+                                : "\u00A0"}
+                          </span>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            setIsAddServerModalOpen(false);
+                            setServerName("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button onClick={handleAddServer} disabled={isEmpty}>
+                          <Plus size={16} strokeWidth={3} />
+                          Add Server
+                        </Button>
+                      </DialogFooter>
+                    </>
+                  )}
+                </DialogContent>
+              </Dialog>
             </div>
-            <PanelContent className="pt-2">
-              <div
-                className={
-                  "mt-4 grid gap-8 " +
-                  (gridType === 1
-                    ? "grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center"
-                    : "grid-cols-1")
-                }
-              >
-                {/* <ServerCardType
+
+            <TileSelector
+              options={[1, 2]}
+              defaultValue={1}
+              onChange={setGridType}
+              className="w-24 h-10"
+              renderOptionLabel={(value) =>
+                value === 1 ? (
+                  <span
+                    className="inline-flex justify-center"
+                    aria-label="Grid view"
+                  >
+                    <LayoutGrid size={14} />
+                  </span>
+                ) : (
+                  <span
+                    className="inline-flex justify-center"
+                    aria-label="List view"
+                  >
+                    <LayoutList size={14} />
+                  </span>
+                )
+              }
+            />
+          </div>
+          <div
+            className={
+              "mt-4 grid gap-8 " +
+              (gridType === 1
+                ? "grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center"
+                : "grid-cols-1")
+            }
+          >
+            {/* <ServerCardType
                   title="Default Server"
                   key="default-server"
                   spawnerUrl={appConfig.url}
@@ -658,43 +651,41 @@ function HomePage() {
                   }
                   showDeleteButton={false}
                 /> */}
-                {Object.entries(spawners)
-                  .sort(([, a], [, b]) => {
-                    if (!a.last_activity) return 1;
-                    if (!b.last_activity) return -1;
-                    return (
-                      new Date(b.last_activity).getTime() -
-                      new Date(a.last_activity).getTime()
-                    );
-                  })
-                  .map(([name, spawner]) => (
-                    <ServerCardType
-                      title={name}
-                      key={name}
-                      spawnerUrl={spawner.url}
-                      lastActivity={spawner.last_activity}
-                      isActive={spawner.active}
-                      isReady={spawner.ready}
-                      handleOpen={() => handleOpenServer(spawner.url)}
-                      handleStop={() => handleStopServer(name)}
-                      handleDelete={() => handleDeleteServer(name)}
-                      handleStart={() => handleStartServer(name)}
-                      handleQuickStart={() => handleQuickStart(name)}
-                      progress={serverProgress[name]}
-                      cpuUsage={resourceUsage[name]?.cpu_usage_ratio}
-                      memoryUsed={resourceUsage[name]?.memory_usage_bytes}
-                      memoryLimit={resourceUsage[name]?.memory_limit_bytes}
-                    />
-                  ))}
-                {Object.keys(spawners).length < maxServers && (
-                  <EmptyServerCard
-                    onClick={() => setIsAddServerModalOpen(true)}
-                    variant={gridType === 1 ? "default" : "inline"}
-                  />
-                )}
-              </div>
-            </PanelContent>
-          </Panel>
+            {Object.entries(spawners)
+              .sort(([, a], [, b]) => {
+                if (!a.last_activity) return 1;
+                if (!b.last_activity) return -1;
+                return (
+                  new Date(b.last_activity).getTime() -
+                  new Date(a.last_activity).getTime()
+                );
+              })
+              .map(([name, spawner]) => (
+                <ServerCardType
+                  title={name}
+                  key={name}
+                  spawnerUrl={spawner.url}
+                  lastActivity={spawner.last_activity}
+                  isActive={spawner.active}
+                  isReady={spawner.ready}
+                  handleOpen={() => handleOpenServer(spawner.url)}
+                  handleStop={() => handleStopServer(name)}
+                  handleDelete={() => handleDeleteServer(name)}
+                  handleStart={() => handleStartServer(name)}
+                  handleQuickStart={() => handleQuickStart(name)}
+                  progress={serverProgress[name]}
+                  cpuUsage={resourceUsage[name]?.cpu_usage_ratio}
+                  memoryUsed={resourceUsage[name]?.memory_usage_bytes}
+                  memoryLimit={resourceUsage[name]?.memory_limit_bytes}
+                />
+              ))}
+            {Object.keys(spawners).length < maxServers && (
+              <EmptyServerCard
+                onClick={() => setIsAddServerModalOpen(true)}
+                variant={gridType === 1 ? "default" : "inline"}
+              />
+            )}
+          </div>
         </div>
       </div>
       <Footer />
