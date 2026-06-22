@@ -3,6 +3,7 @@ import "./HomePage.css";
 import { JupyterHubApiClient, fetchResourceUsage } from "@api";
 import type { ResourceUsageData } from "@api";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { safeServerName } from "@utils";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import {
   ServerCard,
@@ -52,6 +53,10 @@ interface ApiSpawnerData {
 interface SpawnerData extends ApiSpawnerData {
   name?: string;
   pending?: "spawn" | "stop" | null;
+  /**
+   * Safe (slugified) server name matching the JupyterHub backend's
+   */
+  safeName?: string;
 }
 
 /**
@@ -88,6 +93,37 @@ function HomePage() {
   const [spawners, setSpawners] = useState<Record<string, SpawnerData>>(
     appConfig.spawners as Record<string, SpawnerData>,
   );
+  // Mirror spawners in a ref so fetchUsage can read current server names
+  const spawnersRef = useRef(spawners);
+  useEffect(() => {
+    spawnersRef.current = spawners;
+  }, [spawners]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const missing = Object.entries(spawners).filter(([, s]) => !s.safeName);
+    if (missing.length === 0) return;
+    Promise.all(
+      missing.map(async ([raw]) => [raw, await safeServerName(raw)] as const),
+    ).then((entries) => {
+      if (cancelled || entries.length === 0) return;
+      setSpawners((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const [raw, safe] of entries) {
+          // Only patch if still missing.
+          if (next[raw] && !next[raw].safeName) {
+            next[raw] = { ...next[raw], safeName: safe };
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [spawners]);
   const [serverName, setServerName] = useState("");
   const [serverProgress, setServerProgress] = useState<ServerProgress>({});
   const [isAddServerModalOpen, setIsAddServerModalOpen] = useState(false);
@@ -125,25 +161,35 @@ function HomePage() {
   const fetchUsage = useCallback(async () => {
     try {
       const data = await fetchResourceUsage(appConfig.userName);
-      // Only update if data changed (shallow key compare)
+      // The Prometheus usage endpoint returns keys as safe (slugified) server
+      const safeToRaw = new Map<string, string>();
+      for (const [raw, spawner] of Object.entries(spawnersRef.current)) {
+        safeToRaw.set(spawner.safeName ?? raw, raw);
+      }
+      const remapped: ResourceUsageData = {};
+      for (const [safe, metrics] of Object.entries(data)) {
+        const raw = safeToRaw.get(safe) ?? safe;
+        remapped[raw] = metrics;
+      }
+      // Only update if data changed
       const prev = resourceUsageRef.current;
       const sameKeys =
-        Object.keys(data).length === Object.keys(prev).length &&
-        Object.keys(data).every((k) => k in prev);
+        Object.keys(remapped).length === Object.keys(prev).length &&
+        Object.keys(remapped).every((k) => k in prev);
       if (!sameKeys) {
-        resourceUsageRef.current = data;
-        setResourceUsage(data);
+        resourceUsageRef.current = remapped;
+        setResourceUsage(remapped);
         return;
       }
       // Deep compare values to avoid unnecessary re-renders
-      const changed = Object.entries(data).some(
+      const changed = Object.entries(remapped).some(
         ([k, v]) =>
           prev[k]?.cpu_usage_ratio !== v.cpu_usage_ratio ||
           prev[k]?.memory_usage_bytes !== v.memory_usage_bytes,
       );
       if (changed) {
-        resourceUsageRef.current = data;
-        setResourceUsage(data);
+        resourceUsageRef.current = remapped;
+        setResourceUsage(remapped);
       }
     } catch (err) {
       console.error(
