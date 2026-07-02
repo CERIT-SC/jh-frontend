@@ -41,7 +41,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
           />
           {/* Welcome heading */}
           <div className="flex flex-col items-center gap-2 text-center">
-            <H1 className="text-2xl sm:text-3xl">Welcome Back</H1>
+            <H1 className="text-2xl sm:text-3xl">Welcome to JupyterHub</H1>
             <Muted className="text-sm sm:text-base">
               Sign in to access your JupyterHub workspace
             </Muted>
@@ -52,7 +52,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
 
         <CardContent className="flex flex-col gap-5 px-6 py-6 sm:px-8">
           {/* Info section */}
-          <P className="text-center text-sm leading-relaxed sm:text-base">
+          <P className="text-center text-sm leading-relaxed">
             You need to be a valid member of{" "}
             <Button
               variant="ghost"
@@ -79,7 +79,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
               }}
             >
               <Users className="h-5 w-5 shrink-0" />
-              <span className="text-sm text-left">Check membership status</span>
+              <span className="text-sm text-left">Check membership</span>
             </Button>
 
             <Button
@@ -91,9 +91,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
               }}
             >
               <BookOpen className="h-5 w-5 shrink-0" />
-              <span className="text-sm text-left">
-                JupyterHub documentation
-              </span>
+              <span className="text-sm text-left">Documentation</span>
             </Button>
           </div>
         </CardContent>
