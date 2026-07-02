@@ -314,11 +314,13 @@ function FormPage() {
             s3secretkey: formData.s3secretkey as string,
           });
         } catch (error) {
+          console.error(error);
           setIsSubmitting(false);
           const errorMessage =
             error instanceof Error ? error.message : "Unknown error";
-          let userMessage =
-            "Invalid S3 credentials/bucket/S3 url — cannot connect to the bucket.\n\nCheck your inputs are correct.";
+          const errorName =
+            error instanceof Error ? error.name : "UnknownError";
+          let userMessage;
 
           if (
             errorMessage.includes("Access Denied") ||
@@ -337,13 +339,20 @@ function FormPage() {
             errorMessage.includes("ECONNREFUSED") ||
             errorMessage.includes("ENOTFOUND") ||
             errorMessage.includes("getaddrinfo") ||
-            errorMessage.includes("NetworkError")
+            errorMessage.includes("NetworkError") ||
+            errorMessage.includes("Failed to fetch")
           ) {
             userMessage = "Cannot reach S3 endpoint — please check the S3 URL.";
-          } else if (errorMessage.includes("SignatureDoesNotMatch")) {
+          } else if (
+            errorMessage.includes("SignatureDoesNotMatch") ||
+            errorName.includes("SignatureDoesNotMatch")
+          ) {
             userMessage =
               "S3 secret key is incorrect — please verify your secret key.";
-          } else if (errorMessage.includes("InvalidAccessKeyId")) {
+          } else if (
+            errorMessage.includes("InvalidAccessKeyId") ||
+            errorName.includes("InvalidAccessKey")
+          ) {
             userMessage =
               "S3 access key is invalid — please verify your access key.";
           } else if (
@@ -352,6 +361,8 @@ function FormPage() {
           ) {
             userMessage =
               "S3 connection timed out — please check the S3 URL and try again.";
+          } else {
+            userMessage = `S3 validation error - ${errorMessage}`;
           }
 
           pushAlert(userMessage, {
