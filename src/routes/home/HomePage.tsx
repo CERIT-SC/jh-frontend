@@ -540,12 +540,16 @@ function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
-      <div className="container grow  mx-auto py-4 space-y-4">
+      <div className="container grow  mx-auto">
         {appConfig.announcement && (
-          <Announcement message={appConfig.announcement} variant="warning" />
+          <Announcement
+            className="mt-4"
+            message={appConfig.announcement}
+            variant="warning"
+          />
         )}
-        <div className="named-servers">
-          <div className="flex items-center gap-2">
+        <div className="named-servers mt-8">
+          <div className="flex items-center gap-2 mt-1">
             {/* <H1 className="grow">My servers</H1> */}
             <div className="flex items-center gap-4 my-0 grow">
               <Badge className="px-4 py-2 text-md justify-center text-center">

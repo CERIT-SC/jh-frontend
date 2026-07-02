@@ -5,11 +5,13 @@ import { X } from "lucide-react";
 interface AnnouncementProps {
   message: string;
   variant?: "default" | "success" | "warning" | "error";
+  className?: string;
 }
 
 export function Announcement({
   message,
   variant = "warning",
+  className,
 }: AnnouncementProps) {
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -18,7 +20,7 @@ export function Announcement({
   }
 
   return (
-    <Alert variant={variant}>
+    <Alert variant={variant} className={cn(className)}>
       <AlertDescription className="flex w-full items-start justify-between gap-4">
         <span>{message}</span>
         <button
