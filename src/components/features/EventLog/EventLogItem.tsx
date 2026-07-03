@@ -126,7 +126,12 @@ export const EventLogItem = memo(function EventLogItem({
         {cleanHtmlMessage ? (
           <span
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(cleanHtmlMessage) }}
-            className="[&_a]:text-primary [&_a]:underline"
+            className={cn(
+              "[&_a]:underline [&_a]:transition-colors [&_a]:text-info-700 [&_a:hover]:text-info-800",
+              entry.isFailed || entry.isReady || entry.isWarning
+                ? "dark:[&_a]:text-info-700 dark:[&_a:hover]:text-info-800"
+                : "dark:[&_a]:text-info-400 dark:[&_a:hover]:text-info-300",
+            )}
           />
         ) : (
           cleanMessage
