@@ -12,6 +12,7 @@ import {
   Badge,
   cn,
   PanelDescription,
+  Label,
 } from "@e-infra/design-system";
 import { Loader2, RefreshCw } from "lucide-react";
 
@@ -141,11 +142,14 @@ export default function ResourceSelectionSection({
           <Panel className="p-0 bg-background border-primary">
             <PanelTitle className="mb-2 px-6 pt-6">CPU Limit</PanelTitle>
             <PanelDescription className="px-6">
-              Select the limit of CPU cores
+              The number of CPU cores available to this notebook while it's
+              running.
             </PanelDescription>
             <Separator className="mt-2" />
-            <PanelContent className="px-6 pb-6 bg-secondary-300 dark:bg-surface rounded-b-lg">
+            <PanelContent className="px-6 pb-6 bg-secondary-300 dark:bg-surface rounded-b-lg flex flex-col gap-2">
+              <Label className="pl-2">Select the limit of CPU cores</Label>
               <TileSelector
+                ariaLabel="Select the limit of CPU cores"
                 options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
                 defaultValue={defCPU ?? undefined}
                 onChange={handleCPUSelect}
@@ -155,11 +159,14 @@ export default function ResourceSelectionSection({
           <Panel className="p-0 bg-background border-primary">
             <PanelTitle className="mb-2 px-6 pt-6">Memory Limit</PanelTitle>
             <PanelDescription className="px-6">
-              Select the limit of memory in GB
+              The amount of memory available to this notebook while it's
+              running.
             </PanelDescription>
             <Separator className="mt-2" />
-            <PanelContent className="px-6 pb-6 bg-secondary-300 dark:bg-surface rounded-b-lg">
+            <PanelContent className="px-6 pb-6 bg-secondary-300 dark:bg-surface rounded-b-lg flex flex-col gap-2">
+              <Label className="pl-2">Select the limit of memory in GB</Label>
               <TileSelector
+                ariaLabel="Select the limit of memory in GB"
                 options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
                 defaultValue={defMem ?? undefined}
                 onChange={handleMemSelect}
@@ -174,8 +181,8 @@ export default function ResourceSelectionSection({
           {/* <p>By default, no GPU is assigned.</p> */}
 
           {/* GPU Status Section */}
-          <Panel className="bg-surface-raised p-0 pt-6 bg-background border-primary">
-            <PanelTitle className="px-6 pb-4">
+          <Panel className="p-0 pt-6 bg-background border-primary">
+            <PanelTitle className="px-6 pb-2">
               <div className="flex justify-between">
                 GPU
                 <button
@@ -190,7 +197,12 @@ export default function ResourceSelectionSection({
                 </button>
               </div>
             </PanelTitle>
+            <PanelDescription className="px-6 mb-2">
+              The GPU available to this notebook for graphics and compute
+              workloads.
+            </PanelDescription>
             <PanelContent className="flex flex-col px-6 gap-4 border-t py-4 bg-secondary-300 dark:bg-surface rounded-b-lg">
+              <Label className="pl-2">Select GPU</Label>
               <div className="flex flex-wrap gap-2 animate-fade-in">
                 {Object.entries(gpuOptions).map(([value, label]) => {
                   const isActive = selectedGpu === value;
@@ -198,7 +210,7 @@ export default function ResourceSelectionSection({
                     <Badge
                       key={value}
                       className={cn(
-                        "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                        "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
                         "bg-surface-raised border-border text-text",
                         "hover:bg-primary/10 hover:border-primary",
                         isActive &&

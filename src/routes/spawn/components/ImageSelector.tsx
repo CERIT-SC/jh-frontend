@@ -344,7 +344,7 @@ export function SelectingCardsTabs({
               key={category}
               variant={isActive ? "default" : "outline"}
               className={cn(
-                "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
                 "bg-surface-raised border-surface-raised text-text",
                 "hover:bg-primary/10 hover:border-primary",
                 isCustomCategory && "bg-tertiary",
@@ -366,9 +366,9 @@ export function SelectingCardsTabs({
 
       {/* Custom Image Input */}
       {activeCategory === "custom" && (
-        <div className="space-y-3">
+        <div className="space-y-3 ">
           <div className="flex flex-col gap-2">
-            <P className="text-sm text-muted-foreground">
+            <P className="text-sm text-text-muted">
               Provide image name in format repo/image_name:tag or
               repo/image_name
             </P>
@@ -392,56 +392,63 @@ export function SelectingCardsTabs({
       )}
 
       {/* Image Cards Grid */}
-      {activeCategory !== "custom" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar py-2">
-          {filteredImages.map(({ value, name }) => (
-            <Card
-              key={value}
-              className={cn(
-                "min-w-auto",
-                "bg-surface-raised",
-                "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-colors duration-400 ease-in-out",
-                selectedImageId === value
-                  ? "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% dark:via-secondary dark:from-surface-raised dark:to-secondary dark:bg-linear-45 dark:from-85% shadow-md"
-                  : "hover:text-text hover:border-primary/30",
-              )}
-              onClick={() => onSelectImage(value, activeCategory)}
-            >
-              {/* Check indicator in corner */}
-              <div
-                className={cn(
-                  "absolute top-2 right-2 z-10 transition-opacity duration-200",
-                  selectedImageId === value
-                    ? "opacity-100"
-                    : "opacity-0 group-hover:opacity-50",
-                )}
-              >
-                <Check
+      <div className="">
+        {activeCategory !== "custom" && (
+          <>
+            <span className="text-sm text-text-muted pl-1">
+              Available Images
+            </span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar py-2">
+              {filteredImages.map(({ value, name }) => (
+                <Card
+                  key={value}
                   className={cn(
-                    "size-5",
+                    "min-w-auto",
+                    "bg-surface-raised",
+                    "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-colors duration-400 ease-in-out",
                     selectedImageId === value
-                      ? "text-primary-foreground"
-                      : "text-primary",
+                      ? "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% dark:via-secondary dark:from-surface-raised dark:to-secondary dark:bg-linear-45 dark:from-85% shadow-md"
+                      : "hover:text-text hover:border-primary/30",
                   )}
-                />
-              </div>
-              <CardHeader>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <CardTitle className="truncate text-xl">
-                      {extractBaseName(name)}
-                    </CardTitle>
-                  </TooltipTrigger>
-                  <TooltipContent>{extractBaseName(name)}</TooltipContent>
-                </Tooltip>
-                <CardDescription>
-                  {extractImageBadge(name, value)}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      )}
+                  onClick={() => onSelectImage(value, activeCategory)}
+                >
+                  {/* Check indicator in corner */}
+                  <div
+                    className={cn(
+                      "absolute top-2 right-2 z-10 transition-opacity duration-200",
+                      selectedImageId === value
+                        ? "opacity-100"
+                        : "opacity-0 group-hover:opacity-50",
+                    )}
+                  >
+                    <Check
+                      className={cn(
+                        "size-5",
+                        selectedImageId === value
+                          ? "text-primary-foreground"
+                          : "text-primary",
+                      )}
+                    />
+                  </div>
+                  <CardHeader>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <CardTitle className="truncate text-xl">
+                          {extractBaseName(name)}
+                        </CardTitle>
+                      </TooltipTrigger>
+                      <TooltipContent>{extractBaseName(name)}</TooltipContent>
+                    </Tooltip>
+                    <CardDescription>
+                      {extractImageBadge(name, value)}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

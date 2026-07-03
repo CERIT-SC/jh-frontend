@@ -18,6 +18,7 @@ import {
   PanelDescription,
   PanelContent,
   Separator,
+  Content,
 } from "@e-infra/design-system";
 import { OverviewPanel } from "@components/features";
 import initDev from "../../dev-setup";
@@ -442,10 +443,14 @@ function FormPage() {
         userName={appConfig.userName as string}
       ></JupyterHubHeader>
       <Alert alerts={alerts} onRemove={removeAlert} />
-      <div className="mx-auto px-4 py-8 space-y-8 lg:container">
-        {appConfig.announcement && (
-          <Announcement message={appConfig.announcement} variant="warning" />
-        )}
+      {appConfig.announcement && (
+        <Announcement
+          className="mx-auto mt-4 px-4 lg:container"
+          message={appConfig.announcement}
+          variant="warning"
+        />
+      )}
+      <Content className="px-0 space-y-4 lg:container">
         <ContentHeading className="max-w-full">
           {serverName ? (
             <span className="truncate inline-block max-w-full">
@@ -476,13 +481,10 @@ function FormPage() {
                 >
                   <CircleQuestionMark size={52} />
                 </Button>
-                <PanelTitle className="mb-2 px-6 pt-6">
+                <PanelTitle className="p-6 text-2xl">
                   Step 1: Environment Options
                 </PanelTitle>
-                <PanelDescription className="px-6">
-                  Select a image for your notebook.
-                </PanelDescription>
-                <Separator className="mt-2" />
+                <Separator />
                 <PanelContent className="p-6">
                   <ImageSelectionSectionTabs
                     defaultFormData={defaultFormData}
@@ -523,7 +525,7 @@ function FormPage() {
                 >
                   <CircleQuestionMark size={52} />
                 </Button>
-                <PanelTitle className="mb-2 px-6 pt-6">
+                <PanelTitle className="mb-2 px-6 pt-6 text-2xl">
                   Step 2: Storage Options
                 </PanelTitle>
                 <PanelDescription className="px-6">
@@ -590,7 +592,7 @@ function FormPage() {
                 >
                   <CircleQuestionMark size={52} />
                 </Button>
-                <PanelTitle className="mb-2 px-6 pt-6">
+                <PanelTitle className="mb-2 px-6 pt-6 text-2xl">
                   Step 3: Resource Options
                 </PanelTitle>
                 <PanelDescription className="px-6">
@@ -628,7 +630,7 @@ function FormPage() {
             </div>
           </div>
         </ContentBody>
-      </div>
+      </Content>
       <Footer />
     </div>
   );

@@ -204,16 +204,14 @@ export function ImageSelectionSectionTabs({
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-screen">
-      <div>
-        <SelectingCardsTabs
-          selectedImageId={selectedImage}
-          onSelectImage={handleImageSelect}
-          selectedCategory={selectedCategory || undefined}
-          setSelectCategory={setSelectedCategory}
-          customImageValue={customImageValue}
-          onCustomImageChange={handleCustomImageChange}
-        />
-      </div>
+      <SelectingCardsTabs
+        selectedImageId={selectedImage}
+        onSelectImage={handleImageSelect}
+        selectedCategory={selectedCategory || undefined}
+        setSelectCategory={setSelectedCategory}
+        customImageValue={customImageValue}
+        onCustomImageChange={handleCustomImageChange}
+      />
 
       <Separator />
 

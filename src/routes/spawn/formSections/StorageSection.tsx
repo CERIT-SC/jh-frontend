@@ -158,7 +158,7 @@ function SectionHeader({
       {icon && (
         <span
           className={cn(
-            "flex-shrink-0 mt-0.5 transition-colors",
+            "shrink-0 mt-0.5 transition-colors",
             enabled ? "text-primary" : "text-muted-foreground",
           )}
           aria-hidden="true"
@@ -198,6 +198,7 @@ function SectionContent({
       className={cn(
         "p-4 rounded-b-lg border-t border-border bg-secondary-300 dark:bg-surface",
         "animate-[slideInFade_300ms_ease-out]",
+        "px-12",
         className,
       )}
     >
@@ -671,12 +672,12 @@ export default function StorageSelectionSection({
           icon={<HardDrive className="w-5 h-5 mt-0.5" aria-hidden="true" />}
         >
           <H4>Persistent Notebook Home</H4>
-          <P>
+          <P className="pl-1 text-xs">
             Persistent home ensures your data persists even when the notebook is
-            deleted. Mounted to <Code>/home/jovyan</Code>
+            deleted. Mounted to <Code className="text-xs">/home/jovyan</Code>
           </P>
         </SectionContainer.Header>
-        <SectionContainer.Content>
+        <SectionContainer.Content className="px-12">
           {/* Badge Selector for New/Existing */}
           <div className="mb-4 space-y-2">
             <div className="flex flex-wrap gap-2">
@@ -687,7 +688,7 @@ export default function StorageSelectionSection({
                     key={option.value}
                     variant={isActive ? "default" : "outline"}
                     className={cn(
-                      "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                      "cursor-pointer px-4 py-2 text-sm transition-all duration-200",
                       "bg-surface",
                       "hover:bg-primary/10 hover:border-primary",
                       isActive &&
@@ -734,7 +735,7 @@ export default function StorageSelectionSection({
           )}
           {/* Existing Home Configuration */}
           {phSelectionType === "existing" && (
-            <div className="">
+            <div className="pl-3">
               <DropDownMenu
                 formSelect={handlePersistentHome}
                 title="Select Persistent Home"
@@ -763,7 +764,7 @@ export default function StorageSelectionSection({
           </P>
         </SectionContainer.Header>
         <SectionContainer.Content>
-          <div className="space-y-4 pl-4 animate-in fade-in-0 duration-300">
+          <div className="space-y-4 animate-in fade-in-0 duration-300">
             {/* Storage Selection */}
             <div>
               <DropDownMenu
@@ -776,8 +777,8 @@ export default function StorageSelectionSection({
             </div>
 
             {/* Mount Options */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
+            <div className="space-y-3 pl-4">
+              <div className="flex items-start gap-3">
                 <Switch
                   id="locationStorageCheckId"
                   checked={checkedMount}
@@ -786,13 +787,16 @@ export default function StorageSelectionSection({
                 />
                 <Label
                   htmlFor="locationStorageCheckId"
-                  className="cursor-pointer"
+                  className="cursor-pointer flex-wrap"
                 >
-                  Mount selected home to{" "}
-                  <Code className="bg-secondary dark:bg-surface">
-                    /storage/{formData["home"] ?? "chosen_storage"}/home/
-                    {appConfig.userName}
-                  </Code>
+                  <span>Mount selected home directory</span>
+                  <span className="basis-full">
+                    Mounted to:
+                    <Code className="bg-secondary dark:bg-surface basis-full">
+                      /storage/{formData["home"] ?? "chosen_storage"}/home/
+                      {appConfig.userName}
+                    </Code>
+                  </span>
                 </Label>
               </div>
 
@@ -808,11 +812,10 @@ export default function StorageSelectionSection({
                     Mount project directories
                   </Label>
                   <P>
-                    All projects mounted to{" "}
+                    Projects mount as subfolders under:{" "}
                     <Code className="bg-secondary dark:bg-surface">
                       /home/projects/brno12
                     </Code>
-                    , specific projects are subfolders
                   </P>
                 </div>
               </div>
@@ -833,12 +836,14 @@ export default function StorageSelectionSection({
         >
           <H3>S3 Object Storage</H3>
           <P>
-            Mount S3-compatible object storage bucket. Mounted to{" "}
-            <Code>/storage/s3</Code>
+            Mounts S3-compatible object storage to: <Code>/storage/s3</Code>
           </P>
         </SectionContainer.Header>
         <SectionContainer.Content>
-          <div className="space-y-4 pl-4">
+          <div className="space-y-4">
+            <P className="mb-2">
+              Pick a bucket you've already mounted, or connect a new one below.
+            </P>
             {/* S3 Type Selection */}
             <div className="space-y-2">
               <div className="flex flex-wrap gap-2">
@@ -887,7 +892,7 @@ export default function StorageSelectionSection({
 
             {/* Existing S3 Bucket */}
             {s3SelectionType === "existing" && (
-              <div className="animate-in fade-in-0 duration-200">
+              <div className="animate-in fade-in-0 duration-200 px-4">
                 {Object.keys(s3values).length > 0 ? (
                   <DropDownMenu
                     formSelect={handleS3Buckets}

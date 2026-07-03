@@ -46,7 +46,7 @@ export const DropDownMenu: React.FC<DropDownMenuProps> = ({
 
   return (
     <div className="flex flex-col gap-2 mt-2">
-      <Label>{title}</Label>
+      <Label className="pl-2">{title}</Label>
       <Select value={selectedValue} onValueChange={handleValueChange}>
         <SelectTrigger className={`w-full ${className}`}>
           <SelectValue placeholder="Select an option" />

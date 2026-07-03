@@ -21,6 +21,7 @@ import {
   MemoryStick,
   Pencil,
   LayoutDashboard,
+  HardDrive,
 } from "lucide-react";
 import { getGpuOptions, getImageOptions } from "../utils/gatherFormData";
 import { triggerShineById } from "@utils";
@@ -190,7 +191,7 @@ export function OverviewPanel({
 
   return (
     <Panel title={"overview"} className={className}>
-      <PanelTitle className="flex gap-1 items-center pt-6 px-6">
+      <PanelTitle className="flex gap-1 items-center pt-6 px-6 text-2xl">
         <LayoutDashboard />
         Configuration Overview
       </PanelTitle>
@@ -200,31 +201,21 @@ export function OverviewPanel({
         <Separator />
         {/* Image Section */}
         <>
-          <div className="px-6">
+          <div className="px-6 space-y-2">
             <div className="flex items-center justify-between">
               <H4>Environment Configuration</H4>
               <EditButton sectionId="image-section" />
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <P className="pr-1">Name</P>
-                <Strong className="min-w-0 truncate text-right">
-                  {displayImageName || "-"}
-                </Strong>
-              </div>
-              <div className="flex items-center justify-between min-w-0">
-                <P className="pr-1">Tag</P>
-                <Small className="min-w-0 truncate text-right">
-                  {displayImageTag || "-"}
-                </Small>
-              </div>
-              <div className="flex items-center justify-between">
-                <P>SSH Access</P>
-                <SSHStatusIndicator
-                  enabled={sshAccessEnabled}
-                  available={isSSHAvailable}
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-0.5">
+              <P className="pr-1 text-text-heading/80">Name</P>
+              <Strong className="min-w-0 ">{displayImageName || "-"}</Strong>
+              <P className="pr-1 text-text-heading/80">Tag</P>
+              <Small className="min-w-0 ">{displayImageTag || "-"}</Small>
+              <P className="text-text-heading/80">SSH Access</P>
+              <SSHStatusIndicator
+                enabled={sshAccessEnabled}
+                available={isSSHAvailable}
+              />
             </div>
           </div>
         </>
@@ -240,24 +231,23 @@ export function OverviewPanel({
             <EditButton sectionId="storage-section" />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Persistent Home */}
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <Strong>Persistent Home</Strong>
-                </div>
-                <Small className="block mt-1 line-clamp-1">
-                  {phSelection === "new"
-                    ? "New directory"
-                    : formData?.phname || "Existing directory"}
-                </Small>
-                {phSelection === "new" && formData?.phCheck === "yes" && (
-                  <Small className="block text-amber-600 mt-0.5">
-                    ⚠ Will erase if exists
-                  </Small>
-                )}
+            <div className="grid grid-cols-2">
+              <div className="flex items-center gap-2">
+                <HardDrive className="w-3 h-3 text-text-heading" />
+                <P className="text-text-heading/80">Persistent Home</P>
               </div>
+              <P className="block">
+                {phSelection === "new"
+                  ? "New directory"
+                  : formData?.phname || "Existing directory"}
+              </P>
+              {phSelection === "new" && formData?.phCheck === "yes" && (
+                <Small className="block text-amber-600 mt-0.5">
+                  ⚠ Will erase if exists
+                </Small>
+              )}
               {/* <Badge
                 variant="outline"
                 className="text-xs bg-blue-50 text-blue-700 border-blue-200"
@@ -268,53 +258,61 @@ export function OverviewPanel({
             </div>
 
             {/* MetaCentrum Storage */}
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <Strong>MetaCentrum Storage</Strong>
-                  <Server className="w-3 h-3 text-gray-400" />
-                </div>
-                {metaCentrumEnabled && (
-                  <>
-                    <Small className="block mt-1">
-                      {formData?.home || "No storage selected"}
-                    </Small>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {formData?.locationStorageCheck === "yes" && (
-                        <Badge variant="outline" className="text-xs">
-                          Mount to /storage
-                        </Badge>
-                      )}
-                      {formData?.projectCheck === "yes" && (
-                        <Badge variant="outline" className="text-xs">
-                          Project Directories
-                        </Badge>
-                      )}
-                    </div>
-                  </>
-                )}
+            <div className="flex justify-between">
+              <div className="flex items-center gap-2 text-text-heading">
+                <Server className="w-3 h-3" />
+                <P>MetaCentrum Storage</P>
               </div>
               <StatusIndicator enabled={metaCentrumEnabled} />
             </div>
+            {metaCentrumEnabled && (
+              <div className="px-5 grid grid-cols-2">
+                <Small className="text-text-muted">Cluster</Small>
+                <P className="block">
+                  {formData?.home || "No storage selected"}
+                </P>
+                <div className="col-span-2 flex flex-wrap gap-1 mt-1">
+                  {formData?.locationStorageCheck === "yes" && (
+                    <Badge
+                      variant="outline"
+                      className="text-xs text-text-heading"
+                    >
+                      Mount to /storage
+                    </Badge>
+                  )}
+                  {formData?.projectCheck === "yes" && (
+                    <Badge
+                      variant="outline"
+                      className="text-xs text-text-heading"
+                    >
+                      Project Directories
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* S3 Storage */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <Strong>S3 Object Storage</Strong>
-                  <Cloud className="w-3 h-3 text-gray-400" />
+                <div className="flex justify-between">
+                  <div className="flex items-center gap-2 text-text-heading">
+                    <Cloud className="w-3 h-3" />
+                    <P>S3 Object Storage</P>
+                  </div>
+                  <StatusIndicator enabled={s3Enabled} />
                 </div>
                 {s3Enabled && (
-                  <>
-                    <Small className="block mt-1 truncate">
+                  <div className="grid grid-cols-2 col-span-2 px-5">
+                    <Small className="text-text-muted">Bucket</Small>
+                    <Small className="block">
                       {s3Selection === "new"
                         ? formData?.s3bucket || "New bucket"
                         : formData?.s3name || "Existing bucket"}
                     </Small>
-                  </>
+                  </div>
                 )}
               </div>
-              <StatusIndicator enabled={s3Enabled} />
             </div>
           </div>
         </div>
@@ -326,31 +324,25 @@ export function OverviewPanel({
             <H4>Resource Configuration</H4>
             <EditButton sectionId="resources-section" />
           </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex justify-between">
-              <span className="inline-flex items-center gap-1">
-                <Cpu className="w-4 h-4" />
-                CPU
-              </span>
-              <Strong>
-                {formData?.cpuselection}{" "}
-                {formData?.cpuselection === 1 ? "Core" : "Cores"}
-              </Strong>
-            </div>
-            <div className="flex justify-between">
-              <span className="inline-flex items-center gap-1">
-                <MemoryStick className="w-4 h-4" />
-                Memory
-              </span>
-              <Strong>{formData?.memselection} GB</Strong>
-            </div>
-            <div className="flex justify-between">
-              <span className="inline-flex items-center gap-1">
-                <Gpu className="w-4 h-4" />
-                GPU
-              </span>
-              <Strong>{selectedGpuLabel}</Strong>
-            </div>
+          <div className="grid grid-cols-2">
+            <span className="inline-flex items-center gap-2 text-text-heading/80">
+              <Cpu className="w-3 h-3" />
+              CPU
+            </span>
+            <Strong>
+              {formData?.cpuselection}{" "}
+              {formData?.cpuselection === 1 ? "Core" : "Cores"}
+            </Strong>
+            <span className="inline-flex items-center gap-2 text-text-heading/80">
+              <MemoryStick className="w-3 h-3" />
+              Memory
+            </span>
+            <Strong>{formData?.memselection} GB</Strong>
+            <span className="inline-flex items-center gap-2 text-text-heading/80">
+              <Gpu className="w-3 h-3" />
+              GPU
+            </span>
+            <Strong>{selectedGpuLabel}</Strong>
           </div>
         </div>
 
