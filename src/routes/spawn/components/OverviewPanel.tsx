@@ -9,6 +9,10 @@ import {
   Badge,
   Button,
   P,
+  cn,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
 } from "@e-infra/design-system";
 import React, { JSX, useMemo } from "react";
 import {
@@ -59,26 +63,6 @@ function EditButton({ sectionId }: { sectionId: string }): JSX.Element {
 }
 
 /**
- * Status indicator component for showing enabled/disabled state
- */
-function StatusIndicator({ enabled }: { enabled: boolean }): JSX.Element {
-  return enabled ? (
-    <Badge
-      variant="outline"
-      className="bg-[var(--color-success-100)] text-[var(--color-success-700)] border-[var(--color-success-200)] flex items-center gap-1 mt-1"
-    >
-      <Check className="w-3 h-3" />
-      <span className="text-xs">Enabled</span>
-    </Badge>
-  ) : (
-    <Badge variant="secondary" className=" flex items-center gap-1 mt-1">
-      <X className="w-3 h-3" />
-      <span className="text-xs">Disabled</span>
-    </Badge>
-  );
-}
-
-/**
  * Status indicator component for showing enabled/disabled/N/A state
  */
 function SSHStatusIndicator({
@@ -102,7 +86,7 @@ function SSHStatusIndicator({
   return enabled ? (
     <Badge
       variant="outline"
-      className="bg-[var(--color-success-100)] text-[var(--color-success-700)] border-[var(--color-success-200)] flex items-center gap-1 mt-1"
+      className="bg-success-100 text-success-700 border-success-200 flex items-center gap-1 mt-1"
     >
       <Check className="w-3 h-3" />
       <span className="text-xs">Enabled</span>
@@ -190,7 +174,7 @@ export function OverviewPanel({
   const s3Selection = formData?.s3selection || "existing";
 
   return (
-    <Panel title={"overview"} className={className}>
+    <Panel title={"overview"} className={cn("max-w-md", className)}>
       <PanelTitle className="flex gap-1 items-center pt-6 px-6 text-2xl">
         <LayoutDashboard />
         Configuration Overview
@@ -238,11 +222,20 @@ export function OverviewPanel({
                 <HardDrive className="w-3 h-3 text-text-heading" />
                 <P className="text-text-heading/80">Persistent Home</P>
               </div>
-              <P className="block">
-                {phSelection === "new"
-                  ? "New directory"
-                  : formData?.phname || "Existing directory"}
-              </P>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <P className="line-clamp-2">
+                    {phSelection === "new"
+                      ? "New directory"
+                      : formData?.phname || "Existing directory"}
+                  </P>
+                </TooltipTrigger>
+                {phSelection === "existing" && formData?.phname && (
+                  <TooltipContent side="top">
+                    {`${formData.phname}`}
+                  </TooltipContent>
+                )}
+              </Tooltip>
               {phSelection === "new" && formData?.phCheck === "yes" && (
                 <Small className="block text-amber-600 mt-0.5">
                   ⚠ Will erase if exists
@@ -258,20 +251,18 @@ export function OverviewPanel({
             </div>
 
             {/* MetaCentrum Storage */}
-            <div className="flex justify-between">
+            <div className="grid grid-cols-2">
               <div className="flex items-center gap-2 text-text-heading">
                 <Server className="w-3 h-3" />
-                <P>MetaCentrum Storage</P>
+                <P>MetaCentrum</P>
               </div>
-              <StatusIndicator enabled={metaCentrumEnabled} />
-            </div>
-            {metaCentrumEnabled && (
-              <div className="px-5 grid grid-cols-2">
-                <Small className="text-text-muted">Cluster</Small>
-                <P className="block">
-                  {formData?.home || "No storage selected"}
-                </P>
-                <div className="col-span-2 flex flex-wrap gap-1 mt-1">
+              {metaCentrumEnabled ? (
+                <P className="">{formData?.home || "No storage selected"}</P>
+              ) : (
+                <P>-</P>
+              )}
+              {metaCentrumEnabled && (
+                <div className="col-span-2 flex flex-wrap gap-1 pl-5">
                   {formData?.locationStorageCheck === "yes" && (
                     <Badge
                       variant="outline"
@@ -289,29 +280,27 @@ export function OverviewPanel({
                     </Badge>
                   )}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* S3 Storage */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="flex justify-between">
+                <div className="grid grid-cols-2">
                   <div className="flex items-center gap-2 text-text-heading">
                     <Cloud className="w-3 h-3" />
                     <P>S3 Object Storage</P>
                   </div>
-                  <StatusIndicator enabled={s3Enabled} />
-                </div>
-                {s3Enabled && (
-                  <div className="grid grid-cols-2 col-span-2 px-5">
-                    <Small className="text-text-muted">Bucket</Small>
-                    <Small className="block">
+                  {s3Enabled ? (
+                    <P>
                       {s3Selection === "new"
                         ? formData?.s3bucket || "New bucket"
                         : formData?.s3name || "Existing bucket"}
-                    </Small>
-                  </div>
-                )}
+                    </P>
+                  ) : (
+                    <P>-</P>
+                  )}
+                </div>
               </div>
             </div>
           </div>
