@@ -149,30 +149,28 @@ function SectionHeader({
 
   return (
     <div
-      className={cn(
-        "flex items-start gap-3 p-4",
-        !enabled && "opacity-60",
-        className,
-      )}
+      className={cn("flex items-start gap-3 p-4", className)}
+      onClick={() => showToggle && handleToggle(!enabled)}
     >
       {icon && (
         <span
           className={cn(
             "shrink-0 mt-0.5 transition-colors",
-            enabled ? "text-primary" : "text-muted-foreground",
+            enabled ? "text-primary" : "text-muted-foreground opacity-60",
           )}
           aria-hidden="true"
         >
           {icon}
         </span>
       )}
-      <div className={cn("flex-1", !enabled && "text-muted-foreground")}>
+      <div
+        className={cn("flex-1", !enabled && "text-muted-foreground opacity-60")}
+      >
         {children}
       </div>
       {showToggle && (
         <Switch
           checked={enabled}
-          onCheckedChange={handleToggle}
           className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
         />
       )}
