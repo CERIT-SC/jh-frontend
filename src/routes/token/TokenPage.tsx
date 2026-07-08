@@ -326,8 +326,8 @@ function TokenPage() {
                 <DialogHeader>
                   <DialogTitle>Your new API Token</DialogTitle>
                   <DialogDescription>
-                    Copy this token. You won&apos;t be able to see it again, but you
-                    can always come back here to get a new one.
+                    Copy this token. You won&apos;t be able to see it again, but
+                    you can always come back here to get a new one.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="my-4">

@@ -3,7 +3,8 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  background: radial-gradient(circle at center top, #cc3333, transparent 50%),
+  background:
+    radial-gradient(circle at center top, #cc3333, transparent 50%),
     radial-gradient(circle at center bottom, #ff9999, transparent 50%),
     radial-gradient(circle at top left, #ff6666, transparent 60%),
     radial-gradient(circle at top right, #ff4d4d, transparent 60%),
@@ -33,7 +34,8 @@
   border-top: 0;
   left: 0;
   width: 100%;
-  background: radial-gradient(circle at center top, #cc9900, transparent 50%),
+  background:
+    radial-gradient(circle at center top, #cc9900, transparent 50%),
     radial-gradient(circle at center bottom, #ffcc66, transparent 50%),
     radial-gradient(circle at top left, #ffcc33, transparent 60%),
     radial-gradient(circle at top right, #ffb84d, transparent 60%),

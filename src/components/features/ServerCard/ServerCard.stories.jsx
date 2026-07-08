@@ -1,4 +1,9 @@
-import { ServerCard, ServerCardInline, ServerCardCompact, EmptyServerCard } from "./ServerCard";
+import {
+  ServerCard,
+  ServerCardInline,
+  ServerCardCompact,
+  EmptyServerCard,
+} from "./ServerCard";
 import React from "react";
 
 export default {
@@ -42,7 +47,8 @@ export default {
       min: 0,
       max: 100,
       step: 1,
-      description: "CPU usage percentage (0-100), only visible when active+ready",
+      description:
+        "CPU usage percentage (0-100), only visible when active+ready",
     },
     memoryUsed: {
       control: "number",
