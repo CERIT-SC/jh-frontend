@@ -423,14 +423,15 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
         <Card
           className={cn(
             "transition-colors duration-200",
-            "border-0",
+            "border-0 w-full",
             "relative",
-            "dark:bg-surface-raised",
+            "bg-background dark:bg-surface-raised",
+            "sm:mx-0.5",
             isReady
               ? "border-l-2 border-success"
               : !isActive
                 ? "border-l-2 border-slate-400"
-                : "border-l-2 border-warning/30 before:absolute before:inset-x-[-2px] before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
+                : "border-l-2 border-warning/30 before:absolute before:-inset-x-0.5 before:bottom-0 before:pointer-events-none before:h-(--before-height before:border-l-2 before:rounded-bl-md before:border-warning",
           )}
           style={{ "--before-height": `${progress}%` } as React.CSSProperties}
         >
@@ -446,7 +447,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                   <Badge
                     variant={isActive ? "default" : "secondary"}
                     className={cn(
-                      "hidden sm:flex",
+                      "flex",
                       isActive &&
                         "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
                       isReady &&
@@ -667,7 +668,7 @@ export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
     return (
       <Panel
         className={cn(
-          "group border-2 border-dashed bg-transparent transition-all duration-200",
+          "w-full group border-2 border-dashed bg-transparent transition-all duration-200",
           " hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02] dark:border-primary/30",
           "cursor-pointer",
         )}

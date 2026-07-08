@@ -11,8 +11,8 @@ import {
   EmptyServerCard,
 } from "@components/features";
 import initDev from "../../dev-setup";
-import { Alert, Announcement, TileSelector } from "@components/ui";
-import { useAlerts } from "@hooks";
+import { Alert, Announcement } from "@components/ui";
+import { useAlerts, useMediaQuery } from "@hooks";
 import {
   Badge,
   Dialog,
@@ -27,7 +27,7 @@ import {
   cn,
   Small,
 } from "@e-infra/design-system";
-import { LayoutGrid, LayoutList, Plus, AlertCircle } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import type { HomeAppConfig } from "@src-types/appConfig";
 
 /**
@@ -533,8 +533,8 @@ function HomePage() {
     };
   }, []);
 
-  const [gridType, setGridType] = useState(1);
-  const ServerCardType = gridType === 1 ? ServerCard : ServerCardInline;
+  const isMultiColumn = useMediaQuery("(min-width: 768px)");
+  const ServerCardType = isMultiColumn ? ServerCard : ServerCardInline;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -671,37 +671,10 @@ function HomePage() {
                 </DialogContent>
               </Dialog>
             </div>
-
-            <TileSelector
-              options={[1, 2]}
-              defaultValue={1}
-              onChange={setGridType}
-              className="w-24 h-10"
-              renderOptionLabel={(value) =>
-                value === 1 ? (
-                  <span
-                    className="inline-flex justify-center"
-                    aria-label="Grid view"
-                  >
-                    <LayoutGrid size={14} />
-                  </span>
-                ) : (
-                  <span
-                    className="inline-flex justify-center"
-                    aria-label="List view"
-                  >
-                    <LayoutList size={14} />
-                  </span>
-                )
-              }
-            />
           </div>
           <div
             className={
-              "mt-4 grid gap-8 " +
-              (gridType === 1
-                ? "grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center"
-                : "grid-cols-1")
+              "mt-4 grid gap-8 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center"
             }
           >
             {/* <ServerCardType
@@ -747,7 +720,7 @@ function HomePage() {
             {Object.keys(spawners).length < maxServers && (
               <EmptyServerCard
                 onClick={() => setIsAddServerModalOpen(true)}
-                variant={gridType === 1 ? "default" : "inline"}
+                variant={isMultiColumn ? "default" : "inline"}
               />
             )}
           </div>
