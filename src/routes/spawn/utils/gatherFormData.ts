@@ -63,6 +63,8 @@ export function gatherFormData() {
         ? opts.gpu
         : null;
 
+    const normalizedPhome = opts.phome === "delete" ? "new" : opts.phome;
+
     const formData = {
       // Basic Resources
       memory: Number.isNaN(parsedMem) ? null : parsedMem,
@@ -79,17 +81,13 @@ export function gatherFormData() {
       projectDirectories: Boolean(opts.mountprojects),
       persistentHome: {
         type:
-          opts.phome === "new" ||
-          opts.phome === "remain" ||
-          opts.phome === "delete"
+          normalizedPhome === "new" || normalizedPhome === "remain"
             ? "new"
             : "existing",
-        eraseIfExists: opts.phome === "delete",
+        eraseIfExists: false,
         selectedHome:
-          opts.phome !== "new" &&
-          opts.phome !== "remain" &&
-          opts.phome !== "delete"
-            ? { value: opts.phome, text: opts.phome }
+          normalizedPhome !== "new" && normalizedPhome !== "remain"
+            ? { value: normalizedPhome, text: normalizedPhome }
             : null,
       },
 
