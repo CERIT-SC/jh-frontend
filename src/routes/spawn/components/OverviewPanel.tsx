@@ -237,7 +237,7 @@ export function OverviewPanel({
                 )}
               </Tooltip>
               {phSelection === "new" && formData?.phCheck === "yes" && (
-                <Small className="block text-amber-600 mt-0.5">
+                <Small className="block text-amber-600 mt-0.5 pl-5">
                   ⚠ Will erase if exists
                 </Small>
               )}
