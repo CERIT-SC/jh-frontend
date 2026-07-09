@@ -40,15 +40,6 @@ if (import.meta.env.DEV) {
   initDev();
 }
 
-const IMAGE_CATEGORY_KEY_MAP: Record<string, string> = {
-  simple: "simplenbname",
-  r: "rnbname",
-  tf: "tfnbname",
-  matlab: "matlabnbname",
-  various: "varnbname",
-  folding: "foldnbname",
-};
-
 /**
  * Form state interface for the spawn form
  * Compatible with StorageSelectionSection's FormState type
@@ -205,22 +196,6 @@ function FormPage() {
 
     if (isCustomImage) {
       payload.customimage = containerImage;
-    } else if (imageCategory) {
-      const imageFieldKey = IMAGE_CATEGORY_KEY_MAP[imageCategory];
-      if (!imageFieldKey) {
-        pushAlert(
-          `Invalid image category: "${imageCategory}". Please select a valid image.`,
-          {
-            variant: "error",
-          },
-        );
-        return;
-      }
-      payload[imageFieldKey] = containerImage;
-    }
-
-    if (!isCustomImage) {
-      delete payload.customimage;
     }
 
     if (formData.sshAccess) {
