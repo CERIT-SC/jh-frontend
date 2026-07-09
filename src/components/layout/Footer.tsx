@@ -17,7 +17,7 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
       )}
     >
       {/* Gradient accent bar at top */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/40 to-transparent" />
 
       <div className="mx-auto flex max-w-7xl flex-col gap-4">
         {/* Main content row — vertically aligned */}
@@ -40,7 +40,7 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
             </p>
           </div>
 
-          {/* Right — Links with visual treatment */}
+          {/* Right — Links */}
           <nav className="flex flex-wrap items-center justify-center gap-3">
             <Button
               variant="outline"
@@ -67,7 +67,7 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
 
         {/* Divider with gradient */}
         <div className="relative py-2">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="h-px w-full bg-linear-to-r from-transparent via-border to-transparent" />
         </div>
 
         {/* Copyright row */}
