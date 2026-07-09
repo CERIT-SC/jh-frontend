@@ -192,9 +192,9 @@ export function OverviewPanel({
             </div>
             <div className="grid grid-cols-2 gap-0.5">
               <P className="pr-1 text-text-heading/80">Name</P>
-              <Strong className="min-w-0 ">{displayImageName || "-"}</Strong>
+              <Strong className="min-w-0 break-all">{displayImageName || "-"}</Strong>
               <P className="pr-1 text-text-heading/80">Tag</P>
-              <Small className="min-w-0 ">{displayImageTag || "-"}</Small>
+              <Small className="min-w-0 break-all">{displayImageTag || "-"}</Small>
               <P className="text-text-heading/80">SSH Access</P>
               <SSHStatusIndicator
                 enabled={sshAccessEnabled}
@@ -217,14 +217,14 @@ export function OverviewPanel({
 
           <div className="space-y-2">
             {/* Persistent Home */}
-            <div className="grid grid-cols-2">
+            <div className="grid grid-cols-2 items-start">
               <div className="flex items-center gap-2">
                 <HardDrive className="w-3 h-3 text-text-heading" />
                 <P className="text-text-heading/80">Persistent Home</P>
               </div>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <P className="line-clamp-2">
+                  <P className="break-all">
                     {phSelection === "new"
                       ? "New directory"
                       : formData?.phname || "Existing directory"}
@@ -251,7 +251,7 @@ export function OverviewPanel({
             </div>
 
             {/* MetaCentrum Storage */}
-            <div className="grid grid-cols-2">
+            <div className="grid grid-cols-2 items-start">
               <div className="flex items-center gap-2 text-text-heading">
                 <Server className="w-3 h-3" />
                 <P>MetaCentrum</P>
@@ -286,7 +286,7 @@ export function OverviewPanel({
             {/* S3 Storage */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="grid grid-cols-2">
+                <div className="grid grid-cols-2 items-start">
                   <div className="flex items-center gap-2 text-text-heading">
                     <Cloud className="w-3 h-3" />
                     <P>S3 Object Storage</P>
