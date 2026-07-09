@@ -97,6 +97,12 @@ export function ImageSelectionSectionTabs({
   }, [isSSHAvailable]);
 
   useEffect(() => {
+    if (selectedCategory !== "custom") {
+      setCustomImageValue("");
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
     if (defaultFormData?.notebookImage) {
       setSshChecked(defaultFormData.notebookImage.sshAccess || false);
       onSshChange?.(defaultFormData.notebookImage.sshAccess ?? false);

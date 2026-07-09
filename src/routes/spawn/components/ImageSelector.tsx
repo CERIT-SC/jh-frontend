@@ -251,11 +251,6 @@ export function SelectingCardsTabs({
     setActiveCategory(category);
     setSelectCategory?.(category);
     setSearchQuery(""); // Reset search when changing category
-
-    // When switching away from custom, clear the custom image input
-    if (category !== "custom") {
-      onCustomImageChange?.("");
-    }
   };
 
   // Filter images based on search query
