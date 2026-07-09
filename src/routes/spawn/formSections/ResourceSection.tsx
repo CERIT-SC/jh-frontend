@@ -55,12 +55,14 @@ export default function ResourceSelectionSection({
     try {
       const data: GPUIndicatorsData = await fetchGPUIndicators();
       // Parse the data into the format expected by GPUStatusIndicator
-      const statuses = Object.entries(data).map(([model, { total, free }]) => ({
-        model,
-        label: model.replace("NVIDIA-", ""),
-        total,
-        free,
-      }));
+      const statuses = Object.entries(data)
+        .filter(([, { total, free }]) => total >= 0 && free >= 0)
+        .map(([model, { total, free }]) => ({
+          model,
+          label: model.replace("NVIDIA-", ""),
+          total,
+          free,
+        }));
       setGpuStatuses(statuses);
     } catch (err) {
       const errorMessage =

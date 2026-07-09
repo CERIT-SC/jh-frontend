@@ -14,6 +14,16 @@ export interface GPUIndicatorsData {
 const GPU_INDICATORS_URL = "/services/prometheus/gpus";
 
 export async function fetchGPUIndicators(): Promise<GPUIndicatorsData> {
-  const response = await axios.get<GPUIndicatorsData>(GPU_INDICATORS_URL);
-  return response.data;
+  const response = await axios.get<unknown>(GPU_INDICATORS_URL, {
+    headers: { Accept: "application/json" },
+  });
+
+  if (
+    typeof response.data === "string" &&
+    response.data.trimStart().toLowerCase().startsWith("<html")
+  ) {
+    throw new Error("500 internal server error");
+  }
+
+  return response.data as GPUIndicatorsData;
 }
