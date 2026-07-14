@@ -420,12 +420,12 @@ function FormPage() {
       <Alert alerts={alerts} onRemove={removeAlert} />
       {appConfig.announcement && (
         <Announcement
-          className="mx-auto mt-4 px-4 lg:container"
+          className="mx-auto mt-6 px-4 lg:container"
           message={appConfig.announcement}
           variant="warning"
         />
       )}
-      <Content className="px-0 space-y-4 lg:container">
+      <Content className="py-8 px-0 lg:container">
         <ContentHeading className="max-w-full">
           {serverName ? (
             <span className="truncate inline-block max-w-full">

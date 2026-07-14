@@ -246,7 +246,7 @@ function TokenPage() {
     <div className="flex min-h-screen flex-col">
       <JupyterHubHeader userName={appConfig.userName || ""} />
       <main className="flex flex-1 flex-col items-center">
-        <Content className="w-full max-w-7xl">
+        <Content className="w-full max-w-7xl py-8">
           <ContentHeading>Manage JupyterHub Tokens</ContentHeading>
           <ContentBody>
             {/* Request Token Form */}
