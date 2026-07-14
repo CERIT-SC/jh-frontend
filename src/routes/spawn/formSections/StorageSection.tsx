@@ -913,7 +913,7 @@ export default function StorageSelectionSection({
 
             {/* New S3 Bucket */}
             {s3SelectionType === "new" && (
-              <div className="space-y-4 animate-in fade-in-0 duration-200">
+              <div className="space-y-4 animate-in fade-in-0 duration-200 px-4">
                 <Alert variant="default" className="mb-4">
                   <Cloud className="h-4 w-4" />
                   <span className="text-xs">
