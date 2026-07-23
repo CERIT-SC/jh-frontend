@@ -15,16 +15,18 @@
       content="strict-origin-when-cross-origin"
     />
   </head>
-
   <body>
     <div id="root"></div>
     <script>
       const appConfig = {
-        serverName: "{{ server_name }}",
-        spawnUrl: "{{ spawn_url }}",
         userName: "{{ user.name }}",
+        statusCode: {{ status_code }},
+        statusMessage: "{{ status_message }}",
+        messageHtml: {% if message_html %}{{ message_html | tojson }}{% else %}undefined{% endif %},
+        message: {% if message %}{{ message | tojson }}{% else %}undefined{% endif %},
+        extraErrorHtml: {% if extra_error_html %}{{ extra_error_html | tojson }}{% else %}undefined{% endif %},
       };
     </script>
-    <script type="module" src="/src/routes/not-running/not_running.tsx"></script>
+    <script type="module" src="/src/routes/error/error.tsx"></script>
   </body>
 </html>

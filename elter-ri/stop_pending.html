@@ -15,16 +15,17 @@
       content="strict-origin-when-cross-origin"
     />
   </head>
-
   <body>
     <div id="root"></div>
     <script>
       const appConfig = {
-        serverName: "{{ server_name }}",
-        spawnUrl: "{{ spawn_url }}",
+        progressUrl: "{{ progress_url }}",
         userName: "{{ user.name }}",
       };
     </script>
-    <script type="module" src="/src/routes/not-running/not_running.tsx"></script>
+    <script
+      type="module"
+      src="/src/routes/stop-pending/stop_pending.tsx"
+    ></script>
   </body>
 </html>
