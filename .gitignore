@@ -35,3 +35,10 @@ storybook-static
 # static files
 static-files-*
 static-files.yaml
+TODO.md
+/docs
+
+# AI assistant configs
+.claude/
+.opencode/
+.tmp/
