@@ -10,7 +10,7 @@ INPUT=$1
 
 # Define default namespace and valid build targets
 DEFAULT_NAMESPACE="jupyterhub-dev-ns"
-VALID_BUILD_TARGETS=("cas" "c9088" "hub" "elter")
+VALID_BUILD_TARGETS=("cas" "c9088" "hub" "elter-ri")
 
 # Determine if the input is a namespace or build target
 if [[ " ${VALID_BUILD_TARGETS[@]} " =~ " $INPUT " ]]; then
@@ -40,17 +40,20 @@ create_configmap() {
   local name=$1
   local path=$2
 
-  # Don't delete ConfigMaps from the cluster automatically
-  if [ "$NAMESPACE" = "$DEFAULT_NAMESPACE" ]; then
+
     kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
     kubectl create configmap $name --from-file=$path --namespace $NAMESPACE
-  else
-    # Creating the ConfigMaps locally
-    kubectl create configmap $name --from-file=$path --namespace jupyterhub-ns
+  # Don't delete ConfigMaps from the cluster automatically
+  # if [ "$NAMESPACE" = "$DEFAULT_NAMESPACE" ]; then
+  #   kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found
+  #   kubectl create configmap $name --from-file=$path --namespace $NAMESPACE
+  # else
+  #   # Creating the ConfigMaps locally
+  #   kubectl create configmap $name --from-file=$path --namespace jupyterhub-ns
 #    --dry-run=client -o json > $name.json
 #    kubectl patch --local -f $name.json --type=json -p='[{"op": "remove", "path": "/metadata/creationTimestamp"}]' -o yaml > $name.yaml
 #    rm $name.json
-  fi
+  # fi
 }
 
 create_configmap "static-files" "$BASE_DIR"
