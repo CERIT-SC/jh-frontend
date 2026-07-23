@@ -10,10 +10,10 @@ import {
   TooltipContent,
 } from "@e-infra/design-system";
 import { cn } from "@utils";
-import { getImageOptions } from "../utils/gatherFormData";
-
-type ImageOption = { value: string; name: string };
-type ImageOptionsByCategory = Record<string, ImageOption[]>;
+import {
+  buildImageValueToCategoryMap,
+  buildImageValueToNameMap,
+} from "../utils/gatherFormData";
 
 interface DefaultNotebookImage {
   type?: string;
@@ -37,37 +37,33 @@ interface ImageSelectionProps {
   setSelectedCategory: (value: string) => void;
 }
 
-function findImage(
+/**
+ * Finds the category for a given image value using O(1) lookup.
+ * @param imageValue - The image value to look up
+ * @param imageToCategoryMap - Pre-built Map for O(1) lookup
+ * @returns The category key or null if not found
+ */
+function findImageCategory(
   imageValue: string,
-  images: ImageOptionsByCategory,
-): [string, string] | [null, null] {
-  for (const [catKey, catImages] of Object.entries(images)) {
-    const foundImage = catImages.find((img) => img.value === imageValue);
-    if (foundImage) {
-      return [catKey, foundImage.value];
-    }
-  }
-  return [null, null];
+  imageToCategoryMap: Map<string, string>,
+): string | null {
+  return imageToCategoryMap.get(imageValue) || null;
 }
 
 /**
  * Checks if the given image value corresponds to an SSH-capable image
- * by looking for SSH keywords in the image name.
+ * by looking for SSH keywords in the image name using O(1) lookup.
  */
 function imageHasSSHSupport(
   imageValue: string | null,
-  images: ImageOptionsByCategory,
+  imageToNameMap: Map<string, string>,
 ): boolean {
   if (!imageValue) return false;
 
-  for (const catImages of Object.values(images)) {
-    const found = catImages.find((img) => img.value === imageValue);
-    if (found) {
-      const nameLower = found.name.toLowerCase();
-      return nameLower.includes("ssh");
-    }
-  }
-  return false;
+  const imageName = imageToNameMap.get(imageValue);
+  if (!imageName) return false;
+
+  return imageName.toLowerCase().includes("ssh");
 }
 export function ImageSelectionSectionTabs({
   defaultFormData,
@@ -81,13 +77,15 @@ export function ImageSelectionSectionTabs({
   const [sshChecked, setSshChecked] = useState(false);
   const [customImageValue, setCustomImageValue] = useState("");
 
-  const images = getImageOptions() as unknown as ImageOptionsByCategory;
+  // Build O(1) lookup maps once
+  const imageToCategoryMap = useMemo(() => buildImageValueToCategoryMap(), []);
+  const imageToNameMap = useMemo(() => buildImageValueToNameMap(), []);
 
   const isSSHAvailable = useMemo(() => {
     if (!selectedImage && selectedCategory !== "custom") return false;
     if (selectedCategory === "custom") return true;
-    return imageHasSSHSupport(selectedImage, images);
-  }, [selectedImage, selectedCategory, images]);
+    return imageHasSSHSupport(selectedImage, imageToNameMap);
+  }, [selectedImage, selectedCategory, imageToNameMap]);
 
   useEffect(() => {
     if (!isSSHAvailable && sshChecked) {
@@ -127,15 +125,15 @@ export function ImageSelectionSectionTabs({
         return;
       }
 
-      const [category, image] = findImage(strippedVal, images);
-      if (category && image) {
+      const category = findImageCategory(strippedVal, imageToCategoryMap);
+      if (category) {
         const formImagesMap = formImagesName as Record<string, string>;
         const formImageKey = formImagesMap[category] || category;
         setSelectedCategory(category);
-        setSelectedImage(image);
+        setSelectedImage(strippedVal);
         onImageChange?.({
           images: category,
-          [formImageKey]: `cerit.io/hubs/${image}`,
+          [formImageKey]: `cerit.io/hubs/${strippedVal}`,
         });
       } else {
         setCustomImageValue(imgVal || "");
@@ -147,7 +145,7 @@ export function ImageSelectionSectionTabs({
         });
       }
     }
-  }, []);
+  }, [imageToCategoryMap]);
 
   const handleImageSelect = (
     imageValue: string | null,
@@ -173,11 +171,12 @@ export function ImageSelectionSectionTabs({
     // When selecting from the "all" tab, resolve to the image's actual category
     let actualCategory = categoryKey;
     if (categoryKey === "all") {
-      for (const [catKey, catImages] of Object.entries(images)) {
-        if (catImages.some((img: ImageOption) => img.value === imageValue)) {
-          actualCategory = catKey;
-          break;
-        }
+      const resolvedCategory = findImageCategory(
+        imageValue,
+        imageToCategoryMap,
+      );
+      if (resolvedCategory) {
+        actualCategory = resolvedCategory;
       }
     }
 
@@ -230,7 +229,7 @@ export function ImageSelectionSectionTabs({
             onCheckedChange={handleSshToggle}
             disabled={!isSSHAvailable}
             className={cn(
-              "data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary",
+              "data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary dark:data-[state=checked]:bg-primary",
               !isSSHAvailable && "opacity-50 cursor-not-allowed",
             )}
           />

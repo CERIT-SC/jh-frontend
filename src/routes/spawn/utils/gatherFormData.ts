@@ -241,3 +241,39 @@ export function getS3BucketOptions() {
 
   return mapped;
 }
+
+/**
+ * Builds a centralized O(1) lookup map from image value to category.
+ * This is a pure, immutable build from getImageOptions().
+ * @returns Map<string, string> where key is image value and value is category
+ */
+export function buildImageValueToCategoryMap(): Map<string, string> {
+  const imageOptions = getImageOptions();
+  const imageToCategoryMap = new Map<string, string>();
+
+  for (const [category, categoryImages] of Object.entries(imageOptions)) {
+    for (const image of categoryImages) {
+      imageToCategoryMap.set(image.value, category);
+    }
+  }
+
+  return imageToCategoryMap;
+}
+
+/**
+ * Builds a centralized O(1) lookup map from image value to image name.
+ * This is a pure, immutable build from getImageOptions().
+ * @returns Map<string, string> where key is image value and value is image name
+ */
+export function buildImageValueToNameMap(): Map<string, string> {
+  const imageOptions = getImageOptions();
+  const imageToNameMap = new Map<string, string>();
+
+  for (const categoryImages of Object.values(imageOptions)) {
+    for (const image of categoryImages) {
+      imageToNameMap.set(image.value, image.name);
+    }
+  }
+
+  return imageToNameMap;
+}

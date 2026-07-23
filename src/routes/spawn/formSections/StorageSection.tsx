@@ -1,11 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  createContext,
-  useContext,
-} from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { DropDownMenu } from "@components/ui";
 import {
   getPersistentHomeOptions,
@@ -36,6 +29,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { cn } from "@utils";
+import SectionContainer from "../components/SectionContainer";
 
 // ==============================================================================
 // Type Definitions
@@ -92,165 +86,6 @@ interface StorageSelectionSectionProps {
 }
 
 declare const appConfig: { userName?: string };
-
-// ==============================================================================
-// Section Container Component
-// ==============================================================================
-
-interface SectionContainerContextValue {
-  enabled: boolean;
-  onToggle?: (enabled: boolean) => void;
-}
-
-const SectionContainerContext = createContext<SectionContainerContextValue>({
-  enabled: true,
-});
-
-interface SectionContainerProps {
-  children?: React.ReactNode;
-  className?: string;
-  /** Whether the section is enabled (content visible) */
-  enabled?: boolean;
-  /** Callback when toggle switch is clicked */
-  onToggle?: (enabled: boolean) => void;
-  /** ID for the section */
-  id?: string;
-}
-
-interface SectionHeaderProps {
-  children?: React.ReactNode;
-  icon?: React.ReactNode;
-  className?: string;
-  /** Whether to show toggle switch in header */
-  showToggle?: boolean;
-}
-
-interface SectionContentProps {
-  children?: React.ReactNode;
-  className?: string;
-}
-
-/**
- * SectionContainer.Header - Header section with optional icon and toggle
- */
-function SectionHeader({
-  children,
-  icon,
-  className,
-  showToggle = false,
-}: SectionHeaderProps): React.ReactElement {
-  const { enabled, onToggle } = useContext(SectionContainerContext);
-
-  const handleToggle = (checked: boolean) => {
-    if (onToggle) {
-      onToggle(checked);
-    }
-  };
-
-  return (
-    <div
-      className={cn("flex items-start gap-3 p-4", className)}
-      onClick={() => showToggle && handleToggle(!enabled)}
-    >
-      {icon && (
-        <span
-          className={cn(
-            "shrink-0 mt-0.5 transition-colors",
-            enabled ? "text-primary" : "text-muted-foreground opacity-60",
-          )}
-          aria-hidden="true"
-        >
-          {icon}
-        </span>
-      )}
-      <div
-        className={cn("flex-1", !enabled && "text-muted-foreground opacity-60")}
-      >
-        {children}
-      </div>
-      {showToggle && (
-        <Switch
-          checked={enabled}
-          className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
-        />
-      )}
-    </div>
-  );
-}
-
-/**
- * SectionContainer.Content - Content section that collapses when disabled
- */
-function SectionContent({
-  children,
-  className,
-}: SectionContentProps): React.ReactElement | null {
-  const { enabled } = useContext(SectionContainerContext);
-
-  if (!enabled) {
-    return null;
-  }
-
-  return (
-    <div
-      className={cn(
-        "p-4 rounded-b-lg border-t border-border bg-secondary-300 dark:bg-surface",
-        "animate-[slideInFade_300ms_ease-out]",
-        "px-12",
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
-/**
- * Collapsible section container with header and content areas.
- * Uses compound component pattern: SectionContainer.Header and SectionContainer.Content
- *
- * @example
- * ```tsx
- * <SectionContainer
- *   enabled={storageEnabled}
- *   onToggle={setStorageEnabled}
- *   id="storage-section"
- * >
- *   <SectionContainer.Header icon={<Server />} showToggle>
- *     <H3>Storage</H3>
- *     <P>Description</P>
- *   </SectionContainer.Header>
- *   <SectionContainer.Content emptyContent={<div>Enable to configure</div>}>
- *     {/* Form content *\/}
- *   </SectionContainer.Content>
- * </SectionContainer>
- * ```
- */
-function SectionContainer({
-  children,
-  className,
-  enabled = true,
-  onToggle,
-  id,
-}: SectionContainerProps): React.ReactElement {
-  return (
-    <SectionContainerContext.Provider value={{ enabled, onToggle }}>
-      <section
-        id={id}
-        className={cn(
-          "rounded-lg ring shadow-sm bg-background transition-all duration-300",
-          enabled ? "" : "ring-border",
-          className,
-        )}
-      >
-        {children}
-      </section>
-    </SectionContainerContext.Provider>
-  );
-}
-
-SectionContainer.Header = SectionHeader;
-SectionContainer.Content = SectionContent;
 
 // ==============================================================================
 // Constants
@@ -690,7 +525,7 @@ export default function StorageSelectionSection({
                       "bg-surface",
                       "hover:bg-primary/10 hover:border-primary",
                       isActive &&
-                        "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
+                        "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
                     )}
                     onClick={() =>
                       setPhSelectionType(option.value as "new" | "existing")
@@ -712,7 +547,7 @@ export default function StorageSelectionSection({
                   id="phCheckId"
                   checked={checkedErased}
                   onCheckedChange={handleErase}
-                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
+                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
                 />
                 <div className="flex-1">
                   <Label htmlFor="phCheckId" className="cursor-pointer">
@@ -781,7 +616,7 @@ export default function StorageSelectionSection({
                   id="locationStorageCheckId"
                   checked={checkedMount}
                   onCheckedChange={handleLocationStorageCheck}
-                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
+                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
                 />
                 <Label
                   htmlFor="locationStorageCheckId"
@@ -803,7 +638,7 @@ export default function StorageSelectionSection({
                   id="projectCheckId"
                   checked={checkedDirectories}
                   onCheckedChange={handleCheckboxDirectories}
-                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary"
+                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
                 />
                 <div className="flex-1">
                   <Label htmlFor="projectCheckId" className="cursor-pointer">
@@ -840,7 +675,8 @@ export default function StorageSelectionSection({
         <SectionContainer.Content>
           <div className="space-y-4">
             <P className="mb-2">
-              Pick a bucket you've already mounted, or connect a new one below.
+              Pick a bucket you&apos;ve already mounted, or connect a new one
+              below.
             </P>
             {/* S3 Type Selection */}
             <div className="space-y-2">
@@ -861,7 +697,7 @@ export default function StorageSelectionSection({
                               "bg-surface",
                               "hover:bg-primary/10 hover:border-primary",
                               isActive &&
-                                "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
+                                "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
                               isExistingDisabled &&
                                 "opacity-50 cursor-not-allowed",
                             )}

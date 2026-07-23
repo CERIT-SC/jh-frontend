@@ -4,17 +4,16 @@ import { getGpuOptions } from "../utils/gatherFormData";
 import { GPUStatusIndicator, GPUSquare } from "@components/features";
 import { fetchGPUIndicators, GPUIndicatorsData } from "@api";
 import {
-  Panel,
-  PanelTitle,
-  PanelContent,
   Muted,
   Separator,
   Badge,
   cn,
-  PanelDescription,
   Label,
+  H4,
+  P,
 } from "@e-infra/design-system";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, Cpu, Gpu, MemoryStick } from "lucide-react";
+import SectionContainer from "../components/SectionContainer";
 
 type FormState = Record<string, unknown>;
 type FormUpdater = (prev: FormState) => FormState;
@@ -141,52 +140,54 @@ export default function ResourceSelectionSection({
     <>
       {defCPU !== null && defMem !== null && defGPU !== null ? (
         <div className="flex flex-col gap-4">
-          <Panel className="p-0 bg-background border-primary">
-            <PanelTitle className="mb-2 px-6 pt-6">CPU Limit</PanelTitle>
-            <PanelDescription className="px-6">
-              The number of CPU cores available to this notebook while it's
-              running.
-            </PanelDescription>
-            <Separator className="mt-2" />
-            <PanelContent className="px-6 pb-6 bg-secondary-300 dark:bg-surface rounded-b-lg flex flex-col gap-2">
-              <Label className="pl-2">Select the limit of CPU cores</Label>
+          <SectionContainer>
+            <SectionContainer.Header icon={<Cpu className="w-5 h-5 mt-0.5" />}>
+              <H4>CPU Limit</H4>
+              <P className="pl-1 text-xs">
+                The number of CPU cores available to this notebook while
+                it&apos;s running.
+              </P>
+            </SectionContainer.Header>
+            <SectionContainer.Content className="flex flex-col gap-2">
+              <Label className="pl-2 text-text-heading">
+                Select the limit of CPU cores
+              </Label>
               <TileSelector
                 ariaLabel="Select the limit of CPU cores"
                 options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
                 defaultValue={defCPU ?? undefined}
                 onChange={handleCPUSelect}
               />
-            </PanelContent>
-          </Panel>
-          <Panel className="p-0 bg-background border-primary">
-            <PanelTitle className="mb-2 px-6 pt-6">Memory Limit</PanelTitle>
-            <PanelDescription className="px-6">
-              The amount of memory available to this notebook while it's
-              running.
-            </PanelDescription>
-            <Separator className="mt-2" />
-            <PanelContent className="px-6 pb-6 bg-secondary-300 dark:bg-surface rounded-b-lg flex flex-col gap-2">
-              <Label className="pl-2">Select the limit of memory in GB</Label>
+            </SectionContainer.Content>
+          </SectionContainer>
+
+          <SectionContainer>
+            <SectionContainer.Header
+              icon={<MemoryStick className="w-5 h-5 mt-0.5" />}
+            >
+              <H4>Memory Limit</H4>
+              <P className="pl-1 text-xs">
+                The amount of memory available to this notebook while it&apos;s
+                running.
+              </P>
+            </SectionContainer.Header>
+            <SectionContainer.Content className="flex flex-col gap-2">
+              <Label className="pl-2 text-text-heading">
+                Select the limit of memory in GB
+              </Label>
               <TileSelector
                 ariaLabel="Select the limit of memory in GB"
                 options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
                 defaultValue={defMem ?? undefined}
                 onChange={handleMemSelect}
               />
-            </PanelContent>
-          </Panel>
-          {/* <FieldHeader
-              title="GPU"
-              infoText="We strongly advise to request a GPU part instead of whole GPU due to their limited amount. If you use whole GPU inefficiently, you might be banned from requesting it again."
-            >
-            </FieldHeader> */}
-          {/* <p>By default, no GPU is assigned.</p> */}
+            </SectionContainer.Content>
+          </SectionContainer>
 
-          {/* GPU Status Section */}
-          <Panel className="p-0 pt-6 bg-background border-primary">
-            <PanelTitle className="px-6 pb-2">
-              <div className="flex justify-between">
-                GPU
+          <SectionContainer>
+            <SectionContainer.Header
+              icon={<Gpu className="w-5 h-5 mt-0.5" />}
+              action={
                 <button
                   onClick={fetchGPUStatus}
                   disabled={loading}
@@ -197,14 +198,16 @@ export default function ResourceSelectionSection({
                     className={`w-4 h-4 text-text-muted ${loading ? "animate-spin" : ""}`}
                   />
                 </button>
-              </div>
-            </PanelTitle>
-            <PanelDescription className="px-6 mb-2">
-              The GPU available to this notebook for graphics and compute
-              workloads.
-            </PanelDescription>
-            <PanelContent className="flex flex-col px-6 gap-4 border-t py-4 bg-secondary-300 dark:bg-surface rounded-b-lg">
-              <Label className="pl-2">Select GPU</Label>
+              }
+            >
+              <H4>GPU</H4>
+              <P className="pl-1 text-xs">
+                The GPU available to this notebook for graphics and compute
+                workloads.
+              </P>
+            </SectionContainer.Header>
+            <SectionContainer.Content className="flex flex-col gap-4">
+              <Label className="pl-2 text-text-heading">Select GPU</Label>
               <div className="flex flex-wrap gap-2 animate-fade-in">
                 {Object.entries(gpuOptions).map(([value, label]) => {
                   const isActive = selectedGpu === value;
@@ -216,7 +219,7 @@ export default function ResourceSelectionSection({
                         "bg-surface-raised border-border text-text",
                         "hover:bg-primary/10 hover:border-primary",
                         isActive &&
-                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
+                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
                       )}
                       onClick={() => {
                         setSelectedGpu(value);
@@ -274,8 +277,8 @@ export default function ResourceSelectionSection({
                   ))}
                 </div>
               )}
-            </PanelContent>
-          </Panel>
+            </SectionContainer.Content>
+          </SectionContainer>
         </div>
       ) : (
         <></>

@@ -78,7 +78,7 @@ const FEATURE_CONFIG: Record<
   },
   VSC: {
     fullName: "Integrated VS Code",
-    style: "bg-chart-3/50 text-text",
+    style: "bg-chart-3/50 text-primary-foreground",
     keywords: ["vs code", "integrated vs code"],
     description: "Integrated Visual Studio Code editor.",
   },
@@ -342,9 +342,9 @@ export function SelectingCardsTabs({
                 "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
                 "bg-surface-raised border-surface-raised text-text",
                 "hover:bg-primary/10 hover:border-primary",
-                isCustomCategory && "bg-tertiary",
+                isCustomCategory && "bg-secondary",
                 isActive &&
-                  "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
+                  "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
               )}
               onClick={() => handleCategoryChange(category)}
             >
@@ -390,7 +390,7 @@ export function SelectingCardsTabs({
       <div className="">
         {activeCategory !== "custom" && (
           <>
-            <span className="text-sm text-text-muted pl-1">
+            <span className="text-sm text-text-heading pl-1">
               Available Images
             </span>
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar py-2">
@@ -402,7 +402,7 @@ export function SelectingCardsTabs({
                     "bg-surface-raised",
                     "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-colors duration-400 ease-in-out",
                     selectedImageId === value
-                      ? "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% dark:via-secondary dark:from-surface-raised dark:to-secondary dark:bg-linear-45 dark:from-85% shadow-md"
+                      ? "border-primary via-primary to-primary bg-linear-45 from-secondary from-85% dark:via-primary dark:from-surface-raised dark:to-primary dark:bg-linear-45 dark:from-85% shadow-md"
                       : "hover:text-text hover:border-primary/30",
                   )}
                   onClick={() => onSelectImage(value, activeCategory)}
@@ -413,7 +413,7 @@ export function SelectingCardsTabs({
                       "absolute top-2 right-2 z-10 transition-opacity duration-200",
                       selectedImageId === value
                         ? "opacity-100"
-                        : "opacity-0 group-hover:opacity-50",
+                        : "opacity-0 group-hover:opacity-100",
                     )}
                   >
                     <Check
@@ -421,7 +421,7 @@ export function SelectingCardsTabs({
                         "size-5",
                         selectedImageId === value
                           ? "text-primary-foreground"
-                          : "text-primary",
+                          : "text-tertiary",
                       )}
                     />
                   </div>

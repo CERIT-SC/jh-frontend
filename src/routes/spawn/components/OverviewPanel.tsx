@@ -29,11 +29,12 @@ import {
 } from "lucide-react";
 import { getGpuOptions, getImageOptions } from "../utils/gatherFormData";
 import { triggerShineById } from "@utils";
+import type { SpawnFormData } from "@src-types/spawnForm";
 
 interface OverviewPanelProps {
   children?: React.ReactNode;
   className?: string;
-  formData?: any;
+  formData?: SpawnFormData;
   selectedImage: string | null;
   categoryImage: string | null;
 }
@@ -179,7 +180,6 @@ export function OverviewPanel({
         <LayoutDashboard />
         Configuration Overview
       </PanelTitle>
-      {/* <PanelDescription>Configuration summary before starting</PanelDescription> */}
 
       <PanelContent className="flex flex-col gap-4">
         <Separator />
@@ -192,9 +192,13 @@ export function OverviewPanel({
             </div>
             <div className="grid grid-cols-2 gap-0.5">
               <P className="pr-1 text-text-heading/80">Name</P>
-              <Strong className="min-w-0 break-word">{displayImageName || "-"}</Strong>
+              <Strong className="min-w-0 break-word">
+                {displayImageName || "-"}
+              </Strong>
               <P className="pr-1 text-text-heading/80">Tag</P>
-              <Small className="min-w-0 break-all">{displayImageTag || "-"}</Small>
+              <Small className="min-w-0 break-all">
+                {displayImageTag || "-"}
+              </Small>
               <P className="text-text-heading/80">SSH Access</P>
               <SSHStatusIndicator
                 enabled={sshAccessEnabled}
@@ -208,10 +212,7 @@ export function OverviewPanel({
         {/* Storage Section */}
         <div className="px-6 gap-2 flex flex-col">
           <div className="flex items-center justify-between">
-            <H4 className="flex items-center gap-2">
-              {/* <HardDrive className="w-4 h-4" /> */}
-              Storage Configuration
-            </H4>
+            <H4 className="flex items-center gap-2">Storage Configuration</H4>
             <EditButton sectionId="storage-section" />
           </div>
 
@@ -241,13 +242,6 @@ export function OverviewPanel({
                   ⚠ Will erase if exists
                 </Small>
               )}
-              {/* <Badge
-                variant="outline"
-                className="text-xs bg-blue-50 text-blue-700 border-blue-200"
-              >
-                Required
-              </Badge> */}
-              {/* <StatusIndicator enabled={true} /> */}
             </div>
 
             {/* MetaCentrum Storage */}
