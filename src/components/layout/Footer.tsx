@@ -8,7 +8,7 @@ interface FooterProps {
   className?: string;
 }
 
-export const Footer = ({ className }: FooterProps): React.ReactElement => {
+function FooterComponent({ className }: FooterProps): React.ReactElement {
   return (
     <footer
       className={cn(
@@ -83,4 +83,6 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
       </div>
     </footer>
   );
-};
+}
+
+export const Footer = React.memo(FooterComponent);

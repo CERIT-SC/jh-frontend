@@ -418,7 +418,9 @@ export class JupyterHubApiClient {
     );
     return response.data;
   }
-  async getNamedServers(username: string): Promise<any | undefined> {
+  async getNamedServers(
+    username: string,
+  ): Promise<{ [name: string]: ServerModel } | undefined> {
     const response = await this.client.get(`/users/${username}`, {
       headers: {
         "X-XSRFToken": this.xsrf,

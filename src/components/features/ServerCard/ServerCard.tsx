@@ -131,7 +131,7 @@ const LastActivityInfo: React.FC<LastActivityProps> = ({ lastActivity }) => {
 
   return (
     <Tooltip>
-      <Badge variant="outline">
+      <Badge variant="outline" className="dark:border-base-600">
         <Activity className="h-3 w-3" />
         <TooltipTrigger>{dateFormatRelative(lastActivity)}</TooltipTrigger>
       </Badge>
@@ -277,7 +277,7 @@ const StatusIndicator: React.FC<{
           className={cn(
             "absolute inline-flex rounded-full opacity-75 animate-ping",
             sizeClasses[size],
-            isComplete ? "bg-emerald-400" : isPending ? "bg-orange-400" : "",
+            isComplete ? "bg-success-400" : isPending ? "bg-error-400" : "",
           )}
         />
       )}
@@ -286,10 +286,10 @@ const StatusIndicator: React.FC<{
           "relative transition-colors duration-300",
           sizeClasses[size],
           isComplete
-            ? "fill-emerald-500 text-emerald-500"
+            ? "fill-success-500 text-success-500"
             : isPending
-              ? "fill-orange-500 text-orange-500"
-              : "fill-slate-400 text-slate-400",
+              ? "fill-error-500 text-error-500"
+              : "fill-secondary-500 text-secondary-500",
         )}
       />
     </span>
@@ -439,10 +439,10 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
               <Terminal className="hidden sm:block h-5 w-5 shrink-0 text-muted-foreground" />
               <div className="min-w-0 flex-1">
-                <H4 className="truncate">{title}</H4>
+                <H4 className="truncate overflow-visible-y">{title}</H4>
                 <div className="flex items-center gap-3 text-xs">
                   {description && (
-                    <Muted className="truncate">{description}</Muted>
+                    <Muted className="truncate overflow-visible-y">{description}</Muted>
                   )}
                   <Badge
                     variant={isActive ? "default" : "secondary"}
@@ -522,10 +522,10 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
               <Terminal className="h-5 w-5 shrink-0 text-muted-foreground" />
               <div className="min-w-0 flex-1">
-                <H4 className="truncate">{title}</H4>
+                <H4 className="truncate overflow-visible-y">{title}</H4>
                 <div className="flex items-center gap-3 text-xs">
                   {description && (
-                    <Muted className="truncate">{description}</Muted>
+                    <Muted className="truncate overflow-visible-y">{description}</Muted>
                   )}
                   <LastActivityInfo
                     lastActivity={!isActive ? lastActivity : undefined}
@@ -585,7 +585,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           <div className="flex justify-between items-center w-full gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="truncate block">{title}</span>
+                <span className="truncate block overflow-visible-y">{title}</span>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{title}</p>

@@ -5,6 +5,7 @@ export {
   validateDockerImage,
   DOCKER_IMAGE_REGEX,
 } from "./utils";
+export { sanitizeHtml } from "./sanitizeHtml";
 export { triggerShineById, triggerShineMultiple } from "./shine";
 export {
   stripTimestampPrefix,

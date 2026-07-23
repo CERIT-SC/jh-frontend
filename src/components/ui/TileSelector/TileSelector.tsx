@@ -246,7 +246,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
                     className={`relative z-10 block transition-all duration-300 ${
                       isSelected
                         ? "text-primary font-bold"
-                        : "text-gray-600 group-hover:text-primary"
+                        : "text-text-muted group-hover:text-primary"
                     }`}
                   >
                     {option.label}

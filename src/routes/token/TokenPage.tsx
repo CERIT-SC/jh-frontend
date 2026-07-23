@@ -27,6 +27,7 @@ import {
 } from "@e-infra/design-system";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { JupyterHubHeader, Footer } from "@components/layout";
+import { sanitizeHtml } from "@utils";
 import type { TokenAppConfig } from "@src-types/appConfig";
 
 /**
@@ -89,10 +90,8 @@ function TokenPage() {
    */
   const expiryOptions = useMemo(() => {
     if (!appConfig.token_expires_in_options_html) return [];
-    const doc = new DOMParser().parseFromString(
-      appConfig.token_expires_in_options_html,
-      "text/html",
-    );
+    const sanitizedHtml = sanitizeHtml(appConfig.token_expires_in_options_html);
+    const doc = new DOMParser().parseFromString(sanitizedHtml, "text/html");
     return [...doc.querySelectorAll("option")].map((opt) => ({
       value: opt.getAttribute("value") ?? "",
       label: opt.textContent ?? "",

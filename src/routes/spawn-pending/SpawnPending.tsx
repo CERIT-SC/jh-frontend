@@ -1,5 +1,5 @@
 import "./SpawnPending.css";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (spawn_pending.html).
@@ -51,7 +51,6 @@ function getServerName(): string {
  */
 const SpawnPending: React.FC = () => {
   const [logOpen, setLogOpen] = useState(false);
-  const userClosedRef = useRef(false);
   const serverName = getServerName();
 
   // appConfig is a global constant injected by spawn_pending.html (Jinja2)
@@ -66,19 +65,13 @@ const SpawnPending: React.FC = () => {
     // Error is displayed in event log
   }, []);
 
-  const {
-    progress,
-    message,
-    eventLog,
-    isFailed,
-    connectionState,
-    reconnectAttempts,
-  } = useSpawnProgress({
-    url: progressUrl,
-    withCredentials: true,
-    onReady: handleReady,
-    onFailed: handleFailed,
-  });
+  const { progress, message, eventLog, connectionState, reconnectAttempts } =
+    useSpawnProgress({
+      url: progressUrl,
+      withCredentials: true,
+      onReady: handleReady,
+      onFailed: handleFailed,
+    });
 
   // Strip server-side timestamp and level prefixes to avoid duplication with our own UI
   const cleanMessage = useMemo(
@@ -86,19 +79,9 @@ const SpawnPending: React.FC = () => {
     [message],
   );
 
-  // Auto-expand
-  useEffect(() => {
-    if (eventLog.length > 0 && !logOpen && !userClosedRef.current) {
-      setLogOpen(true);
-    }
-  }, [eventLog.length, logOpen]);
-
   // Handle collapsible
   const handleLogOpenChange = useCallback((open: boolean) => {
     setLogOpen(open);
-    if (!open) {
-      userClosedRef.current = true;
-    }
   }, []);
 
   // Handle page refresh
@@ -111,7 +94,7 @@ const SpawnPending: React.FC = () => {
       <JupyterHubHeader userName={userName} />
 
       <div className="container grow mx-auto px-4 py-8 space-y-8 place-content-center">
-        <Panel className="my-auto mx-auto w-full max-w-7xl">
+        <Panel className="bg-background my-auto mx-auto w-full max-w-7xl">
           <PanelHeader>
             <PanelTitle>
               Starting your server
@@ -160,14 +143,6 @@ const SpawnPending: React.FC = () => {
             </div>
 
             <Separator />
-
-            {/* ── Failure details ───────────────────────────────── */}
-            {/*{isFailed && (
-              <div className="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-                Server spawn failed. Check the event log below for details, or
-                try refreshing the page.
-              </div>
-            )}*/}
 
             {/* ── Event log (collapsible + virtualized) ─────────── */}
             <Collapsible open={logOpen} onOpenChange={handleLogOpenChange}>

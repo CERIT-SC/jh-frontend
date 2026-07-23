@@ -270,29 +270,33 @@ function HomePage() {
       )) as Record<string, ApiSpawnerData>;
 
       if (Object.keys(data).length !== 0) {
-        Object.entries(data).forEach(([name, spawner]) => {
-          setSpawners((prevSpawners) => {
-            const existing = prevSpawners[name];
+        // Batch all spawner updates into a single setSpawners call
+        setSpawners((prevSpawners) => {
+          const next = { ...prevSpawners };
+          let changed = false;
+
+          for (const [name, spawner] of Object.entries(data)) {
+            const existing = next[name];
             const needsUpdate =
               !existing ||
               existing.active !== spawner.active ||
               existing.pending !== spawner.pending ||
               (!existing.url && spawner.url);
 
-            if (!needsUpdate) return prevSpawners;
+            if (!needsUpdate) continue;
 
-            return {
-              ...prevSpawners,
-              [name]: {
-                ...prevSpawners[name],
-                active: spawner.active ?? true,
-                pending: spawner.pending,
-                ready: spawner.ready,
-                url: spawner.url ?? prevSpawners[name]?.url,
-                last_activity: spawner.last_activity,
-              },
+            next[name] = {
+              ...existing,
+              active: spawner.active ?? true,
+              pending: spawner.pending,
+              ready: spawner.ready,
+              url: spawner.url ?? existing?.url,
+              last_activity: spawner.last_activity,
             };
-          });
+            changed = true;
+          }
+
+          return changed ? next : prevSpawners;
         });
       }
       return data;
@@ -536,6 +540,18 @@ function HomePage() {
   const isMultiColumn = useMediaQuery("(min-width: 768px)");
   const ServerCardType = isMultiColumn ? ServerCard : ServerCardInline;
 
+  // Memoize sorted server list to avoid re-sorting on every render
+  const sortedSpawners = useMemo(() => {
+    return Object.entries(spawners).sort(([, a], [, b]) => {
+      if (!a.last_activity) return 1;
+      if (!b.last_activity) return -1;
+      return (
+        new Date(b.last_activity).getTime() -
+        new Date(a.last_activity).getTime()
+      );
+    });
+  }, [spawners]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Alert alerts={alerts} onRemove={removeAlert} />
@@ -573,11 +589,11 @@ function HomePage() {
               >
                 <DialogTrigger asChild>
                   <Badge
-                    variant={"outline"}
+                    variant={"secondary"}
                     className={cn(
                       "px-4 py-2 text-md justify-center text-center",
                       "cursor-pointer transition-all duration-200 bg-tertiary",
-                      " hover:border-primary dark:hover:border-primary/50 ",
+                      " hover:border-primary dark:hover:border-primary ",
                     )}
                     onClick={() => setIsAddServerModalOpen(true)}
                   >
@@ -689,34 +705,25 @@ function HomePage() {
                   }
                   showDeleteButton={false}
                 /> */}
-            {Object.entries(spawners)
-              .sort(([, a], [, b]) => {
-                if (!a.last_activity) return 1;
-                if (!b.last_activity) return -1;
-                return (
-                  new Date(b.last_activity).getTime() -
-                  new Date(a.last_activity).getTime()
-                );
-              })
-              .map(([name, spawner]) => (
-                <ServerCardType
-                  title={name}
-                  key={name}
-                  spawnerUrl={spawner.url}
-                  lastActivity={spawner.last_activity}
-                  isActive={spawner.active}
-                  isReady={spawner.ready}
-                  handleOpen={() => handleOpenServer(spawner.url)}
-                  handleStop={() => handleStopServer(name)}
-                  handleDelete={() => handleDeleteServer(name)}
-                  handleStart={() => handleStartServer(name)}
-                  handleQuickStart={() => handleQuickStart(name)}
-                  progress={serverProgress[name]}
-                  cpuUsage={resourceUsage[name]?.cpu_usage_ratio}
-                  memoryUsed={resourceUsage[name]?.memory_usage_bytes}
-                  memoryLimit={resourceUsage[name]?.memory_limit_bytes}
-                />
-              ))}
+            {sortedSpawners.map(([name, spawner]) => (
+              <ServerCardType
+                title={name}
+                key={name}
+                spawnerUrl={spawner.url}
+                lastActivity={spawner.last_activity}
+                isActive={spawner.active}
+                isReady={spawner.ready}
+                handleOpen={() => handleOpenServer(spawner.url)}
+                handleStop={() => handleStopServer(name)}
+                handleDelete={() => handleDeleteServer(name)}
+                handleStart={() => handleStartServer(name)}
+                handleQuickStart={() => handleQuickStart(name)}
+                progress={serverProgress[name]}
+                cpuUsage={resourceUsage[name]?.cpu_usage_ratio}
+                memoryUsed={resourceUsage[name]?.memory_usage_bytes}
+                memoryLimit={resourceUsage[name]?.memory_limit_bytes}
+              />
+            ))}
             {Object.keys(spawners).length < maxServers && (
               <EmptyServerCard
                 onClick={() => setIsAddServerModalOpen(true)}

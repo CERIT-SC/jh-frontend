@@ -1,9 +1,37 @@
+/**
+ * @fileoverview Dev-only mock data for appConfig and spawnOptions globals.
+ *
+ * These are injected onto `window` when `import.meta.env.DEV` is true so the
+ * app can run without JupyterHub's Jinja2 template rendering. The shapes
+ * intentionally mirror what the backend injects (see `src/types/appConfig.ts`
+ * and the `spawnOptions` declaration in `routes/spawn/utils/gatherFormData.ts`).
+ */
+
+/** Shape of a single spawner entry in the home-page mock. */
+interface DevSpawner {
+  last_activity: string;
+  url: string;
+  active: boolean;
+  ready: boolean;
+}
+
+/** Dev-only window globals (mocked appConfig + spawnOptions). */
+interface DevWindow extends Window {
+  appConfig?: Record<string, unknown>;
+  spawnOptions?: Record<string, unknown>;
+}
+
+function getDevWindow(): DevWindow {
+  return window as DevWindow;
+}
+
 export default function initDev() {
   const pathname = window.location.pathname;
+  const devWindow = getDevWindow();
 
   if (pathname.includes("error.html")) {
     // Dev config for error page
-    (window as any).appConfig = {
+    devWindow.appConfig = {
       userName: "dev",
       statusCode: 500,
       statusMessage: "Internal Server Error",
@@ -17,7 +45,20 @@ export default function initDev() {
     pathname.includes("login.html")
   ) {
     // Dev config for home page and other pages with spawners
-    (window as any).appConfig = {
+    const mockSpawners: Record<string, DevSpawner> = Array.from(
+      { length: 5 },
+      (_, i) => `spawner${i + 1}`,
+    ).reduce<Record<string, DevSpawner>>((acc, spawner) => {
+      acc[spawner] = {
+        last_activity: new Date().toISOString(),
+        url: `/user/${spawner}`,
+        active: Math.random() < 0.5,
+        ready: Math.random() < 0.5,
+      };
+      return acc;
+    }, {});
+
+    devWindow.appConfig = {
       spawners: {
         test: {
           last_activity: "2024-11-24T15:48:29.604740Z",
@@ -31,33 +72,22 @@ export default function initDev() {
           active: false,
           ready: false,
         },
-        ...Array.from({ length: 5 }, (_, i) => `spawner${i + 1}`).reduce(
-          (acc: Record<string, any>, spawner) => {
-            acc[spawner] = {
-              last_activity: new Date().toISOString(),
-              url: `/user/${spawner}`,
-              active: Math.random() < 0.5, // Randomly set active status
-              ready: Math.random() < 0.5, // Randomly set ready status
-            };
-            return acc;
-          },
-          {},
-        ),
+        ...mockSpawners,
       },
       default_server_active: false,
       url: "http://localhost",
       userName: "dev",
-      announcement: "This is a development environment.",
+      announcement: "",
       xsrf: "sample-xsrf-token",
     };
   } else {
     // Default dev config for other pages
-    (window as any).appConfig = {
+    devWindow.appConfig = {
       userName: "dev",
       xsrf: "sample-xsrf-token",
     };
   }
-  (window as any).spawnOptions = {
+  devWindow.spawnOptions = {
     user_options: {
       container_image: "cerit.io/hubs/datasciencenb:26-09-2024",
       ssh: false,
@@ -291,9 +321,5 @@ export default function initDev() {
     },
   };
 
-  console.log(
-    "Dev mode",
-    (window as any).appConfig,
-    (window as any).spawnOptions,
-  );
+  console.log("Dev mode", devWindow.appConfig, devWindow.spawnOptions);
 }

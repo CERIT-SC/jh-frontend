@@ -3,6 +3,7 @@ import { Card, CardContent, H1, P } from "@e-infra/design-system";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import { Button } from "@components/ui";
 import { Home } from "lucide-react";
+import { sanitizeHtml } from "@utils";
 /**
  * Global config injected by JupyterHub's Jinja2 template (error.html).
  * Maps to the error template variables: status_code, status_message, message_html, message, extra_error_html
@@ -15,28 +16,6 @@ declare const appConfig: {
   message?: string;
   extraErrorHtml?: string;
 };
-
-/**
- * Sanitizes HTML strings to prevent XSS attacks.
- */
-function sanitizeHtml(html: string): string {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  // Strip dangerous elements
-  doc
-    .querySelectorAll("script, iframe, object, embed, link[rel=stylesheet]")
-    .forEach((el) => el.remove());
-  doc.querySelectorAll("*").forEach((el) => {
-    for (const attr of [...el.attributes]) {
-      if (
-        attr.name.startsWith("on") ||
-        attr.value.toLowerCase().includes("javascript:")
-      ) {
-        el.removeAttribute(attr.name);
-      }
-    }
-  });
-  return doc.body.innerHTML;
-}
 
 const ErrorPage: React.FC = () => {
   const userName = appConfig.userName ?? "";

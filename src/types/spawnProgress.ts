@@ -48,10 +48,7 @@ export interface EventLogEntry {
 
 /** Connection states for the SSE stream */
 export type ConnectionState =
-  | "connecting"
-  | "connected"
-  | "disconnected"
-  | "error";
+  "connecting" | "connected" | "disconnected" | "error";
 
 /** Configuration for the useEventSource reconnection behaviour */
 export interface EventSourceReconnectConfig {

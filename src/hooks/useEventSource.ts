@@ -82,60 +82,64 @@ export function useEventSource({
     setConnectionState("connecting");
     setError(null);
 
-    const es = new EventSource(url, { withCredentials });
-    eventSourceRef.current = es;
-
-    es.onopen = () => {
-      if (isDisposedRef.current) return;
-      setConnectionState("connected");
-      // Reset attempt counter on successful connection
-      attemptCountRef.current = 0;
-      setReconnectAttempts(0);
-      onOpenRef.current?.();
-    };
-
-    es.onmessage = (event: MessageEvent) => {
-      if (isDisposedRef.current) return;
-      onMessageRef.current?.(event);
-    };
-
-    es.onerror = () => {
+    reconnectTimerRef.current = setTimeout(() => {
       if (isDisposedRef.current) return;
 
-      eventSourceRef.current?.close();
-      eventSourceRef.current = null;
-      setConnectionState("error");
+      const es = new EventSource(url, { withCredentials });
+      eventSourceRef.current = es;
 
-      const reconnectError = new Error(`SSE connection error for: ${url}`);
-      setError(reconnectError);
+      es.onopen = () => {
+        if (isDisposedRef.current) return;
+        setConnectionState("connected");
+        // Reset attempt counter on successful connection
+        attemptCountRef.current = 0;
+        setReconnectAttempts(0);
+        onOpenRef.current?.();
+      };
 
-      // Attempt reconnection if configured
-      if (reconnectConfig) {
-        const nextAttempt = attemptCountRef.current + 1;
-        attemptCountRef.current = nextAttempt;
-        setReconnectAttempts(nextAttempt);
+      es.onmessage = (event: MessageEvent) => {
+        if (isDisposedRef.current) return;
+        onMessageRef.current?.(event);
+      };
 
-        if (nextAttempt <= reconnectConfig.maxAttempts) {
-          const delay = Math.min(
-            reconnectConfig.initialDelay *
-              Math.pow(reconnectConfig.backoffMultiplier, nextAttempt - 1),
-            reconnectConfig.maxDelay,
-          );
+      es.onerror = () => {
+        if (isDisposedRef.current) return;
 
-          reconnectTimerRef.current = setTimeout(() => {
-            if (!isDisposedRef.current) {
-              connect();
-            }
-          }, delay);
+        eventSourceRef.current?.close();
+        eventSourceRef.current = null;
+        setConnectionState("error");
+
+        const reconnectError = new Error(`SSE connection error for: ${url}`);
+        setError(reconnectError);
+
+        // Attempt reconnection if configured
+        if (reconnectConfig) {
+          const nextAttempt = attemptCountRef.current + 1;
+          attemptCountRef.current = nextAttempt;
+          setReconnectAttempts(nextAttempt);
+
+          if (nextAttempt <= reconnectConfig.maxAttempts) {
+            const delay = Math.min(
+              reconnectConfig.initialDelay *
+                Math.pow(reconnectConfig.backoffMultiplier, nextAttempt - 1),
+              reconnectConfig.maxDelay,
+            );
+
+            reconnectTimerRef.current = setTimeout(() => {
+              if (!isDisposedRef.current) {
+                connect();
+              }
+            }, delay);
+          } else {
+            // All retries exhausted — report terminal error
+            onErrorRef.current?.(reconnectError);
+          }
         } else {
-          // All retries exhausted — report terminal error
+          // No reconnection configured — report immediately
           onErrorRef.current?.(reconnectError);
         }
-      } else {
-        // No reconnection configured — report immediately
-        onErrorRef.current?.(reconnectError);
-      }
-    };
+      };
+    }, 1500);
   }, [url, withCredentials, reconnectConfig, cleanup]);
 
   const manualReconnect = useCallback(() => {

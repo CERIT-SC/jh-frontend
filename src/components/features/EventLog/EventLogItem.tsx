@@ -3,6 +3,7 @@ import type { EventLogEntry } from "../../../types/spawnProgress";
 import { cn } from "@e-infra/design-system";
 import { stripLevelPrefix, stripTimestampPrefix } from "../../../utils/message";
 import { TriangleAlert, CircleX } from "lucide-react";
+import { sanitizeHtml } from "@utils";
 
 interface EventLogItemProps {
   entry: EventLogEntry;
@@ -22,28 +23,6 @@ function stripHtmlMessagePrefix(html: string): string {
     .replace(/<time[^>]*>[\s\S]*?<\/time>/gi, "");
   // Also strip any remaining bare-text timestamp/level prefix after HTML cleanup
   return stripLevelPrefix(stripTimestampPrefix(cleaned));
-}
-
-/**
- * Sanitizes HTML stringsto prevent XSS attacks.
- */
-function sanitizeHtml(html: string): string {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  // Strip dangerous elements
-  doc
-    .querySelectorAll("script, iframe, object, embed, link[rel=stylesheet]")
-    .forEach((el) => el.remove());
-  doc.querySelectorAll("*").forEach((el) => {
-    for (const attr of [...el.attributes]) {
-      if (
-        attr.name.startsWith("on") ||
-        attr.value.toLowerCase().includes("javascript:")
-      ) {
-        el.removeAttribute(attr.name);
-      }
-    }
-  });
-  return doc.body.innerHTML;
 }
 
 export const EventLogItem = memo(function EventLogItem({
@@ -80,21 +59,24 @@ export const EventLogItem = memo(function EventLogItem({
       aria-label={`Event at ${formattedTime}: ${cleanMessage}`}
     >
       {/* Timestamp */}
-      <span className="shrink-0 text-xs text-text-muted  tabular-nums pt-0.5 select-none">
+      <span className={cn("shrink-0 text-xs text-text  tabular-nums pt-0.5 select-none",
+        entry.isFailed && "text-error-700",
+        entry.isReady && "text-success-700",
+        entry.isWarning && "text-warning-700",)}>
         {formattedTime}
       </span>
 
       {/* Progress badge */}
       <span
         className={cn(
-          "shrink-0 text-xs tabular-nums px-1.5 py-0.5 rounded-sm min-w-[3ch] text-center",
+          "shrink-0 w-11 h-5 text-xs tabular-nums px-1.5 py-0.5 rounded-sm min-w-[3ch] text-center",
           entry.isReady
             ? "bg-success-500 text-success-50"
             : entry.isFailed
               ? "bg-error-600 text-error-50"
               : entry.isWarning
                 ? "bg-warning-600 text-warning-50"
-                : "bg-primary-100 text-text-muted",
+                : "bg-primary-100 text-base-700",
         )}
       >
         {entry.progress}%
