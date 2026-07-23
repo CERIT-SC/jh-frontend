@@ -42,3 +42,8 @@ TODO.md
 .claude/
 .opencode/
 .tmp/
+
+# Documentation
+AGENTS.md
+CLAUDE.md
+project-patterns.md
