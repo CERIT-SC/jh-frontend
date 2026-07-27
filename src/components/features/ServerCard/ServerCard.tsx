@@ -442,7 +442,9 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                 <H4 className="truncate overflow-visible-y">{title}</H4>
                 <div className="flex items-center gap-3 text-xs">
                   {description && (
-                    <Muted className="truncate overflow-visible-y">{description}</Muted>
+                    <Muted className="truncate overflow-visible-y">
+                      {description}
+                    </Muted>
                   )}
                   <Badge
                     variant={isActive ? "default" : "secondary"}
@@ -525,7 +527,9 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                 <H4 className="truncate overflow-visible-y">{title}</H4>
                 <div className="flex items-center gap-3 text-xs">
                   {description && (
-                    <Muted className="truncate overflow-visible-y">{description}</Muted>
+                    <Muted className="truncate overflow-visible-y">
+                      {description}
+                    </Muted>
                   )}
                   <LastActivityInfo
                     lastActivity={!isActive ? lastActivity : undefined}
@@ -585,7 +589,9 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           <div className="flex justify-between items-center w-full gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="truncate block overflow-visible-y">{title}</span>
+                <span className="truncate block overflow-visible-y">
+                  {title}
+                </span>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{title}</p>

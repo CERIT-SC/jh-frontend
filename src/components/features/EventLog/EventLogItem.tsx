@@ -59,10 +59,14 @@ export const EventLogItem = memo(function EventLogItem({
       aria-label={`Event at ${formattedTime}: ${cleanMessage}`}
     >
       {/* Timestamp */}
-      <span className={cn("shrink-0 text-xs text-text  tabular-nums pt-0.5 select-none",
-        entry.isFailed && "text-error-700",
-        entry.isReady && "text-success-700",
-        entry.isWarning && "text-warning-700",)}>
+      <span
+        className={cn(
+          "shrink-0 text-xs text-text  tabular-nums pt-0.5 select-none",
+          entry.isFailed && "text-error-700",
+          entry.isReady && "text-success-700",
+          entry.isWarning && "text-warning-700",
+        )}
+      >
         {formattedTime}
       </span>
 
