@@ -63,6 +63,7 @@
     "build-storybook": "storybook build",
     "lint": "npx eslint .",
     "format": "npx prettier --write \"src/**/*.{js,ts,jsx,tsx,json,css,html}\"",
+    "format:elter-ri": "npx prettier --write \"elter-ri/src/**/*.{js,ts,jsx,tsx,json,css}\" \"elter-ri/data/**/*.js\" \"elter-ri/scripts/**/*.js\" \"elter-ri/vite.config.js\"",
     "lintc": "npx eslint --print-config .",
     "init-msw": "msw init public/"
   },
