@@ -12,16 +12,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install Dependencies
-        run: npm install
+        run: bun install --frozen-lockfile
 
       - name: Build Application
-        run: npm run build:hub
+        run: bun run build:hub
 
       - name: Set Up kubectl
         uses: azure/setup-kubectl@v3
