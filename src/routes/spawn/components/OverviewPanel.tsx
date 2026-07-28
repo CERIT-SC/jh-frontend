@@ -191,15 +191,15 @@ export function OverviewPanel({
               <EditButton sectionId="image-section" />
             </div>
             <div className="grid grid-cols-2 gap-0.5">
-              <P className="pr-1 text-text-heading/80">Name</P>
+              <P className="pr-1 text-text-heading">Name</P>
               <Strong className="min-w-0 break-word">
                 {displayImageName || "-"}
               </Strong>
-              <P className="pr-1 text-text-heading/80">Tag</P>
+              <P className="pr-1 text-text-heading">Tag</P>
               <Small className="min-w-0 break-all">
                 {displayImageTag || "-"}
               </Small>
-              <P className="text-text-heading/80">SSH Access</P>
+              <P className="text-text-heading">SSH Access</P>
               <SSHStatusIndicator
                 enabled={sshAccessEnabled}
                 available={isSSHAvailable}
@@ -221,7 +221,7 @@ export function OverviewPanel({
             <div className="grid grid-cols-2 items-start">
               <div className="flex items-center gap-2">
                 <HardDrive className="w-3 h-3 text-text-heading" />
-                <P className="text-text-heading/80">Persistent Home</P>
+                <P className="text-text-heading">Persistent Home</P>
               </div>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -308,7 +308,7 @@ export function OverviewPanel({
             <EditButton sectionId="resources-section" />
           </div>
           <div className="grid grid-cols-2">
-            <span className="inline-flex items-center gap-2 text-text-heading/80">
+            <span className="inline-flex items-center gap-2 text-text-heading">
               <Cpu className="w-3 h-3" />
               CPU
             </span>
@@ -316,12 +316,12 @@ export function OverviewPanel({
               {formData?.cpuselection}{" "}
               {formData?.cpuselection === 1 ? "Core" : "Cores"}
             </Strong>
-            <span className="inline-flex items-center gap-2 text-text-heading/80">
+            <span className="inline-flex items-center gap-2 text-text-heading">
               <MemoryStick className="w-3 h-3" />
               Memory
             </span>
             <Strong>{formData?.memselection} GB</Strong>
-            <span className="inline-flex items-center gap-2 text-text-heading/80">
+            <span className="inline-flex items-center gap-2 text-text-heading">
               <Gpu className="w-3 h-3" />
               GPU
             </span>
