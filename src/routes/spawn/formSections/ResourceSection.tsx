@@ -234,45 +234,53 @@ export default function ResourceSelectionSection({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <GPUSquare status="free" size="sm" />
-                      <span className="text-xs text-text-muted">Free</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <GPUSquare status="used" size="sm" />
-                      <span className="text-xs text-text-muted">Used</span>
+                    <span className="text-sm font-medium text-text-heading">
+                      Current GPUs Available:
+                    </span>
+                    {/* Legend */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <GPUSquare status="free" size="sm" />
+                        <span className="text-xs text-text-muted">Free</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <GPUSquare status="used" size="sm" />
+                        <span className="text-xs text-text-muted">Used</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {loading && gpuStatuses.length === 0 ? (
-                <div className="flex items-center gap-2 py-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
-                  <span className="text-sm text-text-muted">
-                    Loading GPU status...
-                  </span>
-                </div>
-              ) : error ? (
-                <div className="text-sm text-error">{error}</div>
-              ) : gpuStatuses.length === 0 ? (
-                <Muted className="text-sm">No GPUs available in cluster</Muted>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {gpuStatuses.map((gpu, index) => (
-                    <Fragment key={gpu.model}>
-                      <GPUStatusIndicator
-                        label={gpu.label}
-                        free={gpu.free}
-                        total={gpu.total}
-                        size="md"
-                        gap="md"
-                      />
-                      {index < gpuStatuses.length - 1 && <Separator />}
-                    </Fragment>
-                  ))}
-                </div>
-              )}
+                {loading && gpuStatuses.length === 0 ? (
+                  <div className="flex items-center gap-2 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
+                    <span className="text-sm text-text-muted">
+                      Loading GPU status...
+                    </span>
+                  </div>
+                ) : error ? (
+                  <div className="text-sm text-error">{error}</div>
+                ) : gpuStatuses.length === 0 ? (
+                  <Muted className="text-sm">
+                    No GPUs available in cluster
+                  </Muted>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {gpuStatuses.map((gpu, index) => (
+                      <Fragment key={gpu.model}>
+                        <GPUStatusIndicator
+                          label={gpu.label}
+                          free={gpu.free}
+                          total={gpu.total}
+                          size="md"
+                          gap="md"
+                        />
+                        {index < gpuStatuses.length - 1 && <Separator />}
+                      </Fragment>
+                    ))}
+                  </div>
+                )}
+              </div>
             </SectionContainer.Content>
           </SectionContainer>
         </div>

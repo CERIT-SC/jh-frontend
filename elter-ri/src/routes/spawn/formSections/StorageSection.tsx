@@ -321,7 +321,8 @@ export default function StorageSelectionSection({
         <SectionContainer.Content>
           <div className="space-y-4">
             <P className="mb-2">
-              Pick a bucket you&apos;ve already mounted, or connect a new one below.
+              Pick a bucket you&apos;ve already mounted, or connect a new one
+              below.
             </P>
             {/* S3 Type Selection */}
             <div className="space-y-2">

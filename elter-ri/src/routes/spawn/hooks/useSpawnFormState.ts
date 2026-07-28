@@ -10,10 +10,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import type React from "react";
 import { gatherFormData, getS3BucketOptions } from "../utils/gatherFormData";
 import { DEFAULT_FORM_DATA, INITIAL_FORM_DATA } from "../data/formConstants";
-import type {
-  DefaultFormData,
-  SpawnFormData,
-} from "@src-types/spawnForm";
+import type { DefaultFormData, SpawnFormData } from "@src-types/spawnForm";
 
 /** Adapter variant type used by StorageSelectionSection.pushAlert. */
 export type StorageAlertVariant = "success" | "error" | "info";

@@ -149,7 +149,9 @@ export default function ResourceSelectionSection({
               </P>
             </SectionContainer.Header>
             <SectionContainer.Content className="flex flex-col gap-2">
-              <Label className="pl-2 text-text-heading">Select the limit of CPU cores</Label>
+              <Label className="pl-2 text-text-heading">
+                Select the limit of CPU cores
+              </Label>
               <TileSelector
                 ariaLabel="Select the limit of CPU cores"
                 options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
@@ -160,7 +162,9 @@ export default function ResourceSelectionSection({
           </SectionContainer>
 
           <SectionContainer>
-            <SectionContainer.Header icon={<MemoryStick className="w-5 h-5 mt-0.5" />}>
+            <SectionContainer.Header
+              icon={<MemoryStick className="w-5 h-5 mt-0.5" />}
+            >
               <H4>Memory Limit</H4>
               <P className="pl-1 text-xs">
                 The amount of memory available to this notebook while it&apos;s
@@ -168,7 +172,9 @@ export default function ResourceSelectionSection({
               </P>
             </SectionContainer.Header>
             <SectionContainer.Content className="flex flex-col gap-2">
-              <Label className="pl-2 text-text-heading">Select the limit of memory in GB</Label>
+              <Label className="pl-2 text-text-heading">
+                Select the limit of memory in GB
+              </Label>
               <TileSelector
                 ariaLabel="Select the limit of memory in GB"
                 options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
@@ -201,72 +207,82 @@ export default function ResourceSelectionSection({
               </P>
             </SectionContainer.Header>
             <SectionContainer.Content className="flex flex-col gap-4">
-              <Label className="pl-2 text-text-heading">Select GPU</Label>
-              <div className="flex flex-wrap gap-2 animate-fade-in">
-                {Object.entries(gpuOptions).map(([value, label]) => {
-                  const isActive = selectedGpu === value;
-                  return (
-                    <Badge
-                      key={value}
-                      className={cn(
-                        "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
-                        "bg-surface-raised border-border text-text",
-                        "hover:bg-primary/10 hover:border-primary",
-                        isActive &&
-                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
-                      )}
-                      onClick={() => {
-                        setSelectedGpu(value);
-                        handleGPUSelect(value);
-                      }}
-                    >
-                      {label}
-                    </Badge>
-                  );
-                })}
+              <div className="space-y-2">
+                <Label className="pl-2 text-text-heading">Select GPU</Label>
+                <div className="flex flex-wrap gap-2 animate-fade-in">
+                  {Object.entries(gpuOptions).map(([value, label]) => {
+                    const isActive = selectedGpu === value;
+                    return (
+                      <Badge
+                        key={value}
+                        className={cn(
+                          "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
+                          "bg-surface-raised border-border text-text",
+                          "hover:bg-primary/10 hover:border-primary",
+                          isActive &&
+                            "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground",
+                        )}
+                        onClick={() => {
+                          setSelectedGpu(value);
+                          handleGPUSelect(value);
+                        }}
+                      >
+                        {label}
+                      </Badge>
+                    );
+                  })}
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <GPUSquare status="free" size="sm" />
-                      <span className="text-xs text-text-muted">Free</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <GPUSquare status="used" size="sm" />
-                      <span className="text-xs text-text-muted">Used</span>
+                    <span className="text-sm font-medium text-text-heading">
+                      Current GPUs Available:
+                    </span>
+                    {/* Legend */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <GPUSquare status="free" size="sm" />
+                        <span className="text-xs text-text-muted">Free</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <GPUSquare status="used" size="sm" />
+                        <span className="text-xs text-text-muted">Used</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {loading && gpuStatuses.length === 0 ? (
-                <div className="flex items-center gap-2 py-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
-                  <span className="text-sm text-text-muted">
-                    Loading GPU status...
-                  </span>
-                </div>
-              ) : error ? (
-                <div className="text-sm text-error">{error}</div>
-              ) : gpuStatuses.length === 0 ? (
-                <Muted className="text-sm">No GPUs available in cluster</Muted>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {gpuStatuses.map((gpu, index) => (
-                    <Fragment key={gpu.model}>
-                      <GPUStatusIndicator
-                        label={gpu.label}
-                        free={gpu.free}
-                        total={gpu.total}
-                        size="md"
-                        gap="md"
-                      />
-                      {index < gpuStatuses.length - 1 && <Separator />}
-                    </Fragment>
-                  ))}
-                </div>
-              )}
+                {loading && gpuStatuses.length === 0 ? (
+                  <div className="flex items-center gap-2 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
+                    <span className="text-sm text-text-muted">
+                      Loading GPU status...
+                    </span>
+                  </div>
+                ) : error ? (
+                  <div className="text-sm text-error">{error}</div>
+                ) : gpuStatuses.length === 0 ? (
+                  <Muted className="text-sm">
+                    No GPUs available in cluster
+                  </Muted>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {gpuStatuses.map((gpu, index) => (
+                      <Fragment key={gpu.model}>
+                        <GPUStatusIndicator
+                          label={gpu.label}
+                          free={gpu.free}
+                          total={gpu.total}
+                          size="md"
+                          gap="md"
+                        />
+                        {index < gpuStatuses.length - 1 && <Separator />}
+                      </Fragment>
+                    ))}
+                  </div>
+                )}
+              </div>
             </SectionContainer.Content>
           </SectionContainer>
         </div>

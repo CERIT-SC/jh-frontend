@@ -41,13 +41,21 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
           <nav className="flex flex-col gap-2">
             <FooterNavHeading>Quick Links</FooterNavHeading>
             <FooterNavLink href="/hub">Home</FooterNavLink>
-              <FooterNavLink href="https://docs.cerit.io/en/docs/web-apps/jupyterhub">Documentation</FooterNavLink>
-            <FooterNavLink href="https://portal.elter-ri.eu/">eLTER Services</FooterNavLink>
+            <FooterNavLink href="https://docs.cerit.io/en/docs/web-apps/jupyterhub">
+              Documentation
+            </FooterNavLink>
+            <FooterNavLink href="https://portal.elter-ri.eu/">
+              eLTER Services
+            </FooterNavLink>
           </nav>
           <nav className="flex flex-col gap-2">
-              <FooterNavHeading>Information</FooterNavHeading>
-            <FooterNavLink href="mailto:office@elter-ri.eu">Contacts</FooterNavLink>
-            <FooterNavLink href="https://elter-ri.eu/community">Community</FooterNavLink>
+            <FooterNavHeading>Information</FooterNavHeading>
+            <FooterNavLink href="mailto:office@elter-ri.eu">
+              Contacts
+            </FooterNavLink>
+            <FooterNavLink href="https://elter-ri.eu/community">
+              Community
+            </FooterNavLink>
           </nav>
         </FooterRight>
       </FooterContent>

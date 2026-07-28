@@ -187,9 +187,13 @@ export function OverviewPanel({
             </div>
             <div className="grid grid-cols-2 gap-0.5">
               <P className="pr-1 text-text-heading/80">Name</P>
-              <Strong className="min-w-0 break-word">{displayImageName || "-"}</Strong>
+              <Strong className="min-w-0 break-word">
+                {displayImageName || "-"}
+              </Strong>
               <P className="pr-1 text-text-heading/80">Tag</P>
-              <Small className="min-w-0 break-all">{displayImageTag || "-"}</Small>
+              <Small className="min-w-0 break-all">
+                {displayImageTag || "-"}
+              </Small>
               <P className="text-text-heading/80">SSH Access</P>
               <SSHStatusIndicator
                 enabled={sshAccessEnabled}
@@ -226,7 +230,10 @@ export function OverviewPanel({
                   <span className="text-xs">Delete</span>
                 </Badge>
               ) : (
-                <Badge variant="secondary" className="flex items-center gap-1 mt-1">
+                <Badge
+                  variant="secondary"
+                  className="flex items-center gap-1 mt-1"
+                >
                   <Check className="w-3 h-3" />
                   <span className="text-xs">Keep</span>
                 </Badge>

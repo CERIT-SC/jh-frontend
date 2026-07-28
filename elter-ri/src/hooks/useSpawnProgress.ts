@@ -16,8 +16,7 @@ function isKubernetesWarning(event: SpawnProgressEvent): boolean {
 function getPodUid(event: SpawnProgressEvent): string | null {
   const rawEvent = event.raw_event as Record<string, unknown> | undefined;
   const involvedObject = rawEvent?.involvedObject as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const uid = involvedObject?.uid;
   return typeof uid === "string" ? uid : null;
 }

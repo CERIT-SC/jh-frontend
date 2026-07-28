@@ -65,18 +65,13 @@ const SpawnPending: React.FC = () => {
     // Error is displayed in event log
   }, []);
 
-  const {
-    progress,
-    message,
-    eventLog,
-    connectionState,
-    reconnectAttempts,
-  } = useSpawnProgress({
-    url: progressUrl,
-    withCredentials: true,
-    onReady: handleReady,
-    onFailed: handleFailed,
-  });
+  const { progress, message, eventLog, connectionState, reconnectAttempts } =
+    useSpawnProgress({
+      url: progressUrl,
+      withCredentials: true,
+      onReady: handleReady,
+      onFailed: handleFailed,
+    });
 
   // Strip server-side timestamp and level prefixes to avoid duplication with our own UI
   const cleanMessage = useMemo(

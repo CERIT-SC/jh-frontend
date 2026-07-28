@@ -6,10 +6,7 @@
  * how to surface errors. This makes the builders trivially testable.
  */
 
-import type {
-  SpawnFormData,
-  SpawnFormPayload,
-} from "@src-types/spawnForm";
+import type { SpawnFormData, SpawnFormPayload } from "@src-types/spawnForm";
 import { buildImageValueToCategoryMap } from "./gatherFormData";
 import {
   IMAGE_CATEGORY_KEY_MAP,
