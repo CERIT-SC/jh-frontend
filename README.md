@@ -69,11 +69,25 @@ If you want to create ConfigMaps from the built project, use the `create_config_
 chmod +x create_config_maps.sh
 ```
 
-You can also modify the script if you only want to generate files locally instead of applying them to a Kubernetes cluster.
-Then execute the script:
+Then execute the script with the target namespace:
 
 ```bash
-./create_config_maps.sh {build_target} or {namespace}
+./create_config_maps.sh --target {build_target} --namespace {namespace}
+```
+
+Options:
+
+- `--target {build_target}` — one of `hub`, `cas`, `c9088`, `elter-ri` (default: `hub`), builds into `dist_{build_target}/`
+- `--namespace {namespace}` — Kubernetes namespace to apply the ConfigMaps to (required)
+- `--skip-build` — reuse an existing `dist_{build_target}/` instead of building
+- `--local` — generate ConfigMap YAML files locally (`static-files*.yaml`, git-ignored) instead of applying them to a Kubernetes cluster
+- `--dry-run` — print the kubectl commands without applying any changes
+- `--help` — show usage
+
+Example:
+
+```bash
+./create_config_maps.sh --target cas --namespace jupyterhub-cas-ns
 ```
 
 ## Creating interface for new instance
