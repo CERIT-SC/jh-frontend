@@ -498,7 +498,7 @@ export default function StorageSelectionSection({
   // ==============================================================================
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {/* Persistent Home Configuration */}
       <SectionContainer>
         <SectionContainer.Header

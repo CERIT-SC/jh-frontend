@@ -139,7 +139,7 @@ export default function ResourceSelectionSection({
   return (
     <>
       {defCPU !== null && defMem !== null && defGPU !== null ? (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           <SectionContainer>
             <SectionContainer.Header icon={<Cpu className="w-5 h-5 mt-0.5" />}>
               <H4>CPU Limit</H4>
@@ -231,12 +231,8 @@ export default function ResourceSelectionSection({
                   );
                 })}
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-text-heading">
-                    Current GPUs Available:
-                  </span>
-                  {/* Legend */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5">
                       <GPUSquare status="free" size="sm" />
