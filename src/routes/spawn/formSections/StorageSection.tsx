@@ -590,8 +590,8 @@ export default function StorageSelectionSection({
           icon={<Server className="w-5 h-5 mt-0.5" aria-hidden="true" />}
           showToggle
         >
-          <H3>MetaCentrum Storage</H3>
-          <P>
+          <H4>MetaCentrum Storage</H4>
+          <P className="pl-1 text-xs">
             Mount MetaCentrum home directory and project folders. Mounted to{" "}
             <Code>/home/meta/{appConfig.userName}</Code>
           </P>
@@ -667,8 +667,8 @@ export default function StorageSelectionSection({
           icon={<Cloud className="w-5 h-5 mt-0.5" aria-hidden="true" />}
           showToggle
         >
-          <H3>S3 Object Storage</H3>
-          <P>
+          <H4>S3 Object Storage</H4>
+          <P className="pl-1 text-xs">
             Mounts S3-compatible object storage to: <Code>/storage/s3</Code>
           </P>
         </SectionContainer.Header>
