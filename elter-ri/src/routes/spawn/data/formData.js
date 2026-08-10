@@ -1,3 +1,5 @@
+import { elterLogo } from "../../../../public/static/custom-images";
+
 // Fallback options
 export const selectOptionsStorage = {
   "brno12-cerit": "brno12-cerit",
@@ -69,6 +71,7 @@ export const images = {
 };
 
 export const sectionTitles = {
+  elter: "eLTER",
   simple: "Simple Jupyter Images",
   r: "R Images",
   tf: "TensorFlow Images",
