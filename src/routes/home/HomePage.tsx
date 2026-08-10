@@ -564,7 +564,7 @@ function HomePage() {
             variant="warning"
           />
         )}
-        <div className="named-servers mt-8">
+        <div className="named-servers mt-8 px-4">
           <div className="flex items-center gap-2 mt-1">
             {/* <H1 className="grow">My servers</H1> */}
             <div className="flex items-center gap-4 my-0 grow">
