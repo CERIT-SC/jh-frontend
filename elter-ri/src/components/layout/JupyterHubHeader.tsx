@@ -77,7 +77,7 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Docs</p>
+                      <p>Documentation</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
