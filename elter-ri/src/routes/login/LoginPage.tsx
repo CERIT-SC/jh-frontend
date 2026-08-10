@@ -17,33 +17,9 @@ interface LoginPageProps {
   buttonText: string;
   /** OAuth login URL */
   link: string;
-  /** Optional description text shown below the heading */
-  description?: string;
-  /** Optional member link text (e.g. "MetaCentrum" or "eLTER") */
-  memberLinkText?: string;
-  /** Optional member link URL */
-  memberLinkHref?: string;
-  /** Optional docs link text */
-  docsLinkText?: string;
-  /** Optional docs link URL */
-  docsLinkHref?: string;
-  /** Optional light-mode logo src */
-  logoLightSrc?: string;
-  /** Optional dark-mode logo src */
-  logoDarkSrc?: string;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({
-  buttonText,
-  link,
-  description,
-  memberLinkText = "MetaCentrum",
-  memberLinkHref = "https://profile.e-infra.cz/profile/organizations",
-  docsLinkText = "Documentation",
-  docsLinkHref = "https://docs.cerit.io/en/docs/web-apps/jupyterhub",
-  logoLightSrc = "/static/custom-images/e-INFRA_logo.svg",
-  logoDarkSrc = "/static/custom-images/e-INFRA_logo_White.svg",
-}) => {
+const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8">
       <Card
@@ -54,20 +30,22 @@ const LoginPage: React.FC<LoginPageProps> = ({
         <CardHeader className="flex flex-col items-center gap-4 pb-2 pt-8">
           {/* Logo */}
           <img
-            src={logoLightSrc}
-            alt="JupyterHub"
+            src="/static/custom-images/elter_logo.svg"
+            alt="eLTER"
             className="block h-16 w-auto object-contain dark:hidden sm:h-12"
           />
           <img
-            src={logoDarkSrc}
-            alt="JupyterHub"
+            src="/static/custom-images/elter_logo.svg"
+            alt="eLTER"
             className="hidden h-16 w-auto object-contain dark:block sm:h-12"
           />
           {/* Welcome heading */}
           <div className="flex flex-col items-center gap-2 text-center">
-            <H1 className="text-2xl sm:text-3xl">Welcome to JupyterHub</H1>
+            <H1 className="text-2xl sm:text-3xl">
+              Welcome to eLTER-RI DataLabs
+            </H1>
             <Muted className="text-sm sm:text-base">
-              Sign in to access your JupyterHub workspace
+              Sign in to access your DataLabs workspace
             </Muted>
           </div>
         </CardHeader>
@@ -77,38 +55,20 @@ const LoginPage: React.FC<LoginPageProps> = ({
         <CardContent className="flex flex-col gap-5 px-6 py-6 sm:px-8">
           {/* Info section */}
           <P className="text-center text-sm leading-relaxed">
-            {description ? (
-              <>
-                {description}{" "}
-                {memberLinkHref && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto px-1 py-0 text-sm font-normal text-primary underline-offset-4 hover:underline"
-                    onClick={() => {
-                      window.location.href = memberLinkHref;
-                    }}
-                  >
-                    {memberLinkText}
-                  </Button>
-                )}
-              </>
-            ) : (
-              <>
-                You need to be a valid member of{" "}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto px-1 py-0 text-sm font-normal text-primary underline-offset-4 hover:underline"
-                  onClick={() => {
-                    window.location.href = memberLinkHref;
-                  }}
-                >
-                  {memberLinkText}
-                </Button>{" "}
-                to access JupyterHub.
-              </>
-            )}
+            It is necessary to be a valid member of{" "}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto px-1 py-0 text-sm font-normal text-primary underline-offset-4 hover:underline"
+              onClick={() => {
+                window.location.href = "https://elter-ri.eu";
+              }}
+            >
+              eLTER
+            </Button>{" "}
+            researchers group to access the service. If you are not a member,
+            you will be automatically presented an application upon login. The
+            application will be reviewed by eLTER heads.
           </P>
 
           {/* Quick links grid */}
@@ -117,8 +77,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
               variant="ghost"
               className="h-auto whitespace-normal justify-start gap-3 p-3 border"
               onClick={() => {
-                window.location.href =
-                  "https://docs.cerit.io/en/docs/platform/access#account";
+                window.location.href = "https://elter-ri.eu";
               }}
             >
               <Users className="h-5 w-5 shrink-0" />
@@ -129,11 +88,12 @@ const LoginPage: React.FC<LoginPageProps> = ({
               variant="ghost"
               className="h-auto whitespace-normal justify-start gap-3 p-3 border"
               onClick={() => {
-                window.location.href = docsLinkHref;
+                window.location.href =
+                  "https://docs.cerit.io/en/docs/web-apps/jupyterhub";
               }}
             >
               <BookOpen className="h-5 w-5 shrink-0" />
-              <span className="text-sm text-left">{docsLinkText}</span>
+              <span className="text-sm text-left">Documentation</span>
             </Button>
           </div>
         </CardContent>
