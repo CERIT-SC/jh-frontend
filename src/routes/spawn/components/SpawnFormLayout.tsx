@@ -40,12 +40,12 @@ function SpawnFormLayout({
       <Alert alerts={alerts} onRemove={onRemoveAlert} />
       {announcement && (
         <Announcement
-          className="mx-auto mt-6 px-4 lg:container"
+          className="mx-auto mt-6 lg:container"
           message={announcement}
           variant="warning"
         />
       )}
-      <Content className="py-8 px-0 lg:container">
+      <Content className="py-8 px-4 lg:container">
         <ContentHeading className="max-w-full">
           {serverName ? (
             <span className="truncate inline-block max-w-full">
