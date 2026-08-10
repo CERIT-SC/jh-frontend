@@ -24,18 +24,26 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
       <FooterContent>
         <FooterLeft>
           <FooterLogo>
-            <img
-              src={elterLogo}
-              alt="eLTER RI"
-              className="h-12 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 block dark:hidden"
-            />
-            <img
-              src={elterLogo}
-              alt="eLTER RI"
-              className="h-12 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 hidden dark:block"
-            />
+            <a
+              href="https://elter-ri.eu/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src={elterLogo}
+                alt="eLTER RI"
+                className="h-12 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 block dark:hidden"
+              />
+              <img
+                src={elterLogo}
+                alt="eLTER RI"
+                className="h-12 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 hidden dark:block"
+              />
+            </a>
           </FooterLogo>
-          <FooterLeftText>Operated by CERIT-SC, ICS MUNI</FooterLeftText>
+          <FooterLeftText>
+            Operated by eLTER Research Infrastructure
+          </FooterLeftText>
         </FooterLeft>
         <FooterRight>
           <nav className="flex flex-col gap-2">
