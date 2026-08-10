@@ -7,14 +7,13 @@
 
 import type React from "react";
 import { CircleQuestionMark } from "lucide-react";
+import { Button, Separator } from "@e-infra/design-system";
 import {
-  Button,
   Panel,
   PanelTitle,
   PanelDescription,
   PanelContent,
-  Separator,
-} from "@e-infra/design-system";
+} from "@components/ui";
 
 interface StepPanelProps {
   /** DOM id for anchor navigation (e.g. "image-section"). */

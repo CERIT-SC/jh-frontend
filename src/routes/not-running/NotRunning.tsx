@@ -5,10 +5,9 @@ import {
   Content,
   ContentHeading,
   P,
-  Panel,
-  PanelContent,
   Separator,
 } from "@e-infra/design-system";
+import { Panel, PanelContent } from "@components/ui";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import type { NotRunningAppConfig } from "@src-types/appConfig";
 import { Play } from "lucide-react";

@@ -1,13 +1,13 @@
 import { useCallback, useEffect } from "react";
+import { Footer, JupyterHubHeader } from "@components/layout";
 import {
+  Button,
   Panel,
   PanelContent,
   PanelHeader,
   PanelTitle,
   PanelDescription,
-} from "@e-infra/design-system";
-import { Footer, JupyterHubHeader } from "@components/layout";
-import { Button } from "@components/ui";
+} from "@components/ui";
 import { Loader2 } from "lucide-react";
 
 /**

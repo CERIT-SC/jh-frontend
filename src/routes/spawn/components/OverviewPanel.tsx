@@ -1,8 +1,5 @@
 import {
   H4,
-  Panel,
-  PanelContent,
-  PanelTitle,
   Separator,
   Small,
   Strong,
@@ -14,6 +11,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@e-infra/design-system";
+import { Panel, PanelContent, PanelTitle } from "@components/ui";
 import React, { JSX, useMemo } from "react";
 import {
   Cpu,

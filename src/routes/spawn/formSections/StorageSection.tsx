@@ -9,7 +9,6 @@ import {
   Alert,
   Label,
   Badge,
-  H3,
   Code,
   P,
   Link,

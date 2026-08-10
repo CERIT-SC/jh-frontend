@@ -9,18 +9,20 @@ declare const appConfig: {
   userName: string;
 };
 import {
-  Panel,
-  PanelContent,
-  PanelHeader,
   Progress,
   Separator,
-  PanelTitle,
-  PanelDescription,
   P,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@e-infra/design-system";
+import {
+  Panel,
+  PanelHeader,
+  PanelTitle,
+  PanelDescription,
+  PanelContent,
+} from "@components/ui";
 import { ChevronDown, RotateCcw } from "lucide-react";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import { useSpawnProgress } from "@hooks/useSpawnProgress";

@@ -6,7 +6,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  Panel,
   H4,
   Muted,
   Button,
@@ -670,7 +669,7 @@ export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
 }) => {
   if (variant === "inline") {
     return (
-      <Panel
+      <Card
         className={cn(
           "w-full group border-2 border-dashed bg-transparent transition-all duration-200",
           " hover:border-primary/50 hover:bg-primary/5 hover:scale-[1.02] dark:border-primary/30",
@@ -684,7 +683,7 @@ export const EmptyServerCard: React.FC<EmptyServerCardProps> = ({
             strokeWidth={2}
           />
         </div>
-      </Panel>
+      </Card>
     );
   }
 

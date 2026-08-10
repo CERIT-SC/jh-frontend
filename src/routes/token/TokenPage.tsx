@@ -11,9 +11,6 @@ import {
   TableRow,
   TableHead,
   TableCell,
-  Panel,
-  PanelContent,
-  PanelHeader,
   Input,
   Label,
   P,
@@ -25,6 +22,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@e-infra/design-system";
+import { Panel, PanelContent, PanelHeader } from "@components/ui";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { JupyterHubHeader, Footer } from "@components/layout";
 import { sanitizeHtml } from "@utils";
