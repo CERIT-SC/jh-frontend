@@ -313,7 +313,7 @@ export default function StorageSelectionSection({
           icon={<Cloud className="w-5 h-5 mt-0.5" aria-hidden="true" />}
           showToggle
         >
-          <H3>S3 Object Storage</H3>
+          <H4>S3 Object Storage</H4>
           <P>
             Mounts S3-compatible object storage to: <Code>/storage/s3</Code>
           </P>
