@@ -15,10 +15,35 @@ html {
   scroll-behavior: smooth;
 }
 
+
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
+@layer base {
+  html {
+    scrollbar-color: var(--color-primary-500) transparent;
+  }
 
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-primary-100);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-primary-400);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary-500);
+  }
+}
 @utility custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--primary) transparent;
