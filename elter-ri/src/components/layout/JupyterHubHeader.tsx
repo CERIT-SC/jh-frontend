@@ -16,8 +16,7 @@ import {
 } from "@e-infra/design-system";
 import { Book, LogOut } from "lucide-react";
 import { ModeToggle } from "../ui/ModeToggle";
-import HubLogo from "../../../../public/static/custom-images/hub-rectangle.svg";
-import HubLogoDark from "../../../../public/static/custom-images/hub-rectangle-dark.svg";
+import { elterDatalabsLogo } from "../../../public/static/custom-images/index";
 interface JupyterHubHeaderProps {
   userName: string;
 }
@@ -31,20 +30,18 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
 
   return (
     <>
-      <Header className="">
+      <Header
+        data-theme="elter"
+        className="dark text-text bg-background supports-backdrop-filter:bg-background"
+      >
         <HeaderContent>
           <HeaderLeft>
             {/* Logo */}
             <div className="flex h-10 items-center justify-center">
               <a href="/hub/home">
                 <img
-                  className="h-8 w-auto object-contain block dark:hidden"
-                  src={HubLogo}
-                  alt="Logo"
-                />
-                <img
-                  className="h-8 w-auto object-contain dark:block hidden"
-                  src={HubLogoDark}
+                  className="h-14 w-auto"
+                  src={elterDatalabsLogo}
                   alt="Logo"
                 />
               </a>

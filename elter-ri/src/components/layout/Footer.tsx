@@ -20,7 +20,7 @@ interface FooterProps {
 
 export const Footer = ({ className }: FooterProps): React.ReactElement => {
   return (
-    <EInfraFooter className={cn(className)}>
+    <EInfraFooter className={cn("dark bg-[#0a2033]", className)}>
       <FooterContent>
         <FooterLeft>
           <FooterLogo>
