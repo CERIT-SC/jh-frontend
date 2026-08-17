@@ -334,6 +334,8 @@ export function SelectingCardsTabs({
           const isActive = activeCategory === category;
           const isCustomCategory = category === "custom";
           const isAllCategory = category === "all";
+          const isElterCategory = category === "elter";
+
           return (
             <Badge
               key={category}
@@ -341,10 +343,11 @@ export function SelectingCardsTabs({
               className={cn(
                 "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
                 "bg-surface-raised border-surface-raised text-text",
-                "hover:bg-primary/10 hover:border-primary",
-                isCustomCategory && "bg-tertiary text-tertiary-foreground",
+                isCustomCategory && "bg-secondary text-bold",
+                isElterCategory && "bg-tertiary text-tertiary-foreground",
                 isActive &&
                   "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                "hover:bg-primary/10 hover:border-primary hover:text-text",
               )}
               onClick={() => handleCategoryChange(category)}
             >
