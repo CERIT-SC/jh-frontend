@@ -343,7 +343,8 @@ export function SelectingCardsTabs({
               className={cn(
                 "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
                 "bg-surface-raised border-surface-raised text-text",
-                isCustomCategory && "bg-secondary text-bold",
+                isCustomCategory &&
+                  "bg-secondary text-bold text-secondary-foreground",
                 isElterCategory && "bg-tertiary text-tertiary-foreground",
                 isActive &&
                   "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
