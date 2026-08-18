@@ -126,7 +126,7 @@ function SectionContent({
   return (
     <div
       className={cn(
-        "p-4 rounded-b-lg border-t border-border bg-primary/20 dark:bg-surface",
+        "p-4 rounded-b-lg border-t border-border bg-secondary/30 dark:bg-surface",
         "animate-[slideInFade_300ms_ease-out]",
         "px-12",
         className,
