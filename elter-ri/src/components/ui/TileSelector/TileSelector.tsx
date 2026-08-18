@@ -136,7 +136,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
       const rect = selectedLabel.getBoundingClientRect();
       const containerRect = containerRef.current.getBoundingClientRect();
       setHighlightStyle({
-        left: rect.left - containerRect.left,
+        left: rect.left - containerRect.left + containerRef.current.scrollLeft,
         width: rect.width,
       });
     }
@@ -190,19 +190,19 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
   };
 
   return (
-    <div>
+    <div className="min-w-0">
       {selectionText ? <P className="m-0 mb-2">{selectionText}</P> : null}
       <div
         role="radiogroup"
         aria-label={ariaLabel || selectionText || "Tile selector"}
-        className={`bg-surface-raised text-muted rounded-lg shadow-md text-left ${
+        className={`bg-surface-raised text-muted rounded-lg shadow-md text-left min-w-0 ${
           className || "w-full h-12"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         <div className="flex flex-col items-start text-black p-1 rounded-lg bg-muted h-full">
           <div
             ref={containerRef}
-            className="flex flex-nowrap gap-0 w-full h-full relative"
+            className="flex flex-nowrap gap-0 w-full h-full relative overflow-x-auto no-scrollbar min-w-0"
           >
             {/* Animated highlight background */}
             <div
@@ -227,7 +227,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
                   role="radio"
                   aria-checked={isSelected}
                   tabIndex={disabled ? -1 : isSelected ? 0 : -1}
-                  className={`flex-1 h-full text-center relative cursor-pointer px-3 bg-transparent border-none select-none group z-10 flex items-center justify-center ${
+                  className={`flex-1 min-w-[44px] h-full text-center relative cursor-pointer px-2 sm:px-3 bg-transparent border-none select-none group z-10 flex items-center justify-center ${
                     disabled ? "cursor-not-allowed" : ""
                   }`}
                   onClick={() => handleSelection(option.value)}
@@ -243,7 +243,7 @@ export const TileSelector: React.FC<TileSelectorProps> = (props) => {
                     className="hidden"
                   />
                   <span
-                    className={`relative z-10 block transition-all duration-300 ${
+                    className={`relative z-10 block text-xs sm:text-sm transition-all duration-300 ${
                       isSelected
                         ? "text-primary font-bold"
                         : "text-gray-600 group-hover:text-primary"
