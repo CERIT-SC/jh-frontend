@@ -40,7 +40,7 @@ function SpawnFormLayout({
       <Alert alerts={alerts} onRemove={onRemoveAlert} />
       {announcement && (
         <Announcement
-          className="mx-auto mt-6 px-4 lg:container"
+          className="mx-auto w-full max-w-7xl space-y-8 md:px-6 lg:px-8 xl:px-10 pt-4 px-0 lg:container"
           message={announcement}
           variant="warning"
         />

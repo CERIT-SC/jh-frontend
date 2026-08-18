@@ -52,7 +52,7 @@ function FormPage() {
     >
       <div className="flex flex-row gap-4 xl:gap-12 w-full h-full relative">
         {/* Left side: Scrollable content */}
-        <div className="no-scrollbar flex flex-col gap-8">
+        <div className="no-scrollbar flex flex-col gap-8 min-w-0 flex-1">
           <StepPanel
             id="image-section"
             stepNumber={1}
