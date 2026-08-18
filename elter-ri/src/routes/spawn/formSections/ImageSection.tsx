@@ -240,7 +240,7 @@ export function ImageSelectionSectionTabs({
             onCheckedChange={handleSshToggle}
             disabled={!isSSHAvailable}
             className={cn(
-              "data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-primary/80 dark:data-[state=checked]:bg-secondary",
+              "data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary",
               !isSSHAvailable && "opacity-50 cursor-not-allowed",
             )}
           />
