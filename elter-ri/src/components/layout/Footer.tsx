@@ -1,5 +1,5 @@
 import React from "react";
-import { elterLogo } from "../../../public/static/custom-images";
+import { elterDatalabsLogo } from "../../../public/static/custom-images/index";
 import {
   Button,
   cn,
@@ -30,14 +30,9 @@ export const Footer = ({ className }: FooterProps): React.ReactElement => {
               rel="noopener noreferrer"
             >
               <img
-                src={elterLogo}
+                src={elterDatalabsLogo}
                 alt="eLTER RI"
-                className="h-12 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 block dark:hidden"
-              />
-              <img
-                src={elterLogo}
-                alt="eLTER RI"
-                className="h-12 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 hidden dark:block"
+                className="h-14 w-auto transition-opacity opacity-90 hover:opacity-100"
               />
             </a>
           </FooterLogo>
