@@ -25,7 +25,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
       <Card
         variant="default"
         animation="translate"
-        className="w-full max-w-lg overflow-hidden border-border/50 bg-surface/80 shadow-xl backdrop-blur-md supports-backdrop-filter:bg-surface/60"
+        className="w-full max-w-lg overflow-hidden border-border/50 dark bg-surface/90 shadow-xl backdrop-blur-md supports-backdrop-filter:bg-surface/90"
+        data-theme="elter"
       >
         <CardHeader className="flex flex-col items-center gap-4 pb-2 pt-8">
           {/* Logo */}
