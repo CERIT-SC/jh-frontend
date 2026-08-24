@@ -403,7 +403,7 @@ export default function StorageSelectionSection({
                     <Link
                       href="https://s3-ui.cloud.e-infra.cz/"
                       target="_blank"
-                      className="underline"
+                      className="underline text-text"
                     >
                       https://s3-ui.cloud.e-infra.cz/
                     </Link>
