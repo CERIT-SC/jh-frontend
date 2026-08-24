@@ -41,9 +41,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
           />
           {/* Welcome heading */}
           <div className="flex flex-col items-center gap-2 text-center">
-            <H1 className="text-2xl sm:text-3xl">
-              Welcome to eLTER-RI DataLabs
-            </H1>
+            <H1 className="text-2xl sm:text-3xl">Welcome to eLTER DataLabs</H1>
             <Muted className="text-sm sm:text-base">
               Sign in to access your DataLabs workspace
             </Muted>
@@ -55,7 +53,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
         <CardContent className="flex flex-col gap-5 px-6 py-6 sm:px-8">
           {/* Info section */}
           <P className="text-center text-sm leading-relaxed">
-            It is necessary to be a valid member of{" "}
+            To access the service, you must be a registered user of the eLTER
+            Research Infrastructure and have the{" "}
             <Button
               variant="ghost"
               size="sm"
@@ -64,11 +63,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
                 window.location.href = "https://elter-ri.eu";
               }}
             >
-              eLTER
+              Researcher
             </Button>{" "}
-            researchers group to access the service. If you are not a member,
-            you will be automatically presented an application upon login. The
-            application will be reviewed by eLTER heads.
+            role. If you are not yet registered or do not have the required
+            role, the relevant application form(s) will be presented to you
+            automatically upon login. Your application(s) will then be reviewed
+            by the eLTER heads.
           </P>
 
           {/* Quick links grid */}
@@ -81,7 +81,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
               }}
             >
               <Users className="h-5 w-5 shrink-0" />
-              <span className="text-sm text-left">Check membership</span>
+              <span className="text-sm text-left">eLTER Homepage</span>
             </Button>
 
             <Button
