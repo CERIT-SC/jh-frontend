@@ -5,6 +5,7 @@ import {
   CardFooter,
   CardHeader,
   H1,
+  Link,
   Muted,
   P,
   Separator,
@@ -54,22 +55,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
         <CardContent className="flex flex-col gap-5 px-6 py-6 sm:px-8">
           {/* Info section */}
           <P className="text-center text-sm leading-relaxed">
-            To access the service, you must be a registered user of the eLTER
-            Research Infrastructure and have the{" "}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-auto px-1 py-0 text-sm font-normal text-primary underline-offset-4 hover:underline"
-              onClick={() => {
-                window.location.href = "https://elter-ri.eu";
-              }}
-            >
-              Researcher
-            </Button>{" "}
-            role. If you are not yet registered or do not have the required
-            role, the relevant application form(s) will be presented to you
-            automatically upon login. Your application(s) will then be reviewed
-            by the eLTER heads.
+            To access the service, you must be a registered user of the{" "}
+            <Link href="https://elter-ri.eu">
+              eLTER Research Infrastructure
+            </Link>{" "}
+            and have the Researcher role. If you are not yet registered or do
+            not have the required role, the relevant application form(s) will be
+            presented to you automatically upon login. Your application(s) will
+            then be reviewed by the eLTER heads.
           </P>
 
           {/* Quick links grid */}
