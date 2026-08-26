@@ -19,6 +19,9 @@ import {
   SheetTitle,
   SheetTrigger,
   Separator,
+  Strong,
+  Avatar,
+  AvatarFallback,
 } from "@e-infra/design-system";
 import { Book, LogOut, Menu } from "lucide-react";
 import { ModeToggle } from "../ui/ModeToggle";
@@ -150,24 +153,29 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
 
             <Separator />
 
-            <div className="flex flex-col gap-1 p-4">
-              <span className="px-3 text-sm font-medium text-text">
-                {userName}
-              </span>
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-2 px-3 py-2"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5" />
-                Logout
-              </Button>
+            <div className="p-4">
+              <ModeToggle variant="full" />
             </div>
 
             <Separator />
 
-            <div className="p-4">
-              <ModeToggle variant="full" />
+            <div className="flex items-center-safe justify-between py-4 px-8">
+              <div className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarFallback>
+                    {userName.trim().charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <Strong>{userName}</Strong>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="justify-start gap-2 px-3 py-2"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
