@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Header,
   Button,
@@ -13,8 +13,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
   TooltipContent,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  Separator,
 } from "@e-infra/design-system";
-import { Book, LogOut } from "lucide-react";
+import { Book, LogOut, Menu } from "lucide-react";
 import { ModeToggle } from "../ui/ModeToggle";
 import { elterDatalabsLogo } from "../../../public/static/custom-images/index";
 interface JupyterHubHeaderProps {
@@ -24,6 +30,8 @@ interface JupyterHubHeaderProps {
 export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
   userName,
 }) => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const handleLogout = () => {
     window.location.href = "/hub/logout";
   };
@@ -46,8 +54,8 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
                 />
               </a>
             </div>
-            {/* Nav */}
-            <NavigationMenu>
+            {/* Desktop Nav */}
+            <NavigationMenu className="hidden md:flex">
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuLink href="/hub/home">Home</NavigationMenuLink>
@@ -81,23 +89,88 @@ export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
               </NavigationMenuList>
             </NavigationMenu>
           </HeaderLeft>
-          <HeaderRight>
+
+          {/* Desktop Right — hidden on mobile */}
+          <HeaderRight className="hidden md:flex">
             <span className="ml-2">{userName}</span>
             <ModeToggle />
-            {/* <Avatar>
-              <AvatarImage
-                src={`https://ui-avatars.com/api/?name=${userName || "User"}`}
-                alt={userName || "User"}
-              />
-              <AvatarFallback>
-                {(userName?.[0] || "U").toUpperCase()}
-              </AvatarFallback>
-            </Avatar> */}
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />
               <span className="sr-only">Logout</span>
             </Button>
           </HeaderRight>
+
+          {/* Mobile hamburger — direct child of HeaderContent, pushed right */}
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-auto md:hidden"
+                aria-label="Open menu"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-sm">
+              <SheetHeader className="border-b border-border">
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+
+              <nav className="flex flex-col gap-1 p-4">
+                <a
+                  href="/hub/home"
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-md px-3 py-2 text-base font-medium text-text transition-colors hover:bg-secondary hover:text-primary"
+                >
+                  Home
+                </a>
+                <a
+                  href="/hub/token"
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-md px-3 py-2 text-base font-medium text-text transition-colors hover:bg-secondary hover:text-primary"
+                >
+                  Token
+                </a>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2 px-3 py-2 text-base font-medium"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    window.open(
+                      "https://docs.cerit.io/en/docs/web-apps/jupyterhub",
+                      "_blank",
+                    );
+                  }}
+                >
+                  <Book className="h-5 w-5" />
+                  Documentation
+                </Button>
+              </nav>
+
+              <Separator />
+
+              <div className="flex flex-col gap-1 p-4">
+                <span className="px-3 text-sm font-medium text-text">
+                  {userName}
+                </span>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2 px-3 py-2"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-5 w-5" />
+                  Logout
+                </Button>
+              </div>
+
+              <Separator />
+
+              <div className="p-4">
+                <ModeToggle variant="full" />
+              </div>
+            </SheetContent>
+          </Sheet>
         </HeaderContent>
       </Header>
     </>

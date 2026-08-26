@@ -10,9 +10,16 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+  SheetDescription,
 } from "@e-infra/design-system";
 import { Panel, PanelContent, PanelTitle } from "@components/ui";
-import React, { JSX, useMemo } from "react";
+import React, { JSX, useMemo, useState } from "react";
 import {
   Cpu,
   Gpu,
@@ -40,7 +47,13 @@ interface OverviewPanelProps {
 /**
  * Edit button component that scrolls to a section and triggers shine effect
  */
-function EditButton({ sectionId }: { sectionId: string }): JSX.Element {
+function EditButton({
+  sectionId,
+  onAfterClick,
+}: {
+  sectionId: string;
+  onAfterClick?: () => void;
+}): JSX.Element {
   const handleClick = () => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -51,6 +64,7 @@ function EditButton({ sectionId }: { sectionId: string }): JSX.Element {
         delay: 300,
       });
     }
+    onAfterClick?.();
   };
 
   return (
@@ -116,13 +130,18 @@ function imageHasSSHSupport(
   return false;
 }
 
-export function OverviewPanel({
-  children,
-  className,
+/**
+ * Shared configuration sections rendered inside both the desktop Panel
+ * and the mobile Sheet.
+ */
+function OverviewSections({
   formData,
   selectedImage,
   categoryImage,
-}: OverviewPanelProps): JSX.Element {
+  onSectionEdit,
+}: Omit<OverviewPanelProps, "children" | "className"> & {
+  onSectionEdit?: () => void;
+}): JSX.Element {
   const imageOptions = getImageOptions() as Record<
     string,
     Array<{ value: string; name: string }>
@@ -173,6 +192,168 @@ export function OverviewPanel({
   const s3Selection = formData?.s3selection || "existing";
 
   return (
+    <>
+      <Separator />
+      {/* Image Section */}
+      <div className="px-6 space-y-2">
+        <div className="flex items-center justify-between">
+          <H4>Environment Configuration</H4>
+          <EditButton sectionId="image-section" onAfterClick={onSectionEdit} />
+        </div>
+        <div className="grid grid-cols-2 gap-0.5">
+          <P className="pr-1 text-text-heading">Name</P>
+          <Strong className="min-w-0 break-word">
+            {displayImageName || "-"}
+          </Strong>
+          <P className="pr-1 text-text-heading">Tag</P>
+          <Small className="min-w-0 break-all">{displayImageTag || "-"}</Small>
+          <P className="text-text-heading">SSH Access</P>
+          <SSHStatusIndicator
+            enabled={sshAccessEnabled}
+            available={isSSHAvailable}
+          />
+        </div>
+      </div>
+      <Separator />
+
+      {/* Storage Section */}
+      <div className="px-6 gap-2 flex flex-col">
+        <div className="flex items-center justify-between">
+          <H4 className="flex items-center gap-2">Storage Configuration</H4>
+          <EditButton
+            sectionId="storage-section"
+            onAfterClick={onSectionEdit}
+          />
+        </div>
+
+        <div className="space-y-2">
+          {/* Persistent Home */}
+          <div className="grid grid-cols-2 items-start">
+            <div className="flex items-center gap-2">
+              <HardDrive className="w-3 h-3 text-text-heading" />
+              <P className="text-text-heading">Persistent Home</P>
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <P className="break-all">
+                  {phSelection === "new"
+                    ? "New directory"
+                    : formData?.phname || "Existing directory"}
+                </P>
+              </TooltipTrigger>
+              {phSelection === "existing" && formData?.phname && (
+                <TooltipContent side="top">
+                  {`${formData.phname}`}
+                </TooltipContent>
+              )}
+            </Tooltip>
+            {phSelection === "new" && formData?.phCheck === "yes" && (
+              <Small className="block text-amber-600 mt-0.5 pl-5">
+                ⚠ Will erase if exists
+              </Small>
+            )}
+          </div>
+
+          {/* MetaCentrum Storage */}
+          <div className="grid grid-cols-2 items-start">
+            <div className="flex items-center gap-2 text-text-heading">
+              <Server className="w-3 h-3" />
+              <P>MetaCentrum</P>
+            </div>
+            {metaCentrumEnabled ? (
+              <P>{formData?.home || "No storage selected"}</P>
+            ) : (
+              <P>-</P>
+            )}
+            {metaCentrumEnabled && (
+              <div className="col-span-2 flex flex-wrap gap-1 pl-5">
+                {formData?.locationStorageCheck === "yes" && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs text-text-heading"
+                  >
+                    Mount to /storage
+                  </Badge>
+                )}
+                {formData?.projectCheck === "yes" && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs text-text-heading"
+                  >
+                    Project Directories
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* S3 Storage */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <div className="grid grid-cols-2 items-start">
+                <div className="flex items-center gap-2 text-text-heading">
+                  <Cloud className="w-3 h-3" />
+                  <P>S3 Object Storage</P>
+                </div>
+                {s3Enabled ? (
+                  <P>
+                    {s3Selection === "new"
+                      ? formData?.s3bucket || "New bucket"
+                      : formData?.s3name || "Existing bucket"}
+                  </P>
+                ) : (
+                  <P>-</P>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+      {/* Resources Section */}
+      <div className="px-6">
+        <div className="flex items-center justify-between">
+          <H4>Resource Configuration</H4>
+          <EditButton
+            sectionId="resources-section"
+            onAfterClick={onSectionEdit}
+          />
+        </div>
+        <div className="grid grid-cols-2">
+          <span className="inline-flex items-center gap-2 text-text-heading">
+            <Cpu className="w-3 h-3" />
+            CPU
+          </span>
+          <Strong>
+            {formData?.cpuselection}{" "}
+            {formData?.cpuselection === 1 ? "Core" : "Cores"}
+          </Strong>
+          <span className="inline-flex items-center gap-2 text-text-heading">
+            <MemoryStick className="w-3 h-3" />
+            Memory
+          </span>
+          <Strong>{formData?.memselection} GB</Strong>
+          <span className="inline-flex items-center gap-2 text-text-heading">
+            <Gpu className="w-3 h-3" />
+            GPU
+          </span>
+          <Strong>{selectedGpuLabel}</Strong>
+        </div>
+      </div>
+      <Separator />
+    </>
+  );
+}
+
+export function OverviewPanel({
+  children,
+  className,
+  formData,
+  selectedImage,
+  categoryImage,
+}: OverviewPanelProps): JSX.Element {
+  return (
     <Panel title={"overview"} className={cn("max-w-md", className)}>
       <PanelTitle className="flex gap-1 items-center pt-6 px-6 text-2xl">
         <LayoutDashboard />
@@ -180,157 +361,60 @@ export function OverviewPanel({
       </PanelTitle>
 
       <PanelContent className="flex flex-col gap-4">
-        <Separator />
-        {/* Image Section */}
-        <>
-          <div className="px-6 space-y-2">
-            <div className="flex items-center justify-between">
-              <H4>Environment Configuration</H4>
-              <EditButton sectionId="image-section" />
-            </div>
-            <div className="grid grid-cols-2 gap-0.5">
-              <P className="pr-1 text-text-heading">Name</P>
-              <Strong className="min-w-0 break-word">
-                {displayImageName || "-"}
-              </Strong>
-              <P className="pr-1 text-text-heading">Tag</P>
-              <Small className="min-w-0 break-all">
-                {displayImageTag || "-"}
-              </Small>
-              <P className="text-text-heading">SSH Access</P>
-              <SSHStatusIndicator
-                enabled={sshAccessEnabled}
-                available={isSSHAvailable}
-              />
-            </div>
-          </div>
-        </>
-        <Separator />
-
-        {/* Storage Section */}
-        <div className="px-6 gap-2 flex flex-col">
-          <div className="flex items-center justify-between">
-            <H4 className="flex items-center gap-2">Storage Configuration</H4>
-            <EditButton sectionId="storage-section" />
-          </div>
-
-          <div className="space-y-2">
-            {/* Persistent Home */}
-            <div className="grid grid-cols-2 items-start">
-              <div className="flex items-center gap-2">
-                <HardDrive className="w-3 h-3 text-text-heading" />
-                <P className="text-text-heading">Persistent Home</P>
-              </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <P className="break-all">
-                    {phSelection === "new"
-                      ? "New directory"
-                      : formData?.phname || "Existing directory"}
-                  </P>
-                </TooltipTrigger>
-                {phSelection === "existing" && formData?.phname && (
-                  <TooltipContent side="top">
-                    {`${formData.phname}`}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-              {phSelection === "new" && formData?.phCheck === "yes" && (
-                <Small className="block text-amber-600 mt-0.5 pl-5">
-                  ⚠ Will erase if exists
-                </Small>
-              )}
-            </div>
-
-            {/* MetaCentrum Storage */}
-            <div className="grid grid-cols-2 items-start">
-              <div className="flex items-center gap-2 text-text-heading">
-                <Server className="w-3 h-3" />
-                <P>MetaCentrum</P>
-              </div>
-              {metaCentrumEnabled ? (
-                <P className="">{formData?.home || "No storage selected"}</P>
-              ) : (
-                <P>-</P>
-              )}
-              {metaCentrumEnabled && (
-                <div className="col-span-2 flex flex-wrap gap-1 pl-5">
-                  {formData?.locationStorageCheck === "yes" && (
-                    <Badge
-                      variant="outline"
-                      className="text-xs text-text-heading"
-                    >
-                      Mount to /storage
-                    </Badge>
-                  )}
-                  {formData?.projectCheck === "yes" && (
-                    <Badge
-                      variant="outline"
-                      className="text-xs text-text-heading"
-                    >
-                      Project Directories
-                    </Badge>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* S3 Storage */}
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="grid grid-cols-2 items-start">
-                  <div className="flex items-center gap-2 text-text-heading">
-                    <Cloud className="w-3 h-3" />
-                    <P>S3 Object Storage</P>
-                  </div>
-                  {s3Enabled ? (
-                    <P>
-                      {s3Selection === "new"
-                        ? formData?.s3bucket || "New bucket"
-                        : formData?.s3name || "Existing bucket"}
-                    </P>
-                  ) : (
-                    <P>-</P>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-        {/* Resources Section */}
-        <div className="px-6">
-          <div className="flex items-center justify-between">
-            <H4>Resource Configuration</H4>
-            <EditButton sectionId="resources-section" />
-          </div>
-          <div className="grid grid-cols-2">
-            <span className="inline-flex items-center gap-2 text-text-heading">
-              <Cpu className="w-3 h-3" />
-              CPU
-            </span>
-            <Strong>
-              {formData?.cpuselection}{" "}
-              {formData?.cpuselection === 1 ? "Core" : "Cores"}
-            </Strong>
-            <span className="inline-flex items-center gap-2 text-text-heading">
-              <MemoryStick className="w-3 h-3" />
-              Memory
-            </span>
-            <Strong>{formData?.memselection} GB</Strong>
-            <span className="inline-flex items-center gap-2 text-text-heading">
-              <Gpu className="w-3 h-3" />
-              GPU
-            </span>
-            <Strong>{selectedGpuLabel}</Strong>
-          </div>
-        </div>
-
-        <Separator />
+        <OverviewSections
+          formData={formData}
+          selectedImage={selectedImage}
+          categoryImage={categoryImage}
+        />
       </PanelContent>
 
       <PanelContent className="p-6">{children}</PanelContent>
     </Panel>
+  );
+}
+
+export function OverviewPanelMobile({
+  children,
+  className,
+  formData,
+  selectedImage,
+  categoryImage,
+}: OverviewPanelProps): JSX.Element {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button className="fixed bottom-4 right-4 z-40 rounded-full shadow-lg">
+          <LayoutDashboard className="w-4 h-4 mr-2" />
+          Overview
+        </Button>
+      </SheetTrigger>
+      <SheetContent
+        side="bottom"
+        className={cn("max-h-[85vh] overflow-y-auto", className)}
+      >
+        <SheetHeader>
+          <SheetTitle className="flex gap-1 items-center text-2xl">
+            <LayoutDashboard />
+            Configuration Overview
+          </SheetTitle>
+          <SheetDescription className="sr-only">
+            Review your configuration before starting the server.
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="flex flex-col gap-4">
+          <OverviewSections
+            formData={formData}
+            selectedImage={selectedImage}
+            categoryImage={categoryImage}
+            onSectionEdit={() => setOpen(false)}
+          />
+        </div>
+
+        <SheetFooter className="p-6">{children}</SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

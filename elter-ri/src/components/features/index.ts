@@ -2,7 +2,10 @@ export {
   GPUStatusIndicator,
   GPUSquare,
 } from "./GPUStatusIndicator/GPUStatusIndicator";
-export { OverviewPanel } from "../../routes/spawn/components/OverviewPanel";
+export {
+  OverviewPanel,
+  OverviewPanelMobile,
+} from "../../routes/spawn/components/OverviewPanel";
 export {
   ServerCard,
   ServerCardInline,

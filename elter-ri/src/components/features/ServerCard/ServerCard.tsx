@@ -37,6 +37,7 @@ import {
   Database,
 } from "lucide-react";
 import { dateFormat, dateFormatRelative } from "@utils";
+import { useMediaQuery } from "@hooks";
 import {
   ResourceUsageBadge,
   formatCpuDisplay,
@@ -105,6 +106,7 @@ interface ServerActionButtonsProps {
   handleStart?: () => void;
   handleQuickStart?: () => void;
   buttonClassName: string;
+  iconOnly?: boolean;
 }
 
 interface LastActivityProps {
@@ -149,6 +151,7 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
   handleStart = () => {},
   handleQuickStart = () => {},
   buttonClassName,
+  iconOnly = false,
 }) => {
   const canQuickStart =
     lastActivity !== undefined && dateFormat(lastActivity) !== "Never";
@@ -156,6 +159,8 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
   const [stopHandler, isStopping] = useAsyncAction(handleStop);
   const [startHandler, isStarting] = useAsyncAction(handleStart);
   const [quickStartHandler, isQuickStarting] = useAsyncAction(handleQuickStart);
+
+  const btnSize = iconOnly ? "icon" : "sm";
 
   if (isActive) {
     return (
@@ -165,11 +170,11 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
             <Button
               className={buttonClassName}
               title="Open"
-              size="sm"
+              size={btnSize}
               disabled={isOpening}
               onClick={openHandler}
             >
-              Open
+              {!iconOnly && "Open"}
               {isOpening ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -187,11 +192,11 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
               className={buttonClassName}
               title="Stop"
               variant="tertiary"
-              size="sm"
+              size={btnSize}
               disabled={isStopping}
               onClick={stopHandler}
             >
-              Stop
+              {!iconOnly && "Stop"}
               {isStopping ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -215,12 +220,13 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
             className={buttonClassName}
             title="Start"
             variant="default"
-            size="sm"
+            size={btnSize}
             disabled={isStarting}
             onClick={startHandler}
           >
             {isStarting && <Loader2 className="h-4 w-4 animate-spin" />}
-            Start <Play className="fill-current" strokeWidth={2} />
+            {!iconOnly && "Start"}{" "}
+            <Play className="fill-current" strokeWidth={2} />
           </Button>
         </TooltipTrigger>
         <TooltipContent side="bottom">
@@ -233,11 +239,11 @@ const ServerActionButtons: React.FC<ServerActionButtonsProps> = ({
             className={buttonClassName}
             title="Quick Start"
             variant="tertiary"
-            size="sm"
+            size={btnSize}
             disabled={!canQuickStart || isQuickStarting}
             onClick={quickStartHandler}
           >
-            Quick Start
+            {!iconOnly && "Quick Start"}
             {isQuickStarting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -343,6 +349,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
 }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteHandler, isDeleting] = useAsyncAction(handleDelete);
+  const useIconButtons = !useMediaQuery("(min-width: 480px)");
 
   const confirmDelete = () => {
     setShowDeleteDialog(false);
@@ -366,7 +373,10 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
       handleStop={handleStop}
       handleStart={handleStart}
       handleQuickStart={handleQuickStart}
-      buttonClassName="flex-1 grow-2"
+      buttonClassName={
+        useIconButtons && variant !== "default" ? "" : "flex-1 grow-2"
+      }
+      iconOnly={useIconButtons && variant !== "default"}
     />
   );
 
@@ -384,7 +394,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
 
   const usageBadges =
     showCpuBadge || showMemBadge ? (
-      <>
+      <span className="hidden sm:flex">
         {showCpuBadge && (
           <Tooltip>
             <TooltipTrigger>
@@ -413,7 +423,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
             </TooltipContent>
           </Tooltip>
         )}
-      </>
+      </span>
     ) : null;
 
   if (variant === "inline") {
@@ -434,8 +444,8 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
           )}
           style={{ "--before-height": `${progress}%` } as React.CSSProperties}
         >
-          <div className="flex items-center w-full justify-between gap-2 px-6">
-            <div className="flex items-center gap-3 min-w-0 flex-1 grow-7">
+          <div className="flex items-center w-full justify-between gap-2 px-3">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 grow-7">
               <Terminal className="hidden sm:block h-5 w-5 shrink-0 text-muted-foreground" />
               <div className="min-w-0 flex-1">
                 <H4 className="truncate overflow-visible-y">{title}</H4>
@@ -463,9 +473,6 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                     />
                     {isActive ? (isReady ? "Running" : "Pending") : "Stopped"}
                   </Badge>
-                  <LastActivityInfo
-                    lastActivity={!isActive ? lastActivity : undefined}
-                  />
                   {usageBadges}
                 </div>
               </div>
@@ -515,7 +522,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
               ? "border-l-2 border-success"
               : !isActive
                 ? "border-l-2 border-slate-400"
-                : "border-l-2 border-warning/30 before:absolute before:inset-x-[-2px] before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
+                : "border-l-2 border-warning/30 before:absolute before:-inset-x-0.5 before:bottom-0 before:pointer-events-none before:h-[var(--before-height)] before:border-l-2 before:rounded-bl-md before:border-warning",
           )}
           style={{ "--before-height": `${progress}%` } as React.CSSProperties}
         >
@@ -528,9 +535,11 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                   {description && (
                     <Muted className="truncate">{description}</Muted>
                   )}
-                  <LastActivityInfo
-                    lastActivity={!isActive ? lastActivity : undefined}
-                  />
+                  <span className="hidden sm:flex">
+                    <LastActivityInfo
+                      lastActivity={!isActive ? lastActivity : undefined}
+                    />
+                  </span>
                 </div>
                 {usageBadges}
               </div>

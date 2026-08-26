@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { OverviewPanel } from "@components/features";
+import { OverviewPanel, OverviewPanelMobile } from "@components/features";
 import { Button } from "@e-infra/design-system";
 import { useAlerts } from "@hooks";
 import type { SpawnAppConfig } from "@src-types/appConfig";
@@ -50,9 +50,9 @@ function FormPage() {
       alerts={alerts}
       onRemoveAlert={removeAlert}
     >
-      <div className="flex flex-row gap-4 xl:gap-12 w-full h-full relative">
+      <div className="flex flex-row gap-0 md:gap-4 xl:gap-12 w-full h-full relative">
         {/* Left side: Scrollable content */}
-        <div className="no-scrollbar flex flex-col gap-8 min-w-0 flex-1">
+        <div className="no-scrollbar flex flex-col gap-4 md:gap-8 min-w-0 flex-1">
           <StepPanel
             id="image-section"
             stepNumber={1}
@@ -105,8 +105,8 @@ function FormPage() {
           </StepPanel>
         </div>
 
-        {/* Right side: Sticky */}
-        <div className="min-w-sm relative">
+        {/* Right side: Sticky — desktop only */}
+        <div className="hidden lg:block min-w-sm relative">
           <div className="sticky top-20">
             <OverviewPanel
               formData={form.formData}
@@ -123,6 +123,23 @@ function FormPage() {
               </Button>
             </OverviewPanel>
           </div>
+        </div>
+
+        {/* Mobile: floating trigger + bottom sheet */}
+        <div className="lg:hidden">
+          <OverviewPanelMobile
+            formData={form.formData}
+            selectedImage={form.selectedImage}
+            categoryImage={form.selectedCategory}
+          >
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Validating..." : "Start"}
+            </Button>
+          </OverviewPanelMobile>
         </div>
       </div>
     </SpawnFormLayout>

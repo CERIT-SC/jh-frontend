@@ -542,7 +542,7 @@ function HomePage() {
       <div className="container grow  mx-auto">
         {appConfig.announcement && (
           <Announcement
-            className="mt-6"
+            className="mx-auto w-full max-w-7xl space-y-8 md:px-6 lg:px-8 xl:px-10 pt-4 px-2 lg:container"
             message={appConfig.announcement}
             variant="warning"
           />
