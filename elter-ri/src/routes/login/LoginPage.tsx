@@ -98,7 +98,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ buttonText, link }) => {
           {/* Sign in button */}
           <Button
             size="lg"
-            className="w-full gap-2 text-base"
+            className="w-full gap-2 text-base whitespace-normal h-auto min-h-12 py-3"
             onClick={() => {
               window.location.href = link;
             }}
