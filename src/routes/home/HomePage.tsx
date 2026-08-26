@@ -559,12 +559,12 @@ function HomePage() {
       <div className="container grow  mx-auto">
         {appConfig.announcement && (
           <Announcement
-            className="mx-auto w-full max-w-7xl space-y-8 md:px-6 lg:px-8 xl:px-10 pt-4 px-2 lg:container"
+            className="mx-auto w-full max-w-7xl space-y-8 pt-4 px-2 lg:container"
             message={appConfig.announcement}
             variant="warning"
           />
         )}
-        <div className="named-servers mt-8 px-4">
+        <div className="named-servers mt-8">
           <div className="flex items-center gap-2 mt-1">
             {/* <H1 className="grow">My servers</H1> */}
             <div className="flex items-center gap-4 my-0 grow">
