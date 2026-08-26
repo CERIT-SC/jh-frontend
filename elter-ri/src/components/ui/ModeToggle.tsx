@@ -1,5 +1,3 @@
-"use client";
-
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -16,8 +14,7 @@ interface ModeToggleProps {
 }
 
 export function ModeToggle({ variant = "icon" }: ModeToggleProps) {
-  const { setTheme } = useTheme();
-
+  const { theme, setTheme } = useTheme();
   if (variant === "full") {
     return (
       <DropdownMenu>
@@ -26,7 +23,11 @@ export function ModeToggle({ variant = "icon" }: ModeToggleProps) {
             <span className="relative flex items-center gap-2">
               <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              Theme
+              {theme === "light"
+                ? "Light"
+                : theme === "dark"
+                  ? "Dark"
+                  : "System"}
             </span>
           </Button>
         </DropdownMenuTrigger>
