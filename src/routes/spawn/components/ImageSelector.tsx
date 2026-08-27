@@ -393,7 +393,7 @@ export function SelectingCardsTabs({
             <span className="text-sm text-text-heading pl-1">
               Available Images
             </span>
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar py-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar py-2">
               {filteredImages.map(({ value, name }) => (
                 <Card
                   key={value}
