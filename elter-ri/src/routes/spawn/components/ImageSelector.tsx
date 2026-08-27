@@ -402,22 +402,34 @@ export function SelectingCardsTabs({
                 <Card
                   key={value}
                   className={cn(
-                    "min-w-auto",
                     "bg-surface-raised",
-                    "group flex max-h-sm relative cursor-pointer border overflow-hidden transition-colors duration-400 ease-in-out",
+                    "group relative isolate flex max-h-sm cursor-pointer border overflow-hidden transition-colors duration-400 ease-in-out",
                     selectedImageId === value
-                      ? "border-primary via-primary to-primary bg-linear-45 from-primary/20 from-85% dark:via-primary dark:from-surface-raised dark:to-primary dark:bg-linear-45 dark:from-85% dark:border-primary shadow-md"
-                      : "hover:text-text hover:border-secondary/30",
+                      ? "border-primary shadow-md"
+                      : "hover:text-text hover:border-primary/30",
                   )}
                   onClick={() => onSelectImage(value, activeCategory)}
                 >
+                  {selectedImageId === value && (
+                    <>
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute top-0 right-0 -z-10 size-24 bg-secondary [clip-path:polygon(100%_0,0_0,100%_100%)] dark:bg-surface-raised"
+                      />
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute top-0 right-0 -z-10 size-16 bg-primary [clip-path:polygon(100%_0,0_0,100%_100%)]"
+                      />
+                    </>
+                  )}
+
                   {/* Check indicator in corner */}
                   <div
                     className={cn(
                       "absolute top-2 right-2 z-10 transition-opacity duration-200",
                       selectedImageId === value
                         ? "opacity-100"
-                        : "opacity-0 group-hover:opacity-50",
+                        : "opacity-0 group-hover:opacity-100",
                     )}
                   >
                     <Check
@@ -429,7 +441,8 @@ export function SelectingCardsTabs({
                       )}
                     />
                   </div>
-                  <CardHeader>
+
+                  <CardHeader className="min-w-0 pr-12">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <CardTitle className="truncate text-xl">
