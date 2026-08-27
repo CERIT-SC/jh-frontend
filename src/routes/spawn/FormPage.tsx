@@ -52,7 +52,7 @@ function FormPage() {
     >
       <div className="flex flex-row gap-0 md:gap-4 xl:gap-12 w-full h-full relative">
         {/* Left side: Scrollable content */}
-        <div className="no-scrollbar flex flex-col gap-4 md:gap-8 min-w-0 flex-1">
+        <div className="no-scrollbar flex flex-col gap-4 md:gap-8 min-w-0 lg:w-2/3 flex-1">
           <StepPanel
             id="image-section"
             stepNumber={1}
@@ -107,7 +107,7 @@ function FormPage() {
         </div>
 
         {/* Right side: Sticky — desktop only */}
-        <div className="hidden lg:block min-w-sm relative">
+        <div className="hidden lg:block lg:w-1/3 min-w-sm relative">
           <div className="sticky top-20">
             <OverviewPanel
               formData={form.formData}
