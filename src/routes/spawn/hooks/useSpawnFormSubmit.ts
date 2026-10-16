@@ -11,6 +11,11 @@ import { validateDockerImage } from "@utils";
 import { buildImageValueToCategoryMap } from "../utils/gatherFormData";
 import { validateS3Credentials } from "../utils/validateS3Credentials";
 import { formatS3ErrorMessage } from "../utils/s3ErrorMessages";
+// TEMPORARY HOTFIX (CORS) — remove with the CORS-skip logic below.
+import {
+  isNetworkLevelS3Failure,
+  isEndpointReachable,
+} from "../utils/s3CorsDetection";
 import {
   resolveImageCategory,
   resolveContainerImage,
@@ -75,6 +80,10 @@ export function useSpawnFormSubmit({
         const result = await runSubmitPipeline(ctx);
         if (!result.ok) {
           pushAlert(result.error, { variant: "error" });
+        } else if (result.warning) {
+          // TEMPORARY HOTFIX (CORS) — non-blocking notice that S3
+          // validation was skipped. Remove with the CORS-skip logic.
+          pushAlert(result.warning, { variant: "default" });
         }
       } finally {
         setIsSubmitting(false);
@@ -86,14 +95,14 @@ export function useSpawnFormSubmit({
   return { isSubmitting, submit };
 }
 
-/** Internal: runs the full pipeline. Returns ok or the final error. */
+/** Internal: runs the full pipeline. Returns ok (with optional warning) or the final error. */
 async function runSubmitPipeline(ctx: {
   formData: SpawnFormData;
   selectedImage: string | null;
   checkedS3Storage: boolean;
   s3values: Record<string, string>;
   postUrl: string;
-}): Promise<{ ok: true } | { ok: false; error: string }> {
+}): Promise<{ ok: true; warning?: string } | { ok: false; error: string }> {
   const { formData, selectedImage, checkedS3Storage, s3values, postUrl } = ctx;
   const isCustomImage = formData.images === "custom";
 
@@ -151,6 +160,9 @@ async function runSubmitPipeline(ctx: {
   payload = applyS3Fields(payload, formData, checkedS3Storage);
 
   // 4. S3-specific validation (possibly async — validates credentials).
+  // TEMPORARY HOTFIX (CORS): set when validation is skipped because the
+  // browser blocked the check; the form then submits with a warning.
+  let s3CorsWarning: string | undefined;
   if (checkedS3Storage) {
     const s3Sel = formData.s3selection || "existing";
     if (s3Sel === "existing") {
@@ -168,7 +180,21 @@ async function runSubmitPipeline(ctx: {
       try {
         await validateS3Credentials(fields);
       } catch (error) {
-        return { ok: false, error: formatS3ErrorMessage(error) };
+        // TEMPORARY HOTFIX (CORS): if the failure is a browser-level
+        // network error AND the endpoint itself responds (no-cors probe),
+        // the request was CORS-blocked — skip validation and submit.
+        // Remove this branch once S3 validation moves server-side or
+        // buckets are CORS-configured.
+        const corsBlocked =
+          isNetworkLevelS3Failure(error) &&
+          (await isEndpointReachable(fields.s3url));
+        if (!corsBlocked) {
+          return { ok: false, error: formatS3ErrorMessage(error) };
+        }
+        s3CorsWarning =
+          "S3 credentials could not be verified — the browser blocked the " +
+          "check (CORS). Continuing without validation; if the credentials " +
+          "are wrong, the server will report it when spawning.";
       }
     }
   }
@@ -182,5 +208,5 @@ async function runSubmitPipeline(ctx: {
   if (!result.ok) {
     return { ok: false, error: result.error || "Submission failed" };
   }
-  return { ok: true };
+  return { ok: true, ...(s3CorsWarning && { warning: s3CorsWarning }) };
 }
