@@ -1,11 +1,18 @@
 /**
- * @fileoverview Dev-only mock data for appConfig and spawnOptions globals.
+ * @fileoverview Dev-only bootstrap: mocks `appConfig` and injects the
+ * per-instance fixture (wire + instance config) so the app runs without
+ * JupyterHub's Jinja2 rendering.
  *
- * These are injected onto `window` when `import.meta.env.DEV` is true so the
- * app can run without JupyterHub's Jinja2 template rendering. The shapes
- * intentionally mirror what the backend injects (see `src/types/appConfig.ts`
- * and the `spawnOptions` declaration in `routes/spawn/utils/gatherFormData.ts`).
+ * The fixture is selected by `?instance=<name>`, then `VITE_INSTANCE`, then
+ * `hub` (the legacy wire — exercises the legacy adapter). Injection mirrors
+ * the two backend transports: `legacy-global` sets `window.spawnOptions`
+ * (today's hub backend); `json-script` creates the
+ * `<script type="application/json" id="spawn-options">` element the strict
+ * reader consumes. The `instance` block goes into `#instance-config` on
+ * every page.
  */
+
+import { FIXTURES, type InstanceFixture } from "./fixtures/instances";
 
 /** Shape of a single spawner entry in the home-page mock. */
 interface DevSpawner {
@@ -23,6 +30,31 @@ interface DevWindow extends Window {
 
 function getDevWindow(): DevWindow {
   return window as DevWindow;
+}
+
+/** Creates or replaces a JSON script element with the given content. */
+function injectJsonScript(id: string, content: unknown): void {
+  let element = document.getElementById(id);
+  if (!(element instanceof HTMLScriptElement)) {
+    const script = document.createElement("script");
+    script.id = id;
+    script.type = "application/json";
+    document.body.appendChild(script);
+    element = script;
+  }
+  element.textContent = JSON.stringify(content);
+}
+
+function injectFixture(fixture: InstanceFixture): void {
+  const devWindow = getDevWindow();
+  if (fixture.transport === "legacy-global") {
+    devWindow.spawnOptions = fixture.wire as Record<string, unknown>;
+  } else {
+    injectJsonScript("spawn-options", fixture.wire);
+  }
+  if (fixture.instance !== undefined) {
+    injectJsonScript("instance-config", fixture.instance);
+  }
 }
 
 export default function initDev() {
@@ -87,239 +119,18 @@ export default function initDev() {
       xsrf: "sample-xsrf-token",
     };
   }
-  devWindow.spawnOptions = {
-    user_options: {
-      container_image: "cerit.io/hubs/datasciencenb:26-09-2024",
-      ssh: false,
-      phome: "remain",
-      mountprojects: false,
-      home: null,
-      cpu: "4",
-      mem: "4",
-      gpu: "undefined",
-      shmsize: "4",
-    },
-    phomes: ["xbencs00-home-1"],
-    mhomes: [
-      "brno11-elixir",
-      "brno12-cerit",
-      "brno14-ceitec",
-      "brno1-cerit",
-      "brno2",
-      "budejovice1",
-      "du-cesnet",
-      "liberec3-tul",
-      "plzen1",
-      "plzen4-ntis",
-      "praha1",
-      "praha2-natur",
-      "praha5-elixir",
-      "praha6-fzu",
-      "pruhonice1-ibot",
-      "vestec1-elixir",
-    ],
-    s3buckets: [
-      { value: "bucket-1", name: "Test Bucket 1" },
-      { value: "bucket-2", name: "Test Bucket 2" },
-    ],
-    ssh_dns_domain: "jupyter-xbencs00--x-1---6b86b273.dyn.cloud.e-infra.cz",
-    gpu_instances: [
-      {
-        value: "none",
-        name: "None",
-      },
-      {
-        value: "mig-1g.10gb",
-        name: "10GB part A100",
-      },
-      {
-        value: "mig-2g.20gb",
-        name: "20GB part A100",
-      },
-      {
-        value: "a10",
-        name: "whole A10",
-      },
-      {
-        value: "a40",
-        name: "whole A40",
-      },
-      {
-        value: "a100",
-        name: "whole A100",
-      },
-      {
-        value: "h100-80",
-        name: "whole H100 (80GB)",
-      },
-      {
-        value: "h100-94",
-        name: "whole H100 (94GB)",
-      },
-      {
-        value: "any",
-        name: "any whole gpu",
-      },
-    ],
-    images: {
-      simple: [
-        {
-          value: "minimalnb:02-01-2025-ai",
-          name: "Minimal NB with AI",
-        },
-        {
-          value: "minimalnb:11-04-2025-intelligence-ai",
-          name: "Minimal NB with notebook-intelligence",
-        },
-        {
-          value: "minimalnb:01-02-2025",
-          name: "Minimal NB with SSH access",
-        },
-        {
-          value: "minimalnb-cs:31-10-2024",
-          name: "Minimal NB with Integrated VS Code",
-        },
-        {
-          value: "minimalnb-cs:17-11-2024-ai",
-          name: "Minimal NB with Integrated VS Code and AI",
-        },
-        {
-          value: "datasciencenb:26-09-2024",
-          name: "DataScience NB",
-        },
-        {
-          value: "datasciencenb:31-10-2024-ssh",
-          name: "DataScience NB with SSH access",
-        },
-      ],
-      r: [
-        {
-          value: "jupyterhubronly:05-02-2024",
-          name: "Python 3.11 and R 4.3.1 kernels",
-        },
-        {
-          value: "rstudio:11-08-2022-7",
-          name: "RStudio with R 4.2.1",
-        },
-        {
-          value: "rstudio:4.2.1-rsat",
-          name: "RStudio with R 4.2.1 and RSAT",
-        },
-        {
-          value: "rstudio:4.3.1",
-          name: "RStudio with R 4.3.1",
-        },
-        {
-          value: "rstudio:4.4.0",
-          name: "RStudio with R 4.4.0",
-        },
-        {
-          value: "rstudio:4.4.1",
-          name: "RStudio with R 4.4.1",
-        },
-        {
-          value: "rstudio:4.4.1-ai",
-          name: "RStudio with R 4.4.1 and AI",
-        },
-      ],
-      tf: [
-        {
-          value: "tensorflownb:31-08-2023",
-          name: "TensorFlow 2.10 (CPU only)",
-        },
-        {
-          value: "tensorflowgpu:2.11.1",
-          name: "TensorFlow 2.11.1 with GPU and TensorBoard",
-        },
-        {
-          value: "tensorflowgpu:2.12.1",
-          name: "TensorFlow 2.12.1 with GPU and TensorBoard",
-        },
-        {
-          value: "tensorflowgpu:2.15.0",
-          name: "TensorFlow 2.15.1 with GPU and TensorBoard",
-        },
-        {
-          value: "tensorflowgpu:2.17.0",
-          name: "TensorFlow 2.17.0 with GPU and TensorBoard",
-        },
-        {
-          value: "pytorchgpu:2.4.1",
-          name: "Pytorch 2.4.1",
-        },
-        {
-          value: "nvidia-pytorch:2.5.0",
-          name: "NVIDIA Pytorch 2.5.0",
-        },
-        {
-          value: "nvidia-tensorflow:2.16.1",
-          name: "NVIDIA Tensorflow 2.16.1",
-        },
-      ],
-      matlab: [
-        {
-          value: "matlab:r2022b",
-          name: "MATLAB R2022b",
-        },
-        {
-          value: "matlab:r2023a",
-          name: "MATLAB R2023a",
-        },
-        {
-          value: "matlab:r2024a",
-          name: "MATLAB R2024a",
-        },
-      ],
-      various: [
-        {
-          value: "colab:2025-01-07",
-          name: "Google Colab",
-        },
-        {
-          value: "alphapose:2023-10-26",
-          name: "Alphapose",
-        },
-        {
-          value: "cuda-ubuntu:11.6-22.04",
-          name: "CUDA 11.6",
-        },
-        {
-          value: "cuda-ubuntu:11.8-22.04",
-          name: "CUDA 11.8",
-        },
-        {
-          value: "cuda-ubuntu:12.0-24.04",
-          name: "CUDA 12.0",
-        },
-        {
-          value: "cuda-ubuntu:12.1-22.04",
-          name: "CUDA 12.1",
-        },
-        {
-          value: "cuda-ubuntu:12.2-22.04",
-          name: "CUDA 12.2",
-        },
-        {
-          value: "cuda-ubuntu:12.3-22.04",
-          name: "CUDA 12.3",
-        },
-        {
-          value: "cuda-ubuntu:12.4-22.04",
-          name: "CUDA 12.4",
-        },
-      ],
-      folding: [
-        {
-          value: "colabfold:1.5.5-cu12",
-          name: "Colabfold 1.5.5",
-        },
-        {
-          value: "esmfold:2.0.0",
-          name: "ESM Fold 2.0",
-        },
-      ],
-    },
-  };
 
-  console.log("Dev mode", devWindow.appConfig, devWindow.spawnOptions);
+  // Per-instance fixture: ?instance=<name> beats VITE_INSTANCE beats hub.
+  const name =
+    new URLSearchParams(window.location.search).get("instance") ??
+    import.meta.env.VITE_INSTANCE ??
+    "hub";
+  const fixture = FIXTURES[name];
+  if (fixture) {
+    injectFixture(fixture);
+    console.log(`Dev mode — instance fixture: ${name}`, fixture);
+  } else {
+    console.warn(`Dev mode — unknown instance fixture "${name}", using hub.`);
+    injectFixture(FIXTURES.hub);
+  }
 }
