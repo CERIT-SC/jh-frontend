@@ -32,9 +32,10 @@ import {
   LayoutDashboard,
   HardDrive,
 } from "lucide-react";
-import { getGpuOptions, getImageOptions } from "../utils/gatherFormData";
 import { triggerShineById } from "@utils";
 import type { SpawnFormData } from "@src-types/spawnForm";
+import type { SpawnOptions } from "@src-types/spawnOptions";
+import { effectiveFields } from "../sections/registry";
 
 interface OverviewPanelProps {
   children?: React.ReactNode;
@@ -42,6 +43,10 @@ interface OverviewPanelProps {
   formData?: SpawnFormData;
   selectedImage: string | null;
   categoryImage: string | null;
+  /** The resolved spawn options this form is rendered from. */
+  options: SpawnOptions;
+  /** Generic-field values (formData.fields). */
+  fieldValues?: Record<string, string | boolean>;
 }
 
 /**
@@ -138,15 +143,46 @@ function OverviewSections({
   formData,
   selectedImage,
   categoryImage,
+  options,
+  fieldValues,
   onSectionEdit,
 }: Omit<OverviewPanelProps, "children" | "className"> & {
   onSectionEdit?: () => void;
 }): JSX.Element {
-  const imageOptions = getImageOptions() as Record<
+  // Catalog + GPU labels come from the resolved options (BE-authoritative).
+  const imageOptions: Record<
     string,
     Array<{ value: string; name: string }>
-  >;
-  const gpuOptions = getGpuOptions() as Record<string, string>;
+  > = Object.fromEntries(
+    options.image.categories.map((category) => [
+      category.key,
+      category.images.map((image) => ({
+        value: image.value,
+        name: image.name,
+      })),
+    ]),
+  );
+  const gpuOptions: Record<string, string> = Object.fromEntries(
+    options.resources.gpu.options.map((choice) => [choice.value, choice.name]),
+  );
+
+  const storageFieldRows = effectiveFields(options).filter(
+    (field) => field.section === "storage",
+  );
+  const resourceFieldRows = effectiveFields(options).filter(
+    (field) => field.section === "resources",
+  );
+  const hasStorageContent =
+    options.storage.persistent_home.enabled ||
+    options.storage.metacentrum.enabled ||
+    options.storage.projects.enabled ||
+    options.storage.s3.enabled ||
+    storageFieldRows.length > 0;
+  const hasResourceContent =
+    options.resources.cpu.enabled ||
+    options.resources.memory.enabled ||
+    options.resources.gpu.enabled ||
+    resourceFieldRows.length > 0;
 
   const isCustomImage =
     categoryImage === "custom" || formData?.images === "custom";
@@ -207,140 +243,223 @@ function OverviewSections({
           </Strong>
           <P className="pr-1 text-text-heading">Tag</P>
           <Small className="min-w-0 break-all">{displayImageTag || "-"}</Small>
-          <P className="text-text-heading">SSH Access</P>
-          <SSHStatusIndicator
-            enabled={sshAccessEnabled}
-            available={isSSHAvailable}
-          />
+          {options.image.ssh.enabled && (
+            <>
+              <P className="text-text-heading">SSH Access</P>
+              <SSHStatusIndicator
+                enabled={sshAccessEnabled}
+                available={isSSHAvailable}
+              />
+            </>
+          )}
         </div>
       </div>
       <Separator />
 
-      {/* Storage Section */}
-      <div className="px-6 gap-2 flex flex-col">
-        <div className="flex items-center justify-between">
-          <H4 className="flex items-center gap-2">Storage Configuration</H4>
-          <EditButton
-            sectionId="storage-section"
-            onAfterClick={onSectionEdit}
-          />
-        </div>
-
-        <div className="space-y-2">
-          {/* Persistent Home */}
-          <div className="grid grid-cols-2 items-start">
-            <div className="flex items-center gap-2">
-              <HardDrive className="w-3 h-3 text-text-heading" />
-              <P className="text-text-heading">Persistent Home</P>
-            </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <P className="break-all">
-                  {phSelection === "new"
-                    ? "New directory"
-                    : formData?.phname || "Existing directory"}
-                </P>
-              </TooltipTrigger>
-              {phSelection === "existing" && formData?.phname && (
-                <TooltipContent side="top">
-                  {`${formData.phname}`}
-                </TooltipContent>
-              )}
-            </Tooltip>
-            {phSelection === "new" && formData?.phCheck === "yes" && (
-              <Small className="block text-amber-600 mt-0.5 pl-5">
-                ⚠ Will erase if exists
-              </Small>
-            )}
+      {/* Storage Section — only when the instance offers storage options */}
+      {hasStorageContent && (
+        <div className="px-6 gap-2 flex flex-col">
+          <div className="flex items-center justify-between">
+            <H4 className="flex items-center gap-2">Storage Configuration</H4>
+            <EditButton
+              sectionId="storage-section"
+              onAfterClick={onSectionEdit}
+            />
           </div>
 
-          {/* MetaCentrum Storage */}
-          <div className="grid grid-cols-2 items-start">
-            <div className="flex items-center gap-2 text-text-heading">
-              <Server className="w-3 h-3" />
-              <P>MetaCentrum</P>
-            </div>
-            {metaCentrumEnabled ? (
-              <P>{formData?.home || "No storage selected"}</P>
-            ) : (
-              <P>-</P>
-            )}
-            {metaCentrumEnabled && (
-              <div className="col-span-2 flex flex-wrap gap-1 pl-5">
-                {formData?.locationStorageCheck === "yes" && (
-                  <Badge
-                    variant="outline"
-                    className="text-xs text-text-heading"
-                  >
-                    Mount to /storage
-                  </Badge>
-                )}
-                {formData?.projectCheck === "yes" && (
-                  <Badge
-                    variant="outline"
-                    className="text-xs text-text-heading"
-                  >
-                    Project Directories
-                  </Badge>
+          <div className="space-y-2">
+            {/* Persistent Home */}
+            {options.storage.persistent_home.enabled && (
+              <div className="grid grid-cols-2 items-start">
+                <div className="flex items-center gap-2">
+                  <HardDrive className="w-3 h-3 text-text-heading" />
+                  <P className="text-text-heading">Persistent Home</P>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <P className="break-all">
+                      {phSelection === "new"
+                        ? "New directory"
+                        : formData?.phname || "Existing directory"}
+                    </P>
+                  </TooltipTrigger>
+                  {phSelection === "existing" && formData?.phname && (
+                    <TooltipContent side="top">
+                      {`${formData.phname}`}
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+                {phSelection === "new" && formData?.phCheck === "yes" && (
+                  <Small className="block text-amber-600 mt-0.5 pl-5">
+                    ⚠ Will erase if exists
+                  </Small>
                 )}
               </div>
             )}
-          </div>
 
-          {/* S3 Storage */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0 overflow-hidden">
+            {/* MetaCentrum Storage */}
+            {options.storage.metacentrum.enabled && (
               <div className="grid grid-cols-2 items-start">
                 <div className="flex items-center gap-2 text-text-heading">
-                  <Cloud className="w-3 h-3" />
-                  <P>S3 Object Storage</P>
+                  <Server className="w-3 h-3" />
+                  <P>MetaCentrum</P>
                 </div>
-                {s3Enabled ? (
-                  <P>
-                    {s3Selection === "new"
-                      ? formData?.s3bucket || "New bucket"
-                      : formData?.s3name || "Existing bucket"}
-                  </P>
+                {metaCentrumEnabled ? (
+                  <P>{formData?.home || "No storage selected"}</P>
                 ) : (
                   <P>-</P>
                 )}
+                {metaCentrumEnabled && (
+                  <div className="col-span-2 flex flex-wrap gap-1 pl-5">
+                    {formData?.locationStorageCheck === "yes" && (
+                      <Badge
+                        variant="outline"
+                        className="text-xs text-text-heading"
+                      >
+                        Mount to /storage
+                      </Badge>
+                    )}
+                    {options.storage.projects.enabled &&
+                      formData?.projectCheck === "yes" && (
+                        <Badge
+                          variant="outline"
+                          className="text-xs text-text-heading"
+                        >
+                          Project Directories
+                        </Badge>
+                      )}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
+
+            {/* S3 Storage */}
+            {options.storage.s3.enabled && (
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="grid grid-cols-2 items-start">
+                    <div className="flex items-center gap-2 text-text-heading">
+                      <Cloud className="w-3 h-3" />
+                      <P>S3 Object Storage</P>
+                    </div>
+                    {s3Enabled ? (
+                      <P>
+                        {s3Selection === "new"
+                          ? formData?.s3bucket || "New bucket"
+                          : formData?.s3name || "Existing bucket"}
+                      </P>
+                    ) : (
+                      <P>-</P>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Generic fields (delete-home, …) — one row per field */}
+            {storageFieldRows.map((field) => {
+              const value = fieldValues?.[field.name];
+              const isSet =
+                field.type === "checkbox" ? value === true : Boolean(value);
+              return (
+                <div key={field.name} className="grid grid-cols-2 items-start">
+                  <div className="flex items-center gap-2">
+                    <HardDrive className="w-3 h-3 text-text-heading" />
+                    <P className="text-text-heading">
+                      {field.summary_label || field.label}
+                    </P>
+                  </div>
+                  <P>
+                    {field.type === "checkbox"
+                      ? isSet
+                        ? "Yes"
+                        : "-"
+                      : isSet
+                        ? String(value)
+                        : "-"}
+                  </P>
+                  {field.type === "checkbox" && isSet && field.warning && (
+                    <Small className="block text-amber-600 mt-0.5 pl-5 col-span-2">
+                      ⚠ {field.warning}
+                    </Small>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
-      </div>
+      )}
 
-      <Separator />
-      {/* Resources Section */}
-      <div className="px-6">
-        <div className="flex items-center justify-between">
-          <H4>Resource Configuration</H4>
-          <EditButton
-            sectionId="resources-section"
-            onAfterClick={onSectionEdit}
-          />
+      {hasStorageContent && <Separator />}
+      {/* Resources Section — only when the instance offers resource options */}
+      {hasResourceContent && (
+        <div className="px-6">
+          <div className="flex items-center justify-between">
+            <H4>Resource Configuration</H4>
+            <EditButton
+              sectionId="resources-section"
+              onAfterClick={onSectionEdit}
+            />
+          </div>
+          <div className="grid grid-cols-2">
+            {options.resources.cpu.enabled && (
+              <span className="inline-flex items-center gap-2 text-text-heading">
+                <Cpu className="w-3 h-3" />
+                CPU
+              </span>
+            )}
+            {options.resources.cpu.enabled && (
+              <Strong>
+                {formData?.cpuselection}{" "}
+                {formData?.cpuselection === 1 ? "Core" : "Cores"}
+              </Strong>
+            )}
+            {options.resources.memory.enabled && (
+              <span className="inline-flex items-center gap-2 text-text-heading">
+                <MemoryStick className="w-3 h-3" />
+                Memory
+              </span>
+            )}
+            {options.resources.memory.enabled && (
+              <Strong>{formData?.memselection} GB</Strong>
+            )}
+            {options.resources.gpu.enabled && (
+              <span className="inline-flex items-center gap-2 text-text-heading">
+                <Gpu className="w-3 h-3" />
+                GPU
+              </span>
+            )}
+            {options.resources.gpu.enabled && (
+              <Strong>{selectedGpuLabel}</Strong>
+            )}
+          </div>
+          {/* Generic fields of the resources section */}
+          {resourceFieldRows.length > 0 && (
+            <div className="mt-2 space-y-2">
+              {resourceFieldRows.map((field) => {
+                const value = fieldValues?.[field.name];
+                const isSet =
+                  field.type === "checkbox" ? value === true : Boolean(value);
+                const choice =
+                  field.type === "select"
+                    ? field.options?.find((option) => option.value === value)
+                    : undefined;
+                return (
+                  <div
+                    key={field.name}
+                    className="grid grid-cols-2 items-start"
+                  >
+                    <P className="text-text-heading">
+                      {field.summary_label || field.label}
+                    </P>
+                    <P>{isSet ? (choice?.name ?? String(value)) : "-"}</P>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-        <div className="grid grid-cols-2">
-          <span className="inline-flex items-center gap-2 text-text-heading">
-            <Cpu className="w-3 h-3" />
-            CPU
-          </span>
-          <Strong>
-            {formData?.cpuselection}{" "}
-            {formData?.cpuselection === 1 ? "Core" : "Cores"}
-          </Strong>
-          <span className="inline-flex items-center gap-2 text-text-heading">
-            <MemoryStick className="w-3 h-3" />
-            Memory
-          </span>
-          <Strong>{formData?.memselection} GB</Strong>
-          <span className="inline-flex items-center gap-2 text-text-heading">
-            <Gpu className="w-3 h-3" />
-            GPU
-          </span>
-          <Strong>{selectedGpuLabel}</Strong>
-        </div>
-      </div>
+      )}
       <Separator />
     </>
   );
@@ -352,6 +471,8 @@ export function OverviewPanel({
   formData,
   selectedImage,
   categoryImage,
+  options,
+  fieldValues,
 }: OverviewPanelProps): JSX.Element {
   return (
     <Panel title={"overview"} className={cn("max-w-md", className)}>
@@ -365,6 +486,8 @@ export function OverviewPanel({
           formData={formData}
           selectedImage={selectedImage}
           categoryImage={categoryImage}
+          options={options}
+          fieldValues={fieldValues}
         />
       </PanelContent>
 
@@ -379,6 +502,8 @@ export function OverviewPanelMobile({
   formData,
   selectedImage,
   categoryImage,
+  options,
+  fieldValues,
 }: OverviewPanelProps): JSX.Element {
   const [open, setOpen] = useState(false);
 
@@ -409,6 +534,8 @@ export function OverviewPanelMobile({
             formData={formData}
             selectedImage={selectedImage}
             categoryImage={categoryImage}
+            options={options}
+            fieldValues={fieldValues}
             onSectionEdit={() => setOpen(false)}
           />
         </div>

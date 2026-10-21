@@ -1,6 +1,5 @@
 import { useState, useEffect, Fragment, useCallback } from "react";
 import { TileSelector } from "@components/ui";
-import { getGpuOptions } from "../utils/gatherFormData";
 import { GPUStatusIndicator, GPUSquare } from "@components/features";
 import { fetchGPUIndicators, GPUIndicatorsData } from "@api";
 import {
@@ -14,6 +13,9 @@ import {
 } from "@e-infra/design-system";
 import { Loader2, RefreshCw, Cpu, Gpu, MemoryStick } from "lucide-react";
 import SectionContainer from "../components/SectionContainer";
+import GenericFieldBlock from "../components/GenericFieldBlock";
+import type { SpawnOptions } from "@src-types/spawnOptions";
+import type { GenericField } from "@src-types/spawnOptions";
 
 type FormState = Record<string, unknown>;
 type FormUpdater = (prev: FormState) => FormState;
@@ -28,13 +30,27 @@ interface ResourceSelectionSectionProps {
   formData: FormState;
   setFormData: (updater: FormUpdater) => void;
   defaultFormData?: ResourceDefaultFormData;
+  /** The `resources` slice of the resolved spawn options. */
+  resources: SpawnOptions["resources"];
+  /** Generic fields rendered inside the resources section. */
+  fields: GenericField[];
+  /** Generic-field values and change handler. */
+  fieldValues: Record<string, string | boolean>;
+  onFieldChange: (name: string, value: string | boolean) => void;
 }
 
 export default function ResourceSelectionSection({
   setFormData,
   defaultFormData,
+  resources,
+  fields,
+  fieldValues,
+  onFieldChange,
 }: ResourceSelectionSectionProps) {
-  const gpuOptions = getGpuOptions();
+  // GPU tiles come from the schema; labels are BE-authoritative.
+  const gpuOptions = Object.fromEntries(
+    resources.gpu.options.map((choice) => [choice.value, choice.name]),
+  );
   const [defMem, setDefMem] = useState<number | null>(null);
   const [defCPU, setDefCPU] = useState<number | null>(null);
   const [defGPU, setDefGPU] = useState<[string, string] | null>(null);
@@ -47,7 +63,7 @@ export default function ResourceSelectionSection({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch GPU indicators
+  // Fetch GPU indicators — only when the instance offers a live status widget
   const fetchGPUStatus = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -74,22 +90,27 @@ export default function ResourceSelectionSection({
   }, []);
 
   useEffect(() => {
-    fetchGPUStatus();
-  }, [fetchGPUStatus]);
+    if (resources.gpu.enabled && resources.gpu.live_status) {
+      fetchGPUStatus();
+    }
+  }, [fetchGPUStatus, resources.gpu.enabled, resources.gpu.live_status]);
 
   useEffect(() => {
     if (defaultFormData) {
       const mem = Number(defaultFormData.memory);
       const cpu = Number(defaultFormData.cpu);
-      const resolvedMem = Number.isNaN(mem) || mem <= 0 ? 4 : mem;
-      const resolvedCpu = Number.isNaN(cpu) || cpu <= 0 ? 1 : cpu;
+      const resolvedMem =
+        Number.isNaN(mem) || mem <= 0 ? resources.memory.default : mem;
+      const resolvedCpu =
+        Number.isNaN(cpu) || cpu <= 0 ? resources.cpu.default : cpu;
 
       const requestedGpu = String(defaultFormData.gpu ?? "");
       const gpuMap = gpuOptions as Record<string, string>;
+      const defaultGpu = resources.gpu.default;
       const resolvedGpu =
         requestedGpu && gpuMap[requestedGpu]
           ? ([requestedGpu, gpuMap[requestedGpu]] as [string, string])
-          : (["none", gpuMap.none || "None"] as [string, string]);
+          : ([defaultGpu, gpuMap[defaultGpu] || "None"] as [string, string]);
 
       setFormData((prev) => ({
         ...prev,
@@ -140,149 +161,164 @@ export default function ResourceSelectionSection({
     <>
       {defCPU !== null && defMem !== null && defGPU !== null ? (
         <div className="flex flex-col gap-6">
-          <SectionContainer>
-            <SectionContainer.Header icon={<Cpu className="w-5 h-5 mt-0.5" />}>
-              <H4>CPU Limit</H4>
-              <P className="pl-1 text-xs">
-                The number of CPU cores available to this notebook while
-                it&apos;s running.
-              </P>
-            </SectionContainer.Header>
-            <SectionContainer.Content className="flex flex-col gap-2">
-              <Label className="pl-2 text-text-heading">
-                Select the limit of CPU cores
-              </Label>
-              <TileSelector
-                ariaLabel="Select the limit of CPU cores"
-                options={[1, 4, 6, 8, 10, 16, 24, 32, 48, 64, 80, 96]}
-                defaultValue={defCPU ?? undefined}
-                onChange={handleCPUSelect}
-              />
-            </SectionContainer.Content>
-          </SectionContainer>
+          {resources.cpu.enabled && (
+            <SectionContainer>
+              <SectionContainer.Header
+                icon={<Cpu className="w-5 h-5 mt-0.5" />}
+              >
+                <H4>CPU Limit</H4>
+                <P className="pl-1 text-xs">
+                  The number of CPU cores available to this notebook while
+                  it&apos;s running.
+                </P>
+              </SectionContainer.Header>
+              <SectionContainer.Content className="flex flex-col gap-2">
+                <Label className="pl-2 text-text-heading">
+                  Select the limit of CPU cores
+                </Label>
+                <TileSelector
+                  ariaLabel="Select the limit of CPU cores"
+                  options={resources.cpu.options}
+                  defaultValue={defCPU ?? undefined}
+                  onChange={handleCPUSelect}
+                />
+              </SectionContainer.Content>
+            </SectionContainer>
+          )}
 
-          <SectionContainer>
-            <SectionContainer.Header
-              icon={<MemoryStick className="w-5 h-5 mt-0.5" />}
-            >
-              <H4>Memory Limit</H4>
-              <P className="pl-1 text-xs">
-                The amount of memory available to this notebook while it&apos;s
-                running.
-              </P>
-            </SectionContainer.Header>
-            <SectionContainer.Content className="flex flex-col gap-2">
-              <Label className="pl-2 text-text-heading">
-                Select the limit of memory in GB
-              </Label>
-              <TileSelector
-                ariaLabel="Select the limit of memory in GB"
-                options={[4, 8, 16, 32, 64, 128, 256, 512, 768, 1024]}
-                defaultValue={defMem ?? undefined}
-                onChange={handleMemSelect}
-              />
-            </SectionContainer.Content>
-          </SectionContainer>
+          {resources.memory.enabled && (
+            <SectionContainer>
+              <SectionContainer.Header
+                icon={<MemoryStick className="w-5 h-5 mt-0.5" />}
+              >
+                <H4>Memory Limit</H4>
+                <P className="pl-1 text-xs">
+                  The amount of memory available to this notebook while
+                  it&apos;s running.
+                </P>
+              </SectionContainer.Header>
+              <SectionContainer.Content className="flex flex-col gap-2">
+                <Label className="pl-2 text-text-heading">
+                  Select the limit of memory in GB
+                </Label>
+                <TileSelector
+                  ariaLabel="Select the limit of memory in GB"
+                  options={resources.memory.options}
+                  defaultValue={defMem ?? undefined}
+                  onChange={handleMemSelect}
+                />
+              </SectionContainer.Content>
+            </SectionContainer>
+          )}
 
-          <SectionContainer>
-            <SectionContainer.Header
-              icon={<Gpu className="w-5 h-5 mt-0.5" />}
-              action={
-                <button
-                  onClick={fetchGPUStatus}
-                  disabled={loading}
-                  className="p-1 hover:bg-surface-raised rounded transition-colors disabled:opacity-50"
-                  aria-label="Refresh GPU status"
-                >
-                  <RefreshCw
-                    className={`w-4 h-4 text-text-muted ${loading ? "animate-spin" : ""}`}
-                  />
-                </button>
-              }
-            >
-              <H4>GPU</H4>
-              <P className="pl-1 text-xs">
-                The GPU available to this notebook for graphics and compute
-                workloads.
-              </P>
-            </SectionContainer.Header>
-            <SectionContainer.Content className="flex flex-col gap-4">
-              <Label className="pl-2 text-text-heading">Select GPU</Label>
-              <div className="flex flex-wrap gap-2 animate-fade-in">
-                {Object.entries(gpuOptions).map(([value, label]) => {
-                  const isActive = selectedGpu === value;
-                  return (
-                    <Badge
-                      key={value}
-                      className={cn(
-                        "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
-                        "bg-surface-raised border-border text-text",
-                        "hover:bg-primary/10 hover:border-primary",
-                        isActive &&
-                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-                      )}
-                      onClick={() => {
-                        setSelectedGpu(value);
-                        handleGPUSelect(value);
-                      }}
-                    >
-                      {label}
-                    </Badge>
-                  );
-                })}
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-text-heading">
-                      Current GPUs Available:
-                    </span>
-                    {/* Legend */}
+          {resources.gpu.enabled && (
+            <SectionContainer>
+              <SectionContainer.Header
+                icon={<Gpu className="w-5 h-5 mt-0.5" />}
+                action={
+                  <button
+                    onClick={fetchGPUStatus}
+                    disabled={loading}
+                    className="p-1 hover:bg-surface-raised rounded transition-colors disabled:opacity-50"
+                    aria-label="Refresh GPU status"
+                  >
+                    <RefreshCw
+                      className={`w-4 h-4 text-text-muted ${loading ? "animate-spin" : ""}`}
+                    />
+                  </button>
+                }
+              >
+                <H4>GPU</H4>
+                <P className="pl-1 text-xs">
+                  The GPU available to this notebook for graphics and compute
+                  workloads.
+                </P>
+              </SectionContainer.Header>
+              <SectionContainer.Content className="flex flex-col gap-4">
+                <Label className="pl-2 text-text-heading">Select GPU</Label>
+                <div className="flex flex-wrap gap-2 animate-fade-in">
+                  {Object.entries(gpuOptions).map(([value, label]) => {
+                    const isActive = selectedGpu === value;
+                    return (
+                      <Badge
+                        key={value}
+                        className={cn(
+                          "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
+                          "bg-surface-raised border-border text-text",
+                          "hover:bg-primary/10 hover:border-primary",
+                          isActive &&
+                            "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                        )}
+                        onClick={() => {
+                          setSelectedGpu(value);
+                          handleGPUSelect(value);
+                        }}
+                      >
+                        {label}
+                      </Badge>
+                    );
+                  })}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5">
-                        <GPUSquare status="free" size="sm" />
-                        <span className="text-xs text-text-muted">Free</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <GPUSquare status="used" size="sm" />
-                        <span className="text-xs text-text-muted">Used</span>
+                      <span className="text-sm font-medium text-text-heading">
+                        Current GPUs Available:
+                      </span>
+                      {/* Legend */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5">
+                          <GPUSquare status="free" size="sm" />
+                          <span className="text-xs text-text-muted">Free</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <GPUSquare status="used" size="sm" />
+                          <span className="text-xs text-text-muted">Used</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {loading && gpuStatuses.length === 0 ? (
-                  <div className="flex items-center gap-2 py-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
-                    <span className="text-sm text-text-muted">
-                      Loading GPU status...
-                    </span>
-                  </div>
-                ) : error ? (
-                  <div className="text-sm text-error">{error}</div>
-                ) : gpuStatuses.length === 0 ? (
-                  <Muted className="text-sm">
-                    No GPUs available in cluster
-                  </Muted>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {gpuStatuses.map((gpu, index) => (
-                      <Fragment key={gpu.model}>
-                        <GPUStatusIndicator
-                          label={gpu.label}
-                          free={gpu.free}
-                          total={gpu.total}
-                          size="md"
-                          gap="md"
-                        />
-                        {index < gpuStatuses.length - 1 && <Separator />}
-                      </Fragment>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </SectionContainer.Content>
-          </SectionContainer>
+                  {loading && gpuStatuses.length === 0 ? (
+                    <div className="flex items-center gap-2 py-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
+                      <span className="text-sm text-text-muted">
+                        Loading GPU status...
+                      </span>
+                    </div>
+                  ) : error ? (
+                    <div className="text-sm text-error">{error}</div>
+                  ) : gpuStatuses.length === 0 ? (
+                    <Muted className="text-sm">
+                      No GPUs available in cluster
+                    </Muted>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      {gpuStatuses.map((gpu, index) => (
+                        <Fragment key={gpu.model}>
+                          <GPUStatusIndicator
+                            label={gpu.label}
+                            free={gpu.free}
+                            total={gpu.total}
+                            size="md"
+                            gap="md"
+                          />
+                          {index < gpuStatuses.length - 1 && <Separator />}
+                        </Fragment>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </SectionContainer.Content>
+            </SectionContainer>
+          )}
+
+          {/* Generic fields of the resources section */}
+          <GenericFieldBlock
+            fields={fields}
+            values={fieldValues}
+            onChange={onFieldChange}
+          />
         </div>
       ) : (
         <></>

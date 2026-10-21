@@ -29,6 +29,9 @@ import {
 } from "lucide-react";
 import { cn } from "@utils";
 import SectionContainer from "../components/SectionContainer";
+import GenericFieldBlock from "../components/GenericFieldBlock";
+import type { SpawnOptions } from "@src-types/spawnOptions";
+import type { GenericField } from "@src-types/spawnOptions";
 
 // ==============================================================================
 // Type Definitions
@@ -73,6 +76,13 @@ interface StorageDefaultFormData {
 
 interface StorageSelectionSectionProps {
   defaultFormData?: StorageDefaultFormData;
+  /** The `storage` slice of the resolved spawn options. */
+  storage: SpawnOptions["storage"];
+  /** Generic fields rendered inside the storage section (incl. delete-home). */
+  fields: GenericField[];
+  /** Generic-field values and change handler. */
+  fieldValues: Record<string, string | boolean>;
+  onFieldChange: (name: string, value: string | boolean) => void;
   formData: StorageFormData;
   onPersistentHomeChange: (updater: FormUpdater) => void;
   onMetaCentrumChange: (updater: FormUpdater) => void;
@@ -121,6 +131,10 @@ const S3_OPTIONS = [
 
 export default function StorageSelectionSection({
   defaultFormData,
+  storage,
+  fields,
+  fieldValues,
+  onFieldChange,
   formData,
   onPersistentHomeChange,
   onMetaCentrumChange,
@@ -155,7 +169,7 @@ export default function StorageSelectionSection({
   );
 
   const [s3UrlValue, setS3UrlValue] = useState<string>(
-    "https://s3.cloud.e-infra.cz",
+    storage.s3.default_endpoint,
   );
   const [s3BucketValue, setS3BucketValue] = useState<string>("");
   const [s3AccessKeyValue, setS3AccessKeyValue] = useState<string>("");
@@ -334,7 +348,7 @@ export default function StorageSelectionSection({
     if (s3SelectionType === "new" && !formData.s3url) {
       onS3Change((prev) => ({
         ...prev,
-        s3url: "https://s3.cloud.e-infra.cz",
+        s3url: storage.s3.default_endpoint,
       }));
     }
   }, [s3SelectionType]);
@@ -498,342 +512,377 @@ export default function StorageSelectionSection({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Persistent Home Configuration */}
-      <SectionContainer>
-        <SectionContainer.Header
-          icon={<HardDrive className="w-5 h-5 mt-0.5" aria-hidden="true" />}
-        >
-          <H4>Persistent Notebook Home</H4>
-          <P className="pl-1 text-xs">
-            Persistent home ensures your data persists even when the notebook is
-            deleted. Mounted to <Code className="text-xs">/home/jovyan</Code>
-          </P>
-        </SectionContainer.Header>
-        <SectionContainer.Content className="px-12">
-          {/* Badge Selector for New/Existing */}
-          <div className="mb-4 space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {PERSISTENT_HOME_OPTIONS.map((option) => {
-                const isActive = phSelectionType === option.value;
-                return (
-                  <Badge
-                    key={option.value}
-                    variant={isActive ? "default" : "outline"}
-                    className={cn(
-                      "cursor-pointer px-4 py-2 text-sm transition-all duration-200",
-                      "bg-surface",
-                      "hover:bg-primary/10 hover:border-primary",
-                      isActive &&
-                        "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-                    )}
-                    onClick={() =>
-                      setPhSelectionType(option.value as "new" | "existing")
-                    }
-                  >
-                    {option.label}
-                  </Badge>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* New Home Configuration */}
-          {phSelectionType === "new" && (
-            <div className="space-y-4 pl-4">
-              {/* Inline Warning with Checkbox */}
-              <div className="flex items-start gap-3">
-                <Switch
-                  id="phCheckId"
-                  checked={checkedErased}
-                  onCheckedChange={handleErase}
-                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
-                />
-                <div className="flex-1">
-                  <Label htmlFor="phCheckId" className="cursor-pointer">
-                    Erase if home exists
-                  </Label>
-                </div>
-              </div>
-              {checkedErased && (
-                <Alert variant="warning" className="mt-2">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="text-xs">
-                    Warning: This will erase all existing data in your
-                    persistent home directory!
-                  </span>
-                </Alert>
-              )}
-            </div>
-          )}
-          {/* Existing Home Configuration */}
-          {phSelectionType === "existing" && (
-            <div className="pl-3">
-              <DropDownMenu
-                formSelect={handlePersistentHome}
-                title="Select Persistent Home"
-                menuOptions={persistentHomeOptions}
-                defaultOption={defaultOptionPhname}
-                className="bg-surface"
-              />
-            </div>
-          )}
-        </SectionContainer.Content>
-      </SectionContainer>
-      {/* MetaCentrum Storage Configuration */}
-      <SectionContainer
-        enabled={checkedStorage}
-        onToggle={handleStorageCheck}
-        id="metacentrum-storage"
-      >
-        <SectionContainer.Header
-          icon={<Server className="w-5 h-5 mt-0.5" aria-hidden="true" />}
-          showToggle
-        >
-          <H4>MetaCentrum Storage</H4>
-          <P className="pl-1 text-xs">
-            Mount MetaCentrum home directory and project folders. Mounted to{" "}
-            <Code>/home/meta/{appConfig.userName}</Code>
-          </P>
-        </SectionContainer.Header>
-        <SectionContainer.Content>
-          <div className="space-y-4 animate-in fade-in-0 duration-300">
-            {/* Storage Selection */}
-            <div>
-              <DropDownMenu
-                formSelect={handleStorage}
-                title="Select MetaCentrum Storage"
-                menuOptions={storageOptions}
-                defaultOption={defaultHome}
-                className="bg-surface"
-              />
-            </div>
-
-            {/* Mount Options */}
-            <div className="space-y-3 pl-4">
-              <div className="flex items-start gap-3">
-                <Switch
-                  id="locationStorageCheckId"
-                  checked={checkedMount}
-                  onCheckedChange={handleLocationStorageCheck}
-                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
-                />
-                <Label
-                  htmlFor="locationStorageCheckId"
-                  className="cursor-pointer flex-wrap"
-                >
-                  <span>Mount selected home directory</span>
-                  <span className="basis-full">
-                    Mounted to:
-                    <Code className="bg-secondary dark:bg-surface basis-full">
-                      /storage/{formData["home"] ?? "chosen_storage"}/home/
-                      {appConfig.userName}
-                    </Code>
-                  </span>
-                </Label>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Switch
-                  id="projectCheckId"
-                  checked={checkedDirectories}
-                  onCheckedChange={handleCheckboxDirectories}
-                  className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
-                />
-                <div className="flex-1">
-                  <Label htmlFor="projectCheckId" className="cursor-pointer">
-                    Mount project directories
-                  </Label>
-                  <P>
-                    Projects mount as subfolders under:{" "}
-                    <Code className="bg-secondary dark:bg-surface">
-                      /home/projects/brno12
-                    </Code>
-                  </P>
-                </div>
-              </div>
-            </div>
-          </div>
-        </SectionContainer.Content>
-      </SectionContainer>
-
-      {/* S3 Storage Configuration */}
-      <SectionContainer
-        enabled={checkedS3Storage}
-        onToggle={onS3Check}
-        id="s3-storage"
-      >
-        <SectionContainer.Header
-          icon={<Cloud className="w-5 h-5 mt-0.5" aria-hidden="true" />}
-          showToggle
-        >
-          <H4>S3 Object Storage</H4>
-          <P className="pl-1 text-xs">
-            Mounts S3-compatible object storage to: <Code>/storage/s3</Code>
-          </P>
-        </SectionContainer.Header>
-        <SectionContainer.Content>
-          <div className="space-y-4">
-            <P className="mb-2">
-              Pick a bucket you&apos;ve already mounted, or connect a new one
-              below.
+      {/* Persistent Home Configuration — only when the instance offers it */}
+      {storage.persistent_home.enabled && (
+        <SectionContainer>
+          <SectionContainer.Header
+            icon={<HardDrive className="w-5 h-5 mt-0.5" aria-hidden="true" />}
+          >
+            <H4>Persistent Notebook Home</H4>
+            <P className="pl-1 text-xs">
+              Persistent home ensures your data persists even when the notebook
+              is deleted. Mounted to{" "}
+              <Code className="text-xs">/home/jovyan</Code>
             </P>
-            {/* S3 Type Selection */}
-            <div className="space-y-2">
+          </SectionContainer.Header>
+          <SectionContainer.Content className="px-12">
+            {/* Badge Selector for New/Existing */}
+            <div className="mb-4 space-y-2">
               <div className="flex flex-wrap gap-2">
-                {S3_OPTIONS.map((option) => {
-                  const isActive = s3SelectionType === option.value;
-                  const isExistingDisabled =
-                    option.value === "existing" &&
-                    Object.keys(s3values).length === 0;
+                {PERSISTENT_HOME_OPTIONS.map((option) => {
+                  const isActive = phSelectionType === option.value;
                   return (
-                    <TooltipProvider key={option.value}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge
-                            variant={isActive ? "default" : "outline"}
-                            className={cn(
-                              "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
-                              "bg-surface",
-                              "hover:bg-primary/10 hover:border-primary",
-                              isActive &&
-                                "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-                              isExistingDisabled &&
-                                "opacity-50 cursor-not-allowed",
-                            )}
-                            onClick={() => {
-                              if (!isExistingDisabled) {
-                                setS3SelectionType(
-                                  option.value as "existing" | "new",
-                                );
-                              }
-                            }}
-                          >
-                            {option.label}
-                          </Badge>
-                        </TooltipTrigger>
-                        {isExistingDisabled && (
-                          <TooltipContent>
-                            <p>No buckets mounted</p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Badge
+                      key={option.value}
+                      variant={isActive ? "default" : "outline"}
+                      className={cn(
+                        "cursor-pointer px-4 py-2 text-sm transition-all duration-200",
+                        "bg-surface",
+                        "hover:bg-primary/10 hover:border-primary",
+                        isActive &&
+                          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                      )}
+                      onClick={() =>
+                        setPhSelectionType(option.value as "new" | "existing")
+                      }
+                    >
+                      {option.label}
+                    </Badge>
                   );
                 })}
               </div>
             </div>
 
-            {/* Existing S3 Bucket */}
-            {s3SelectionType === "existing" && (
-              <div className="animate-in fade-in-0 duration-200 px-4">
-                {Object.keys(s3values).length > 0 ? (
-                  <DropDownMenu
-                    formSelect={handleS3Buckets}
-                    title="Select S3 Bucket"
-                    menuOptions={s3values}
-                    defaultOption={defaultOptionS3name}
-                    className="bg-surface"
+            {/* New Home Configuration */}
+            {phSelectionType === "new" && (
+              <div className="space-y-4 pl-4">
+                {/* Inline Warning with Checkbox */}
+                <div className="flex items-start gap-3">
+                  <Switch
+                    id="phCheckId"
+                    checked={checkedErased}
+                    onCheckedChange={handleErase}
+                    className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
                   />
-                ) : (
+                  <div className="flex-1">
+                    <Label htmlFor="phCheckId" className="cursor-pointer">
+                      Erase if home exists
+                    </Label>
+                  </div>
+                </div>
+                {checkedErased && (
                   <Alert variant="warning" className="mt-2">
                     <AlertTriangle className="h-4 w-4" />
                     <span className="text-xs">
-                      No existing S3 buckets are available. Please create a
-                      bucket first using the link above.
+                      Warning: This will erase all existing data in your
+                      persistent home directory!
                     </span>
                   </Alert>
                 )}
               </div>
             )}
-
-            {/* New S3 Bucket */}
-            {s3SelectionType === "new" && (
-              <div className="space-y-4 animate-in fade-in-0 duration-200 px-4">
-                <Alert variant="default" className="mb-4">
-                  <Cloud className="h-4 w-4" />
-                  <span className="text-xs">
-                    To create bucket go to{" "}
-                    <Link
-                      href="https://s3-ui.cloud.e-infra.cz/"
-                      target="_blank"
-                      className="underline"
-                    >
-                      https://s3-ui.cloud.e-infra.cz/
-                    </Link>
-                    .
-                  </span>
-                </Alert>
-
-                <div className="space-y-2">
-                  <Label htmlFor="s3-url">S3 URL</Label>
-                  <Input
-                    id="s3-url"
-                    type="text"
-                    value={s3UrlValue}
-                    placeholder="https://s3.cloud.e-infra.cz"
-                    onChange={(e) => handleS3UrlChange(e.target.value)}
-                    className="w-full bg-surface"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="s3-bucket">Bucket Name</Label>
-                  <Input
-                    id="s3-bucket"
-                    type="text"
-                    value={s3BucketValue}
-                    placeholder="example-bucket"
-                    onChange={(e) => handleS3BucketChange(e.target.value)}
-                    className="w-full bg-surface"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="s3-access-key">Access Key</Label>
-                  <div className="relative">
-                    <Input
-                      id="s3-access-key"
-                      type={showAccessKey ? "text" : "password"}
-                      value={s3AccessKeyValue}
-                      placeholder="s3AccessKey"
-                      onChange={(e) => handleS3AccessKeyChange(e.target.value)}
-                      className="w-full pr-10 bg-surface"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowAccessKey(!showAccessKey)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
-                    >
-                      {showAccessKey ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="s3-secret-key">Secret Key</Label>
-                  <div className="relative">
-                    <Input
-                      id="s3-secret-key"
-                      type={showSecretKey ? "text" : "password"}
-                      value={s3SecretKeyValue}
-                      placeholder="s3SecretKey"
-                      onChange={(e) => handleS3SecretKeyChange(e.target.value)}
-                      className="w-full pr-10 bg-surface"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSecretKey(!showSecretKey)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
-                    >
-                      {showSecretKey ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
+            {/* Existing Home Configuration */}
+            {phSelectionType === "existing" && (
+              <div className="pl-3">
+                <DropDownMenu
+                  formSelect={handlePersistentHome}
+                  title="Select Persistent Home"
+                  menuOptions={persistentHomeOptions}
+                  defaultOption={defaultOptionPhname}
+                  className="bg-surface"
+                />
               </div>
             )}
-          </div>
-        </SectionContainer.Content>
-      </SectionContainer>
+          </SectionContainer.Content>
+        </SectionContainer>
+      )}
+      {/* MetaCentrum Storage Configuration — only when the instance offers it */}
+      {storage.metacentrum.enabled && (
+        <SectionContainer
+          enabled={checkedStorage}
+          onToggle={handleStorageCheck}
+          id="metacentrum-storage"
+        >
+          <SectionContainer.Header
+            icon={<Server className="w-5 h-5 mt-0.5" aria-hidden="true" />}
+            showToggle
+          >
+            <H4>MetaCentrum Storage</H4>
+            <P className="pl-1 text-xs">
+              Mount MetaCentrum home directory and project folders. Mounted to{" "}
+              <Code>/home/meta/{appConfig.userName}</Code>
+            </P>
+          </SectionContainer.Header>
+          <SectionContainer.Content>
+            <div className="space-y-4 animate-in fade-in-0 duration-300">
+              {/* Storage Selection */}
+              <div>
+                <DropDownMenu
+                  formSelect={handleStorage}
+                  title="Select MetaCentrum Storage"
+                  menuOptions={storageOptions}
+                  defaultOption={defaultHome}
+                  className="bg-surface"
+                />
+              </div>
+
+              {/* Mount Options */}
+              <div className="space-y-3 pl-4">
+                <div className="flex items-start gap-3">
+                  <Switch
+                    id="locationStorageCheckId"
+                    checked={checkedMount}
+                    onCheckedChange={handleLocationStorageCheck}
+                    className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
+                  />
+                  <Label
+                    htmlFor="locationStorageCheckId"
+                    className="cursor-pointer flex-wrap"
+                  >
+                    <span>Mount selected home directory</span>
+                    <span className="basis-full">
+                      Mounted to:
+                      <Code className="bg-secondary dark:bg-surface basis-full">
+                        /storage/{formData["home"] ?? "chosen_storage"}/home/
+                        {appConfig.userName}
+                      </Code>
+                    </span>
+                  </Label>
+                </div>
+
+                {storage.projects.enabled && (
+                  <div className="flex items-start gap-3">
+                    <Switch
+                      id="projectCheckId"
+                      checked={checkedDirectories}
+                      onCheckedChange={handleCheckboxDirectories}
+                      className="scale-120 data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary"
+                    />
+                    <div className="flex-1">
+                      <Label
+                        htmlFor="projectCheckId"
+                        className="cursor-pointer"
+                      >
+                        Mount project directories
+                      </Label>
+                      <P>
+                        Projects mount as subfolders under:{" "}
+                        <Code className="bg-secondary dark:bg-surface">
+                          /home/projects/brno12
+                        </Code>
+                      </P>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </SectionContainer.Content>
+        </SectionContainer>
+      )}
+
+      {/* S3 Storage Configuration — only when the instance offers it */}
+      {storage.s3.enabled && (
+        <SectionContainer
+          enabled={checkedS3Storage}
+          onToggle={onS3Check}
+          id="s3-storage"
+        >
+          <SectionContainer.Header
+            icon={<Cloud className="w-5 h-5 mt-0.5" aria-hidden="true" />}
+            showToggle
+          >
+            <H4>S3 Object Storage</H4>
+            <P className="pl-1 text-xs">
+              Mounts S3-compatible object storage to: <Code>/storage/s3</Code>
+            </P>
+          </SectionContainer.Header>
+          <SectionContainer.Content>
+            <div className="space-y-4">
+              <P className="mb-2">
+                Pick a bucket you&apos;ve already mounted, or connect a new one
+                below.
+              </P>
+              {/* S3 Type Selection */}
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {S3_OPTIONS.map((option) => {
+                    const isActive = s3SelectionType === option.value;
+                    const isExistingDisabled =
+                      option.value === "existing" &&
+                      Object.keys(s3values).length === 0;
+                    return (
+                      <TooltipProvider key={option.value}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              variant={isActive ? "default" : "outline"}
+                              className={cn(
+                                "cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200",
+                                "bg-surface",
+                                "hover:bg-primary/10 hover:border-primary",
+                                isActive &&
+                                  "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+                                isExistingDisabled &&
+                                  "opacity-50 cursor-not-allowed",
+                              )}
+                              onClick={() => {
+                                if (!isExistingDisabled) {
+                                  setS3SelectionType(
+                                    option.value as "existing" | "new",
+                                  );
+                                }
+                              }}
+                            >
+                              {option.label}
+                            </Badge>
+                          </TooltipTrigger>
+                          {isExistingDisabled && (
+                            <TooltipContent>
+                              <p>No buckets mounted</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Existing S3 Bucket */}
+              {s3SelectionType === "existing" && (
+                <div className="animate-in fade-in-0 duration-200 px-4">
+                  {Object.keys(s3values).length > 0 ? (
+                    <DropDownMenu
+                      formSelect={handleS3Buckets}
+                      title="Select S3 Bucket"
+                      menuOptions={s3values}
+                      defaultOption={defaultOptionS3name}
+                      className="bg-surface"
+                    />
+                  ) : (
+                    <Alert variant="warning" className="mt-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-xs">
+                        No existing S3 buckets are available. Please create a
+                        bucket first using the link above.
+                      </span>
+                    </Alert>
+                  )}
+                </div>
+              )}
+
+              {/* New S3 Bucket */}
+              {s3SelectionType === "new" && (
+                <div className="space-y-4 animate-in fade-in-0 duration-200 px-4">
+                  <Alert variant="default" className="mb-4">
+                    <Cloud className="h-4 w-4" />
+                    <span className="text-xs">
+                      To create bucket go to{" "}
+                      {storage.s3.console_url ? (
+                        <Link
+                          href={storage.s3.console_url}
+                          target="_blank"
+                          className="underline"
+                        >
+                          {storage.s3.console_url}
+                        </Link>
+                      ) : (
+                        "the S3 console"
+                      )}
+                      .
+                    </span>
+                  </Alert>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="s3-url">S3 URL</Label>
+                    <Input
+                      id="s3-url"
+                      type="text"
+                      value={s3UrlValue}
+                      placeholder="S3 endpoint URL"
+                      onChange={(e) => handleS3UrlChange(e.target.value)}
+                      className="w-full bg-surface"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="s3-bucket">Bucket Name</Label>
+                    <Input
+                      id="s3-bucket"
+                      type="text"
+                      value={s3BucketValue}
+                      placeholder="example-bucket"
+                      onChange={(e) => handleS3BucketChange(e.target.value)}
+                      className="w-full bg-surface"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="s3-access-key">Access Key</Label>
+                    <div className="relative">
+                      <Input
+                        id="s3-access-key"
+                        type={showAccessKey ? "text" : "password"}
+                        value={s3AccessKeyValue}
+                        placeholder="s3AccessKey"
+                        onChange={(e) =>
+                          handleS3AccessKeyChange(e.target.value)
+                        }
+                        className="w-full pr-10 bg-surface"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAccessKey(!showAccessKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
+                      >
+                        {showAccessKey ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="s3-secret-key">Secret Key</Label>
+                    <div className="relative">
+                      <Input
+                        id="s3-secret-key"
+                        type={showSecretKey ? "text" : "password"}
+                        value={s3SecretKeyValue}
+                        placeholder="s3SecretKey"
+                        onChange={(e) =>
+                          handleS3SecretKeyChange(e.target.value)
+                        }
+                        className="w-full pr-10 bg-surface"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSecretKey(!showSecretKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-text"
+                      >
+                        {showSecretKey ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </SectionContainer.Content>
+        </SectionContainer>
+      )}
+
+      {/* Generic fields of the storage section (incl. delete-home) */}
+      <GenericFieldBlock
+        fields={fields}
+        values={fieldValues}
+        onChange={onFieldChange}
+      />
     </div>
   );
 }

@@ -14,6 +14,9 @@ import {
   buildImageValueToCategoryMap,
   buildImageValueToNameMap,
 } from "../utils/gatherFormData";
+import GenericFieldBlock from "../components/GenericFieldBlock";
+import type { SpawnOptions } from "@src-types/spawnOptions";
+import type { GenericField } from "@src-types/spawnOptions";
 
 interface DefaultNotebookImage {
   type?: string | null;
@@ -29,6 +32,13 @@ interface ImageSelectionProps {
     notebookImage?: DefaultNotebookImage;
     sshName?: string;
   };
+  /** The `image` slice of the resolved spawn options. */
+  image: SpawnOptions["image"];
+  /** Generic fields rendered inside the image section. */
+  fields: GenericField[];
+  /** Generic-field values and change handler. */
+  fieldValues: Record<string, string | boolean>;
+  onFieldChange: (name: string, value: string | boolean) => void;
   onImageChange?: (data: ImageFormDataUpdate) => void;
   onSshChange?: (checked: boolean) => void;
   selectedImage: string | null;
@@ -67,6 +77,10 @@ function imageHasSSHSupport(
 }
 export function ImageSelectionSectionTabs({
   defaultFormData,
+  image,
+  fields,
+  fieldValues,
+  onFieldChange,
   onImageChange,
   onSshChange,
   selectedImage,
@@ -216,44 +230,50 @@ export function ImageSelectionSectionTabs({
         setSelectCategory={setSelectedCategory}
         customImageValue={customImageValue}
         onCustomImageChange={handleCustomImageChange}
+        customEnabled={image.custom.enabled}
+        customPlaceholder={image.custom.placeholder}
       />
 
       <Separator />
 
-      {/* SSH Option */}
-      <Tooltip>
-        <div className="flex items-center space-x-3">
-          <Switch
-            id="sshCheckBox"
-            checked={sshChecked}
-            onCheckedChange={handleSshToggle}
-            disabled={!isSSHAvailable}
-            className={cn(
-              "data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary dark:data-[state=checked]:bg-primary",
-              !isSSHAvailable && "opacity-50 cursor-not-allowed",
-            )}
-          />
-          <TooltipTrigger>
-            <Label
-              htmlFor="sshCheckBox"
+      {/* SSH Option — rendered only when the instance offers SSH */}
+      {image.ssh.enabled && (
+        <Tooltip>
+          <div className="flex items-center space-x-3">
+            <Switch
+              id="sshCheckBox"
+              checked={sshChecked}
+              onCheckedChange={handleSshToggle}
+              disabled={!isSSHAvailable}
               className={cn(
-                "text-sm font-medium",
-                isSSHAvailable
-                  ? "cursor-pointer"
-                  : "cursor-not-allowed text-muted-foreground",
+                "data-[state=unchecked]:bg-surface-raised dark:data-[state=unchecked]:bg-secondary dark:data-[state=checked]:bg-primary",
+                !isSSHAvailable && "opacity-50 cursor-not-allowed",
               )}
-            >
-              Ensure SSH access into the notebook
-            </Label>
-          </TooltipTrigger>
-        </div>
-        {!isSSHAvailable && (
-          <TooltipContent side="top">
-            <p>SSH access is only available for images with the SSH support.</p>
-          </TooltipContent>
-        )}
-      </Tooltip>
-      {sshChecked && (
+            />
+            <TooltipTrigger>
+              <Label
+                htmlFor="sshCheckBox"
+                className={cn(
+                  "text-sm font-medium",
+                  isSSHAvailable
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed text-muted-foreground",
+                )}
+              >
+                Ensure SSH access into the notebook
+              </Label>
+            </TooltipTrigger>
+          </div>
+          {!isSSHAvailable && (
+            <TooltipContent side="top">
+              <p>
+                SSH access is only available for images with the SSH support.
+              </p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      )}
+      {image.ssh.enabled && sshChecked && (
         <>
           <div className="text-sm text-text-muted">
             Connection will be available at{" "}
@@ -265,6 +285,13 @@ export function ImageSelectionSectionTabs({
           </div>
         </>
       )}
+
+      {/* Generic fields of the image section */}
+      <GenericFieldBlock
+        fields={fields}
+        values={fieldValues}
+        onChange={onFieldChange}
+      />
     </div>
   );
 }

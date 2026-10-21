@@ -28,6 +28,10 @@ interface SelectingCardTabsProps {
   setSelectCategory?: (category: string) => void;
   customImageValue?: string;
   onCustomImageChange?: (value: string) => void;
+  /** Custom-image tab shown only when the instance offers it (A3 gating). */
+  customEnabled?: boolean;
+  /** Custom-image input placeholder from `image.custom.placeholder`. */
+  customPlaceholder?: string;
 }
 
 // Feature configuration: abbreviation -> { fullName, style, keywords, description }
@@ -231,10 +235,16 @@ export function SelectingCardsTabs({
   setSelectCategory,
   customImageValue = "",
   onCustomImageChange,
+  customEnabled = true,
+  customPlaceholder = "e.g., cerit.io/hubs/custom-image:latest",
 }: SelectingCardTabsProps) {
   const images = useMemo(() => getImageOptions() as ImageOptions, []);
   const allCategories = Object.keys(images);
-  const categories = ["all", ...allCategories, "custom"];
+  const categories = [
+    "all",
+    ...allCategories,
+    ...(customEnabled ? ["custom"] : []),
+  ];
   const [activeCategory, setActiveCategory] = useState<string>(
     selectedCategory || "all",
   );
@@ -369,7 +379,7 @@ export function SelectingCardsTabs({
             </P>
             <Input
               type="text"
-              placeholder="e.g., cerit.io/hubs/custom-image:latest"
+              placeholder={customPlaceholder}
               value={customImageValue}
               onChange={handleCustomImageInput}
               className="w-full bg-surface-raised"
