@@ -9,6 +9,10 @@ Usage: $0 --namespace <ns> [--target <target>] [--skip-build] [--dry-run] [--loc
 
 Build a hub frontend and publish its static files as Kubernetes ConfigMaps.
 
+Targets share builds: 'hub' and 'cas' both build and publish dist_hub/
+(cas is the first adopter of the shared build); 'elter-ri' builds its own
+dist_elter-ri/. 'c9088' is not yet migrated.
+
 Options:
   --namespace <ns>   Kubernetes namespace to apply ConfigMaps to (required)
   --target <target>  Build target: ${VALID_BUILD_TARGETS[*]} (default: hub)
@@ -75,13 +79,35 @@ if [[ -z "$NAMESPACE" ]]; then
 fi
 
 BASE_DIR="./dist_${BUILD_TARGET}"
+BUILD_SCRIPT="build:${BUILD_TARGET}"
+
+# Target → dist dir / build script mapping (decoupled: cas uses the shared
+# hub build; c9088 is not yet migrated).
+case "$BUILD_TARGET" in
+  hub)
+    BASE_DIR="./dist_hub"
+    BUILD_SCRIPT="build:hub"
+    ;;
+  cas)
+    BASE_DIR="./dist_hub"
+    BUILD_SCRIPT="build:hub"
+    ;;
+  elter-ri)
+    BASE_DIR="./dist_elter-ri"
+    BUILD_SCRIPT="build:elter-ri"
+    ;;
+  c9088)
+    echo "Error: target 'c9088' is not yet migrated to the shared build." >&2
+    exit 1
+    ;;
+esac
 
 if [[ "$SKIP_BUILD" == true ]]; then
   echo "Skipping build; using existing $BASE_DIR"
 else
   echo "Running build for target: $BUILD_TARGET"
   bun install
-  bun run "build:$BUILD_TARGET"
+  bun run "$BUILD_SCRIPT"
 fi
 
 create_configmap() {

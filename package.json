@@ -36,7 +36,7 @@
     "dev:not_found": "ENTRY=404.html vite",
     "dev:error": "ENTRY=error.html vite",
     "dev:token": "ENTRY=token.html vite",
-    "dev-cas:form": "cd cas && ENTRY=spawn.html vite",
+    "dev-cas:form": "VITE_INSTANCE=cas ENTRY=spawn.html vite",
     "dev-cas:spawn_p": "cd cas && ENTRY=spawn_pending.html vite",
     "dev-cas:login": "cd cas && ENTRY=login.html vite",
     "dev-cas:not_running": "cd cas && ENTRY=not_running.html vite",
