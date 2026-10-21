@@ -28,11 +28,14 @@ import {
   formImagesName as legacyFormImagesName,
   sectionTitles as legacySectionTitles,
 } from "../data/formData";
-import { DEFAULT_CONTAINER_IMAGE, DOCS_URLS } from "../data/formConstants";
+import { DOCS_URLS } from "../data/formConstants";
 import { DELETE_HOME_DEFAULTS } from "./presets";
 
 /** Hub's registry prefix; bare catalog values get it prepended (Review Focus #1). */
 export const HUB_REGISTRY_PREFIX = "cerit.io/hubs/";
+
+/** Today's fallback container image (was DEFAULT_CONTAINER_IMAGE). */
+const DEFAULT_CONTAINER_IMAGE = "cerit.io/hubs/datasciencenb:26-09-2024";
 
 /** Today's custom-image input placeholder (ImageSelector.tsx, verbatim). */
 const LEGACY_CUSTOM_IMAGE_PLACEHOLDER =

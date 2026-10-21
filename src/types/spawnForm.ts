@@ -33,6 +33,8 @@ export interface SpawnFormData {
   home?: string;
   locationStorageCheck?: string;
   projectCheck?: string;
+  /** Generic-field values (spawn_options `fields[]`), keyed by POST name. */
+  fields?: Record<string, string | boolean>;
   [key: string]: unknown;
 }
 
@@ -78,6 +80,8 @@ export interface DefaultFormData {
     s3secretkey: string | null;
     s3selection: string;
   };
+  /** Initial generic-field values (schema defaults / persisted prefill). */
+  fields?: Record<string, string | boolean>;
 }
 
 /**

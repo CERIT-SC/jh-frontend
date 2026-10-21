@@ -9,8 +9,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type React from "react";
 import { gatherFormData, getS3BucketOptions } from "../utils/gatherFormData";
-import { DEFAULT_FORM_DATA, INITIAL_FORM_DATA } from "../data/formConstants";
+import { getSpawnOptions } from "../config/readSpawnOptions";
 import type { DefaultFormData, SpawnFormData } from "@src-types/spawnForm";
+import type {
+  ConfigProblem,
+  ConfigSource,
+  SpawnOptions,
+} from "@src-types/spawnOptions";
 import type { PushAlertOptions } from "@hooks/useAlerts";
 
 /** Adapter variant type used by StorageSelectionSection.pushAlert. */
@@ -18,6 +23,18 @@ export type StorageAlertVariant = "success" | "error" | "info";
 
 /** Push-alert signature from useAlerts (the real PushAlertOptions shape). */
 export type PushAlertFn = (message: string, options?: PushAlertOptions) => void;
+
+/** Initial mutable form state, derived from the resolved spawn options. */
+function initialFormData(options: SpawnOptions): SpawnFormData {
+  return {
+    memselection: options.resources.memory.default,
+    cpuselection: options.resources.cpu.default,
+    gpuselection: options.resources.gpu.default,
+    migamount: options.resources.gpu.mig_default_amount,
+    sshAccess: false,
+    shmsize: String(options.resources.memory.default),
+  };
+}
 
 /** Return type of the useSpawnFormState hook. */
 export interface SpawnFormState {
@@ -44,6 +61,16 @@ export interface SpawnFormState {
   handleFormUpdater: (updater: (prev: SpawnFormData) => SpawnFormData) => void;
   /** Adapter that maps StorageSection's variant union to useAlerts variants. */
   pushAlertAdapter: (message: string, variant?: StorageAlertVariant) => void;
+
+  // Capability-driven config (A1 reader)
+  /** The resolved spawn options this form is rendered from. */
+  options: SpawnOptions;
+  /** Where the options came from ("legacy" adapter or backend schema). */
+  configSource: ConfigSource;
+  /** Schema problems to surface (blocking ones disable Start). */
+  configProblems: ConfigProblem[];
+  /** Generic-field change handler: writes into formData.fields[name]. */
+  handleFieldChange: (name: string, value: string | boolean) => void;
 }
 
 /**
@@ -53,22 +80,35 @@ export interface SpawnFormState {
  *   hook decoupled from useAlerts' exact return shape).
  */
 export function useSpawnFormState(pushAlert: PushAlertFn): SpawnFormState {
+  const resolved = getSpawnOptions();
+  const options = resolved.options;
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [checkedS3Storage, setCheckedS3Storage] = useState(false);
   const [s3values, setS3Values] = useState<Record<string, string>>({});
-  const [formData, setFormData] = useState<SpawnFormData>(INITIAL_FORM_DATA);
+  const [formData, setFormData] = useState<SpawnFormData>(() => {
+    const gathered = gatherFormData(options);
+    return { ...initialFormData(options), fields: { ...gathered.fields } };
+  });
 
   useEffect(() => {
     setS3Values(getS3BucketOptions());
   }, []);
 
-  const defaultFormData = useMemo<DefaultFormData>(() => {
-    const gathered = gatherFormData();
-    return gathered === null
-      ? DEFAULT_FORM_DATA
-      : (gathered as DefaultFormData);
-  }, []);
+  const defaultFormData = useMemo<DefaultFormData>(
+    () => gatherFormData(options),
+    [options],
+  );
+
+  const handleFieldChange = useCallback(
+    (name: string, value: string | boolean) => {
+      setFormData((prev) => ({
+        ...prev,
+        fields: { ...(prev.fields ?? {}), [name]: value },
+      }));
+    },
+    [],
+  );
 
   const handleS3Check = useCallback((checked: boolean) => {
     setFormData((prev) => {
@@ -134,5 +174,9 @@ export function useSpawnFormState(pushAlert: PushAlertFn): SpawnFormState {
     handleSshChange,
     handleFormUpdater,
     pushAlertAdapter,
+    options,
+    configSource: resolved.source,
+    configProblems: resolved.problems,
+    handleFieldChange,
   };
 }

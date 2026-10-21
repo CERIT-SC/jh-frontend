@@ -7,11 +7,8 @@
  */
 
 import type { SpawnFormData, SpawnFormPayload } from "@src-types/spawnForm";
+import type { GenericField, SpawnOptions } from "@src-types/spawnOptions";
 import { buildImageValueToCategoryMap } from "./gatherFormData";
-import {
-  IMAGE_CATEGORY_KEY_MAP,
-  DEFAULT_CONTAINER_IMAGE,
-} from "../data/formConstants";
 
 /**
  * Resolve the image category from the selected image using O(1) lookup.
@@ -32,6 +29,19 @@ export type ContainerImageResult =
   { ok: true; image: string } | { ok: false; error: string };
 
 /**
+ * Prefix a bare image value with the instance's registry prefix.
+ * A value that already contains a "/" is a full reference and is kept as-is
+ * (Review Focus #1: cas sends full refs with no prefix).
+ */
+export function resolveContainerRef(
+  value: string,
+  registryPrefix: string,
+): string {
+  if (value.includes("/")) return value;
+  return registryPrefix ? `${registryPrefix}${value}` : value;
+}
+
+/**
  * Resolve the final container image string from form state.
  *
  * Custom images are trimmed; the caller is responsible for `validateDockerImage`
@@ -41,7 +51,7 @@ export function resolveContainerImage(
   isCustomImage: boolean,
   formData: SpawnFormData,
   selectedImage: string | null,
-  defaultContainerImage: string = DEFAULT_CONTAINER_IMAGE,
+  options: SpawnOptions,
 ): ContainerImageResult {
   if (isCustomImage) {
     const image = (formData.customimage || "").trim();
@@ -51,54 +61,43 @@ export function resolveContainerImage(
     return { ok: true, image };
   }
   if (selectedImage) {
-    return { ok: true, image: `cerit.io/hubs/${selectedImage}` };
+    return {
+      ok: true,
+      image: resolveContainerRef(selectedImage, options.image.registry_prefix),
+    };
   }
-  return { ok: true, image: defaultContainerImage };
+  if (options.image.default) {
+    return {
+      ok: true,
+      image: resolveContainerRef(
+        options.image.default,
+        options.image.registry_prefix,
+      ),
+    };
+  }
+  return { ok: false, error: "Select an image." };
 }
 
 /**
- * Build the base payload with the fields always sent to the backend.
- *
- * Note: `shmsize` is intentionally derived from `memselection` to match
- * the backend contract (`options['shmsize'] = options['mem']`).
+ * Apply generic fields (`spawn_options.fields[]`) to the payload.
+ * checkbox checked → `checked_value` (default "yes"); unchecked → omitted.
+ * select → posted when a non-empty value is chosen; empty → omitted.
  */
-export function buildBasePayload(
-  formData: SpawnFormData,
-  imageCategory: string | null,
-  containerImage: string,
-): SpawnFormPayload {
-  const phselection = formData.phselection || "new";
-  return {
-    cpuselection: String(formData.cpuselection ?? ""),
-    memselection: String(formData.memselection ?? ""),
-    gpuselection: String(formData.gpuselection ?? "none"),
-    shmsize: String(formData.memselection ?? ""),
-    images: imageCategory || "",
-    phselection,
-    container_image: containerImage,
-  };
-}
-
-/**
- * Apply image-specific fields (`customimage` for custom, legacy per-category
- * keys otherwise). Removes `customimage` when not a custom image.
- */
-export function applyImageFields(
+export function applyGenericFields(
   payload: SpawnFormPayload,
-  isCustomImage: boolean,
-  imageCategory: string | null,
-  containerImage: string,
+  formData: SpawnFormData,
+  fields: GenericField[],
 ): SpawnFormPayload {
+  const values = formData.fields ?? {};
   const next: SpawnFormPayload = { ...payload };
-  if (isCustomImage) {
-    next.customimage = containerImage;
-  } else {
-    delete next.customimage;
-    if (imageCategory) {
-      const key = IMAGE_CATEGORY_KEY_MAP[imageCategory];
-      if (key) {
-        next[key] = containerImage;
+  for (const field of fields) {
+    const value = values[field.name];
+    if (field.type === "checkbox") {
+      if (value === true) {
+        next[field.name] = field.checked_value ?? "yes";
       }
+    } else if (typeof value === "string" && value !== "") {
+      next[field.name] = value;
     }
   }
   return next;
