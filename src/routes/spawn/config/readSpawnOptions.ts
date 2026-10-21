@@ -573,6 +573,24 @@ function resolve(wire: SpawnWire | undefined): ResolvedSpawn {
   const cpu = numericGroup(resources.cpu, problems, "resources.cpu");
   const memory = numericGroup(resources.memory, problems, "resources.memory");
 
+  const mergedBadges = badgeConfig(image.badge_config, problems);
+  // Per-image `badges` referencing a key defined in neither the backend's
+  // badge_config nor the FE registry → non-blocking problem; the chip is
+  // skipped at render time.
+  for (const category of categories) {
+    for (const entry of category.images) {
+      if (!entry.badges) continue;
+      for (const key of entry.badges) {
+        if (!mergedBadges[key]) {
+          problems.push({
+            message: `Unknown badge key "${key}" on image "${entry.name}" — chip skipped.`,
+            blocking: false,
+          });
+        }
+      }
+    }
+  }
+
   const deleteHomeLabel = nonEmptyString(deleteHome.label)
     ? deleteHome.label
     : DELETE_HOME_DEFAULTS.label;
@@ -596,7 +614,7 @@ function resolve(wire: SpawnWire | undefined): ResolvedSpawn {
       registry_prefix: stringOrEmpty(image.registry_prefix),
       default: defaultImage,
       categories,
-      badge_config: badgeConfig(image.badge_config, problems),
+      badge_config: mergedBadges,
       custom: {
         enabled: enabled(custom.enabled),
         placeholder: stringOrEmpty(custom.placeholder),

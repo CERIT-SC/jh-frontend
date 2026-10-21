@@ -28,7 +28,6 @@ import {
   formImagesName as legacyFormImagesName,
   sectionTitles as legacySectionTitles,
 } from "../data/formData";
-import { DOCS_URLS } from "../data/formConstants";
 import { DELETE_HOME_DEFAULTS } from "./presets";
 
 /** Hub's registry prefix; bare catalog values get it prepended (Review Focus #1). */
@@ -36,6 +35,14 @@ export const HUB_REGISTRY_PREFIX = "cerit.io/hubs/";
 
 /** Today's fallback container image (was DEFAULT_CONTAINER_IMAGE). */
 const DEFAULT_CONTAINER_IMAGE = "cerit.io/hubs/datasciencenb:26-09-2024";
+
+/** Today's help-docs URLs (were DOCS_URLS in formConstants). */
+const LEGACY_DOCS_URLS = {
+  image: "https://docs.cerit.io/en/docs/web-apps/jupyterhub#choosing-image",
+  storage: "https://docs.cerit.io/en/docs/web-apps/jupyterhub#choosing-storage",
+  resources:
+    "https://docs.cerit.io/en/docs/web-apps/jupyterhub#resource-allocation",
+};
 
 /** Today's custom-image input placeholder (ImageSelector.tsx, verbatim). */
 const LEGACY_CUSTOM_IMAGE_PLACEHOLDER =
@@ -208,9 +215,9 @@ export function fromLegacyWire(wire: SpawnWire | undefined): SpawnOptions {
     },
     fields: [],
     docs: {
-      image: DOCS_URLS.image,
-      storage: DOCS_URLS.storage,
-      resources: DOCS_URLS.resources,
+      image: LEGACY_DOCS_URLS.image,
+      storage: LEGACY_DOCS_URLS.storage,
+      resources: LEGACY_DOCS_URLS.resources,
     },
   };
 }

@@ -27,6 +27,9 @@ export const BADGE_STYLES: Record<string, string> = {
 /** Style of the verbatim version chip (from the image's `version` field). */
 export const VERSION_CHIP_STYLE = "bg-surface text-text ring-1 ring-border";
 
+/** Fallback chip style for badge keys outside the FE registry. */
+export const DEFAULT_BADGE_STYLE = "bg-surface-raised text-text border-border";
+
 /** Keywords per badge id for the legacy name-keyword heuristic (hub parity). */
 export const BADGE_KEYWORDS: Record<string, string[]> = {
   AI: ["ai"],

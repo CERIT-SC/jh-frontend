@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { formImagesName } from "../data/formData";
 import { SelectingCardsTabs } from "@components/features";
 import {
   Separator,
@@ -14,6 +13,7 @@ import {
   buildImageValueToCategoryMap,
   buildImageValueToNameMap,
 } from "../utils/gatherFormData";
+import { resolveContainerRef } from "../utils/buildSpawnPayload";
 import GenericFieldBlock from "../components/GenericFieldBlock";
 import type { SpawnOptions } from "@src-types/spawnOptions";
 import type { GenericField } from "@src-types/spawnOptions";
@@ -132,8 +132,14 @@ export function ImageSelectionSectionTabs({
         return;
       }
 
+      // Image prefill strips the instance's registry prefix (not a literal).
+      const prefix = image.registry_prefix;
       const imgVal = defaultFormData.notebookImage.containerImage;
-      const strippedVal = imgVal?.replace("cerit.io/hubs/", "");
+      const strippedVal = imgVal
+        ? imgVal.startsWith(prefix)
+          ? imgVal.slice(prefix.length)
+          : imgVal
+        : undefined;
 
       if (!strippedVal) {
         return;
@@ -141,13 +147,21 @@ export function ImageSelectionSectionTabs({
 
       const category = findImageCategory(strippedVal, imageToCategoryMap);
       if (category) {
-        const formImagesMap = formImagesName as Record<string, string>;
-        const formImageKey = formImagesMap[category] || category;
+        const legacyPostKey = image.categories.find(
+          (candidate) => candidate.key === category,
+        )?.legacy_post_key;
         setSelectedCategory(category);
         setSelectedImage(strippedVal);
         onImageChange?.({
           images: category,
-          [formImageKey]: `cerit.io/hubs/${strippedVal}`,
+          ...(legacyPostKey
+            ? {
+                [legacyPostKey]: resolveContainerRef(
+                  strippedVal,
+                  image.registry_prefix,
+                ),
+              }
+            : {}),
         });
       } else {
         setCustomImageValue(imgVal || "");
@@ -194,14 +208,22 @@ export function ImageSelectionSectionTabs({
       }
     }
 
-    const formImagesMap = formImagesName as Record<string, string>;
-    const formImageKey = formImagesMap[actualCategory] || actualCategory;
+    const legacyPostKey = image.categories.find(
+      (candidate) => candidate.key === actualCategory,
+    )?.legacy_post_key;
     setSelectedImage(imageValue);
     setSelectedCategory(actualCategory);
 
     onImageChange?.({
       images: actualCategory,
-      [formImageKey]: `cerit.io/hubs/${imageValue}`,
+      ...(legacyPostKey
+        ? {
+            [legacyPostKey]: resolveContainerRef(
+              imageValue,
+              image.registry_prefix,
+            ),
+          }
+        : {}),
       customimage: "",
     });
   };
@@ -230,8 +252,7 @@ export function ImageSelectionSectionTabs({
         setSelectCategory={setSelectedCategory}
         customImageValue={customImageValue}
         onCustomImageChange={handleCustomImageChange}
-        customEnabled={image.custom.enabled}
-        customPlaceholder={image.custom.placeholder}
+        image={image}
       />
 
       <Separator />

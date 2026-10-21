@@ -16,10 +16,14 @@ import {
   Input,
   P,
 } from "@e-infra/design-system";
-import { sectionTitles } from "../data/formData";
-import { getImageOptions } from "../utils/gatherFormData";
-
-type ImageOptions = Record<string, Array<{ value: string; name: string }>>;
+import type { SpawnOptions } from "@src-types/spawnOptions";
+import {
+  BADGE_KEYWORDS,
+  BADGE_STYLES,
+  DEFAULT_BADGES,
+  DEFAULT_BADGE_STYLE,
+  VERSION_CHIP_STYLE,
+} from "../data/imageBadges";
 
 interface SelectingCardTabsProps {
   selectedImageId: string | null;
@@ -28,72 +32,9 @@ interface SelectingCardTabsProps {
   setSelectCategory?: (category: string) => void;
   customImageValue?: string;
   onCustomImageChange?: (value: string) => void;
-  /** Custom-image tab shown only when the instance offers it (A3 gating). */
-  customEnabled?: boolean;
-  /** Custom-image input placeholder from `image.custom.placeholder`. */
-  customPlaceholder?: string;
+  /** The `image` slice of the resolved spawn options. */
+  image: SpawnOptions["image"];
 }
-
-// Feature configuration: abbreviation -> { fullName, style, keywords, description }
-const FEATURE_CONFIG: Record<
-  string,
-  { fullName: string; style: string; keywords: string[]; description: string }
-> = {
-  AI: {
-    fullName: "Artificial Intelligence",
-    style: "bg-chart-2/50 text-text",
-    keywords: ["ai"],
-    description:
-      "Pre-installed AI/ML frameworks and tools for machine learning development.",
-  },
-  SSH: {
-    fullName: "SSH Access",
-    style: "bg-chart-4/50 text-text",
-    keywords: ["ssh", "ssh access"],
-    description:
-      "Allows direct terminal access to the running notebook container via SSH protocol.",
-  },
-  GPU: {
-    fullName: "GPU Support",
-    style: "bg-chart-3/50 text-text",
-    keywords: ["gpu"],
-    description:
-      "Includes GPU drivers and libraries (CUDA/cuDNN). Requires selecting a GPU instance in Resource Options.",
-  },
-  CPU: {
-    fullName: "CPU Only",
-    style: "bg-chart-2/50 text-text",
-    keywords: ["cpu only"],
-    description: "Optimized for CPU-only workloads without GPU acceleration.",
-  },
-  TB: {
-    fullName: "TensorBoard",
-    style: "bg-chart-5/50 text-text",
-    keywords: ["tensorboard"],
-    description:
-      "Includes TensorBoard for visualizing machine learning experiments and model training.",
-  },
-  RSAT: {
-    fullName: "RSAT Tools",
-    style: "bg-chart-1/50 text-text",
-    keywords: ["rsat"],
-    description:
-      "Regulatory Sequence Analysis Tools for bioinformatics research.",
-  },
-  VSC: {
-    fullName: "Integrated VS Code",
-    style: "bg-chart-3/50 text-primary-foreground",
-    keywords: ["vs code", "integrated vs code"],
-    description: "Integrated Visual Studio Code editor.",
-  },
-  NI: {
-    fullName: "Notebook Intelligence",
-    style: "bg-chart-2/50 text-text",
-    keywords: ["notebook-intelligence", "intelligence"],
-    description:
-      "AI-powered code assistance and suggestions within Jupyter notebooks.",
-  },
-};
 
 /**
  * Extracts the base image name without feature suffixes and version
@@ -163,9 +104,20 @@ function extractDateFromValue(value: string): string | null {
   return null;
 }
 
+/**
+ * Schema-aware badge extraction.
+ *
+ * - Per-image `version` present → verbatim version chip; absent → the
+ *   existing tag-regex chain over the image value.
+ * - Per-image `badges` present (even `[]`) → explicit mode: registry lookup
+ *   per key (unknown keys are skipped — the resolver already reported them).
+ * - `badges` absent → the name-keyword heuristic over the FE registry
+ *   (hub parity).
+ * Chip styling never leaves FE code.
+ */
 function extractImageBadge(
-  name: string,
-  value?: string,
+  entry: { value: string; name: string; badges?: string[]; version?: string },
+  badgeConfig: SpawnOptions["image"]["badge_config"],
 ): React.ReactElement | null {
   const foundFeatures: Array<{
     abbr: string;
@@ -173,31 +125,53 @@ function extractImageBadge(
     style: string;
   }> = [];
 
-  const nameLower = name.toLowerCase();
-
-  // Extract date/version from value if provided
-  if (value) {
-    const dateVersion = extractDateFromValue(value);
-    if (dateVersion) {
-      foundFeatures.push({
-        abbr: dateVersion,
-        fullName: `Version ${dateVersion}`,
-        style: "bg-surface text-text ring-1 ring-border",
-      });
-    }
+  // Version chip: verbatim `version` when given, else the tag-regex chain.
+  const version = entry.version ?? extractDateFromValue(entry.value);
+  if (version) {
+    foundFeatures.push({
+      abbr: version,
+      fullName: `Version ${version}`,
+      style: VERSION_CHIP_STYLE,
+    });
   }
 
-  // Check each feature's keywords
-  for (const [abbr, config] of Object.entries(FEATURE_CONFIG)) {
-    const matchesFeature = config.keywords.some((keyword) =>
-      nameLower.includes(keyword),
+  // The FE registry is always part of the lookup (backend badge_config is
+  // merged per key over it; the legacy adapter ships an empty config).
+  const mergedConfig: Record<string, { name: string; description: string }> =
+    Object.fromEntries(
+      Object.entries({ ...DEFAULT_BADGES, ...badgeConfig }).map(
+        ([key, def]) => [key, { name: def.name, description: def.description }],
+      ),
     );
-    if (matchesFeature) {
+
+  if (entry.badges !== undefined) {
+    // Explicit mode: badges come from the schema only.
+    for (const key of entry.badges) {
+      const def = mergedConfig[key];
+      if (!def) {
+        continue; // unknown key — skipped (resolver reports the problem)
+      }
       foundFeatures.push({
-        abbr,
-        fullName: config.fullName,
-        style: config.style,
+        abbr: key,
+        fullName: def.name,
+        style: BADGE_STYLES[key] ?? DEFAULT_BADGE_STYLE,
       });
+    }
+  } else {
+    // Heuristic mode: name keywords over the FE registry (hub parity).
+    const nameLower = entry.name.toLowerCase();
+    for (const [abbr, keywords] of Object.entries(BADGE_KEYWORDS)) {
+      if (keywords.some((keyword) => nameLower.includes(keyword))) {
+        const def = mergedConfig[abbr];
+        if (!def) {
+          continue;
+        }
+        foundFeatures.push({
+          abbr,
+          fullName: def.name,
+          style: BADGE_STYLES[abbr] ?? DEFAULT_BADGE_STYLE,
+        });
+      }
     }
   }
 
@@ -216,9 +190,9 @@ function extractImageBadge(
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-xs">
             <p className="font-semibold">{feature.fullName}</p>
-            {FEATURE_CONFIG[feature.abbr]?.description && (
+            {mergedConfig[feature.abbr]?.description && (
               <p className="text-xs mt-1 text-muted-foreground">
-                {FEATURE_CONFIG[feature.abbr].description}
+                {mergedConfig[feature.abbr].description}
               </p>
             )}
           </TooltipContent>
@@ -235,15 +209,36 @@ export function SelectingCardsTabs({
   setSelectCategory,
   customImageValue = "",
   onCustomImageChange,
-  customEnabled = true,
-  customPlaceholder = "e.g., cerit.io/hubs/custom-image:latest",
+  image,
 }: SelectingCardTabsProps) {
-  const images = useMemo(() => getImageOptions() as ImageOptions, []);
+  // Category tab list + labels + image lists all come from the schema slice.
+  const categoryLabels = useMemo(
+    () =>
+      Object.fromEntries(
+        image.categories.map((category) => [category.key, category.name]),
+      ) as Record<string, string>,
+    [image.categories],
+  );
+  const images = useMemo(() => {
+    const byCategory: Record<
+      string,
+      Array<{
+        value: string;
+        name: string;
+        badges?: string[];
+        version?: string;
+      }>
+    > = {};
+    for (const category of image.categories) {
+      byCategory[category.key] = category.images;
+    }
+    return byCategory;
+  }, [image.categories]);
   const allCategories = Object.keys(images);
   const categories = [
     "all",
     ...allCategories,
-    ...(customEnabled ? ["custom"] : []),
+    ...(image.custom.enabled ? ["custom"] : []),
   ];
   const [activeCategory, setActiveCategory] = useState<string>(
     selectedCategory || "all",
@@ -362,8 +357,7 @@ export function SelectingCardsTabs({
                 ? "Custom Image"
                 : isAllCategory
                   ? "ALL"
-                  : sectionTitles[category as keyof typeof sectionTitles] ||
-                    category}
+                  : categoryLabels[category] || category}
             </Badge>
           );
         })}
@@ -379,7 +373,7 @@ export function SelectingCardsTabs({
             </P>
             <Input
               type="text"
-              placeholder={customPlaceholder}
+              placeholder={image.custom.placeholder}
               value={customImageValue}
               onChange={handleCustomImageInput}
               className="w-full bg-surface-raised"
@@ -404,19 +398,19 @@ export function SelectingCardsTabs({
               Available Images
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 max-h-[calc(3*8rem+2*1rem)] overflow-y-auto custom-scrollbar py-2">
-              {filteredImages.map(({ value, name }) => (
+              {filteredImages.map((entry) => (
                 <Card
-                  key={value}
+                  key={entry.value}
                   className={cn(
                     "bg-surface-raised",
                     "group relative isolate flex max-h-sm cursor-pointer border overflow-hidden transition-colors duration-400 ease-in-out",
-                    selectedImageId === value
+                    selectedImageId === entry.value
                       ? "border-primary shadow-md"
                       : "hover:text-text hover:border-primary/30",
                   )}
-                  onClick={() => onSelectImage(value, activeCategory)}
+                  onClick={() => onSelectImage(entry.value, activeCategory)}
                 >
-                  {selectedImageId === value && (
+                  {selectedImageId === entry.value && (
                     <>
                       <span
                         aria-hidden
@@ -433,7 +427,7 @@ export function SelectingCardsTabs({
                   <div
                     className={cn(
                       "absolute top-2 right-2 z-10 transition-opacity duration-200",
-                      selectedImageId === value
+                      selectedImageId === entry.value
                         ? "opacity-100"
                         : "opacity-0 group-hover:opacity-100",
                     )}
@@ -441,7 +435,7 @@ export function SelectingCardsTabs({
                     <Check
                       className={cn(
                         "size-5",
-                        selectedImageId === value
+                        selectedImageId === entry.value
                           ? "text-primary-foreground"
                           : "text-tertiary",
                       )}
@@ -452,13 +446,15 @@ export function SelectingCardsTabs({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <CardTitle className="truncate text-xl">
-                          {extractBaseName(name)}
+                          {extractBaseName(entry.name)}
                         </CardTitle>
                       </TooltipTrigger>
-                      <TooltipContent>{extractBaseName(name)}</TooltipContent>
+                      <TooltipContent>
+                        {extractBaseName(entry.name)}
+                      </TooltipContent>
                     </Tooltip>
                     <CardDescription>
-                      {extractImageBadge(name, value)}
+                      {extractImageBadge(entry, image.badge_config)}
                     </CardDescription>
                   </CardHeader>
                 </Card>
