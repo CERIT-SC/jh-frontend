@@ -11,6 +11,7 @@ import {
   EmptyServerCard,
 } from "@components/features";
 import initDev from "../../dev-setup";
+import { getInstanceConfig, getAnnouncement } from "@utils/instanceConfig";
 import { Alert, Announcement } from "@components/ui";
 import { useAlerts, useMediaQuery } from "@hooks";
 import {
@@ -158,6 +159,10 @@ function HomePage() {
   const resourceUsageRef = useRef<ResourceUsageData>({});
   const [resourceUsage, setResourceUsage] = useState<ResourceUsageData>({});
 
+  // Page-wide instance config: widgets the instance does not offer are off
+  // (no network request at all).
+  const { config: instanceConfig } = getInstanceConfig();
+
   const fetchUsage = useCallback(async () => {
     try {
       const data = await fetchResourceUsage(appConfig.userName);
@@ -200,6 +205,7 @@ function HomePage() {
   }, [appConfig.userName]);
 
   useEffect(() => {
+    if (!instanceConfig.pages.home.resource_usage) return;
     const hasActiveServers = Object.values(spawners).some(
       (s) => s.active && s.ready,
     );
@@ -226,7 +232,7 @@ function HomePage() {
 
     poll();
     return () => clearTimeout(timeoutId);
-  }, [fetchUsage, spawners]);
+  }, [fetchUsage, spawners, instanceConfig]);
 
   const handleStopServer = async (name: string) => {
     console.log(`Stopping server: ${name}`);
@@ -557,10 +563,10 @@ function HomePage() {
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
       <div className="container grow  mx-auto">
-        {appConfig.announcement && (
+        {getAnnouncement() && (
           <Announcement
             className="mx-auto w-full max-w-7xl space-y-8 pt-4 px-2 lg:container"
-            message={appConfig.announcement}
+            message={getAnnouncement()}
             variant="warning"
           />
         )}
