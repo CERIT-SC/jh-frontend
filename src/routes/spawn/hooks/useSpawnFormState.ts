@@ -11,15 +11,13 @@ import type React from "react";
 import { gatherFormData, getS3BucketOptions } from "../utils/gatherFormData";
 import { DEFAULT_FORM_DATA, INITIAL_FORM_DATA } from "../data/formConstants";
 import type { DefaultFormData, SpawnFormData } from "@src-types/spawnForm";
+import type { PushAlertOptions } from "@hooks/useAlerts";
 
 /** Adapter variant type used by StorageSelectionSection.pushAlert. */
 export type StorageAlertVariant = "success" | "error" | "info";
 
-/** Push-alert signature from useAlerts (loosened to accept any variant string). */
-export type PushAlertFn = (
-  message: string,
-  options?: { variant?: string },
-) => void;
+/** Push-alert signature from useAlerts (the real PushAlertOptions shape). */
+export type PushAlertFn = (message: string, options?: PushAlertOptions) => void;
 
 /** Return type of the useSpawnFormState hook. */
 export interface SpawnFormState {
@@ -101,7 +99,10 @@ export function useSpawnFormState(pushAlert: PushAlertFn): SpawnFormState {
   );
 
   // StorageSection uses "success" | "error" | "info"; map to useAlerts variants.
-  const VARIANT_MAP: Record<StorageAlertVariant, string> = {
+  const VARIANT_MAP: Record<
+    StorageAlertVariant,
+    NonNullable<PushAlertOptions["variant"]>
+  > = {
     success: "success",
     error: "error",
     info: "default",

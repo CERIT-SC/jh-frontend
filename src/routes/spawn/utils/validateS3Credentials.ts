@@ -75,10 +75,13 @@ function validateS3Endpoint(url: string): void {
   try {
     parsedUrl = new URL(url);
   } catch (error) {
-    throw new Error(
+    // `cause` requires lib ES2022; attach it explicitly to keep the runtime
+    // behavior (the underlying parse error travels with the thrown error).
+    const err = new Error(
       `Invalid S3 endpoint URL: "${url}". Please provide a valid HTTPS URL.`,
-      { cause: error },
     );
+    (err as Error & { cause?: unknown }).cause = error;
+    throw err;
   }
 
   // Check protocol - must be HTTPS

@@ -16,9 +16,9 @@ import {
 } from "../utils/gatherFormData";
 
 interface DefaultNotebookImage {
-  type?: string;
+  type?: string | null;
   sshAccess?: boolean;
-  containerImage?: string;
+  containerImage?: string | null;
   selectedOption?: string;
 }
 

@@ -267,7 +267,7 @@ function HomePage() {
     try {
       const data = (await apiClient.getNamedServers(
         appConfig.userName,
-      )) as Record<string, ApiSpawnerData>;
+      )) as unknown as Record<string, ApiSpawnerData>;
 
       if (Object.keys(data).length !== 0) {
         // Batch all spawner updates into a single setSpawners call

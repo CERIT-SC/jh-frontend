@@ -51,17 +51,17 @@ interface StorageDefaultFormData {
   persistentHome?: {
     type?: string;
     eraseIfExists?: boolean;
-    selectedHome?: { value?: string };
+    selectedHome?: { value?: string; text?: string } | null;
   };
   projectDirectories?: boolean;
   metaCentrumHome?: {
     enabled?: boolean;
-    selectedHome?: { value?: string };
+    selectedHome?: { value?: string; text?: string } | null;
     mountToStorage?: boolean;
   };
   s3Storage?: {
     enabled?: boolean;
-    existings3?: { value?: string };
+    existings3?: { value?: string } | null;
     s3url?: string | null;
     s3bucket?: string | null;
     s3accesskey?: string | null;
