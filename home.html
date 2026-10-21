@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="{{ (instance | default({})).brand | default('origin') }}">
   <head>
     <meta charset="UTF-8" />
     <link />
@@ -44,6 +44,8 @@
         xsrf: "{{ xsrf_token }}",
       };
     </script>
+    <script type="application/json" id="instance-config">{{ instance | default({}) | tojson }}</script>
+    <script type="application/json" id="announcement-data">{{ announcement | default('', true) | tojson }}</script>
     <script type="module" src="/src/routes/home/home.jsx"></script>
     {% endblock main %}
   </body>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="{{ (instance | default({})).brand | default('origin') }}">
   <head>
     <meta charset="UTF-8" />
     <link />
@@ -27,6 +27,7 @@
         extraErrorHtml: {% if extra_error_html %}{{ extra_error_html | tojson }}{% else %}undefined{% endif %},
       };
     </script>
+    <script type="application/json" id="instance-config">{{ instance | default({}) | tojson }}</script>
     <script type="module" src="/src/routes/error/error.tsx"></script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="{{ (instance | default({})).brand | default('origin') }}">
   <head>
     <meta charset="UTF-8" />
     <link />
@@ -17,6 +17,7 @@
   </head>
   <body>
     <div id="root"></div>
+    <script type="application/json" id="instance-config">{{ instance | default({}) | tojson }}</script>
     <script type="module" src="/src/routes/login/login.jsx"></script>
   </body>
 </html>
