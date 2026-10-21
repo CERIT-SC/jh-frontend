@@ -16,6 +16,7 @@ export default defineConfig({
       "@hooks": resolve(__dirname, "./src/hooks"),
       "@api": resolve(__dirname, "./src/api"),
       "@utils": resolve(__dirname, "./src/utils"),
+      "@src-types": resolve(__dirname, "./src/types"),
       "@assets": resolve(__dirname, "./src/assets"),
       "@data": resolve(__dirname, "./src/data"),
     },

@@ -6,6 +6,7 @@ export {
   DOCKER_IMAGE_REGEX,
 } from "./utils";
 export { sanitizeHtml } from "./sanitizeHtml";
+export { readJsonScript } from "./readJsonScript";
 export { triggerShineById, triggerShineMultiple } from "./shine";
 export {
   stripTimestampPrefix,
