@@ -114,27 +114,52 @@ create_configmap() {
   local name=$1
   local path=$2
 
+  # Render the ConfigMap up front (client-side dry-run) so its size can be
+  # checked before any apply — client-side apply stores a 256 KiB-limited
+  # annotation, and server-side apply rejects objects above ~1 MiB.
+  local tmp
+  tmp=$(mktemp)
+  kubectl create configmap "$name" --from-file="$path" --namespace "$NAMESPACE" --dry-run=client -o yaml > "$tmp"
+
+  local size_kb
+  size_kb=$(( $(wc -c < "$tmp") / 1024 ))
+  if (( size_kb > 1000 )); then
+    echo "Error: ConfigMap $name is ${size_kb} KiB — exceeds the 1000 KiB limit. Reduce the assets in $path." >&2
+    rm -f "$tmp"
+    exit 1
+  elif (( size_kb > 900 )); then
+    echo "Warning: ConfigMap $name is ${size_kb} KiB — approaching the 1000 KiB limit." >&2
+  fi
+
   if [[ "$DRY_RUN" == true ]]; then
-    if [[ "$LOCAL" == true ]]; then
-      echo "[dry-run] kubectl create configmap $name --from-file=$path --namespace $NAMESPACE --dry-run=client -o yaml > ${name}.yaml"
-    else
-      echo "[dry-run] kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found"
-      echo "[dry-run] kubectl create configmap $name --from-file=$path --namespace $NAMESPACE"
-    fi
+    echo "[dry-run] kubectl apply --server-side --force-conflicts --namespace $NAMESPACE -f -  (configmap $name from $path, ${size_kb} KiB)"
+    rm -f "$tmp"
   elif [[ "$LOCAL" == true ]]; then
-    kubectl create configmap "$name" --from-file="$path" --namespace "$NAMESPACE" --dry-run=client -o yaml > "${name}.yaml"
+    mv "$tmp" "${name}.yaml"
     echo "Generated ${name}.yaml"
   else
-    kubectl delete configmap "$name" --namespace "$NAMESPACE" --ignore-not-found
-    kubectl create configmap "$name" --from-file="$path" --namespace "$NAMESPACE"
+    kubectl apply --server-side --force-conflicts -f "$tmp" --namespace "$NAMESPACE"
+    rm -f "$tmp"
   fi
 }
 
-create_configmap "static-files" "$BASE_DIR"
+# Apply asset ConfigMaps first and the templates bundle (static-files) last,
+# so a partially-updated cluster never serves new HTML with old assets.
 create_configmap "static-files-js" "$BASE_DIR/static/custom-js"
 create_configmap "static-files-css" "$BASE_DIR/static/custom-css"
 create_configmap "static-files-woff" "$BASE_DIR/static/woff"
 create_configmap "static-files-woff2" "$BASE_DIR/static/woff2"
 create_configmap "static-files-images" "$BASE_DIR/static/custom-images"
+create_configmap "static-files" "$BASE_DIR"
+
+if [[ "$DRY_RUN" != true && "$LOCAL" != true ]]; then
+  BUILD_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  DEPLOYED_BY="$(git config user.name 2>/dev/null || echo unknown)"
+  echo
+  echo "Deployed build: ${BUILD_SHA} (${BUILD_DATE})"
+  echo "Ready-to-paste docs/deployments.md row:"
+  echo "| ${NAMESPACE} | ${BUILD_TARGET} | ${BUILD_SHA} | ${BUILD_DATE} | ${DEPLOYED_BY} |  |"
+fi
 
 echo "All ConfigMaps processed successfully."

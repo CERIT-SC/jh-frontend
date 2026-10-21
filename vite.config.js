@@ -1,10 +1,24 @@
 import { defineConfig } from "vite";
 import { resolve, dirname } from "path";
+import { execSync } from "child_process";
 import { fileURLToPath } from "url";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Build stamp: short SHA of the built commit + build time (decision 15).
+// Recorded per namespace in docs/deployments.md after each deploy.
+function buildStamp() {
+  try {
+    const sha = execSync("git rev-parse --short HEAD").toString().trim();
+    return `${sha} ${new Date().toISOString()}`;
+  } catch {
+    return `unknown ${new Date().toISOString()}`;
+  }
+}
+
+const BUILD_STAMP = buildStamp();
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -62,7 +76,22 @@ export default defineConfig({
   //     return html;
   //   },
   // },
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    {
+      name: "jh-frontend-build-stamp",
+      transformIndexHtml() {
+        return [
+          {
+            tag: "meta",
+            attrs: { name: "jh-frontend-build", content: BUILD_STAMP },
+            injectTo: "head",
+          },
+        ];
+      },
+    },
+  ],
   server: {
     open: process.env?.ENTRY || "/spawn.html",
     proxy: {
