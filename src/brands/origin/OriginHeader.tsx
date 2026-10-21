@@ -1,0 +1,179 @@
+/**
+ * @fileoverview The origin brand's Header — moved verbatim from
+ * `components/layout/JupyterHubHeader.tsx` (docs URL now from brand copy).
+ */
+
+import React, { useState } from "react";
+import {
+  Header,
+  Button,
+  HeaderContent,
+  HeaderLeft,
+  HeaderRight,
+  NavigationMenuLink,
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  Separator,
+  Strong,
+  Avatar,
+  AvatarFallback,
+} from "@e-infra/design-system";
+import { Book, LogOut, Menu } from "lucide-react";
+import { ModeToggle } from "@components/ui/ModeToggle";
+import HubLogo from "../../../public/static/custom-images/hub-rectangle.svg";
+import HubLogoDark from "../../../public/static/custom-images/hub-rectangle-dark.svg";
+import { originCopy } from "./copy";
+import type { JupyterHubHeaderProps } from "../types";
+
+export const OriginHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogout = () => {
+    window.location.href = "/hub/logout";
+  };
+
+  return (
+    <Header className="">
+      <HeaderContent>
+        <HeaderLeft>
+          {/* Logo */}
+          <div className="flex h-10 items-center justify-center">
+            <a href="/hub/home">
+              <img
+                className="h-8 w-auto object-contain block dark:hidden"
+                src={HubLogo}
+                alt="Logo"
+              />
+              <img
+                className="h-8 w-auto object-contain dark:block hidden"
+                src={HubLogoDark}
+                alt="Logo"
+              />
+            </a>
+          </div>
+          {/* Desktop Nav */}
+          <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink href="/hub/home">Home</NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink href="/hub/token">Token</NavigationMenuLink>
+              </NavigationMenuItem>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => window.open(originCopy.docs_url, "_blank")}
+                    >
+                      <Book className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Docs</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </HeaderLeft>
+
+        {/* Desktop Right — hidden on mobile */}
+        <HeaderRight className="hidden md:flex">
+          <span className="ml-2">{userName}</span>
+          <ModeToggle />
+          <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <LogOut className="h-5 w-5" />
+            <span className="sr-only">Logout</span>
+          </Button>
+        </HeaderRight>
+
+        {/* Mobile hamburger — direct child of HeaderContent, pushed right */}
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto md:hidden"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-sm">
+            <SheetHeader className="border-b border-border">
+              <SheetTitle>Menu</SheetTitle>
+            </SheetHeader>
+
+            <nav className="flex flex-col gap-1 p-4">
+              <a
+                href="/hub/home"
+                onClick={() => setMobileOpen(false)}
+                className="rounded-md px-3 py-2 text-base font-medium text-text transition-colors hover:bg-secondary hover:text-primary"
+              >
+                Home
+              </a>
+              <a
+                href="/hub/token"
+                onClick={() => setMobileOpen(false)}
+                className="rounded-md px-3 py-2 text-base font-medium text-text transition-colors hover:bg-secondary hover:text-primary"
+              >
+                Token
+              </a>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 px-3 py-2 text-base font-medium"
+                onClick={() => {
+                  setMobileOpen(false);
+                  window.open(originCopy.docs_url, "_blank");
+                }}
+              >
+                <Book className="h-5 w-5" />
+                Docs
+              </Button>
+            </nav>
+
+            <Separator />
+
+            <div className="p-4">
+              <ModeToggle variant="full" />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center-safe justify-between py-4 px-8">
+              <div className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarFallback>
+                    {userName.trim().charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <Strong>{userName}</Strong>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="justify-start gap-2 px-3 py-2"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </HeaderContent>
+    </Header>
+  );
+};
