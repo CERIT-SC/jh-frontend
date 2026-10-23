@@ -13,7 +13,6 @@ import {
   buildImageValueToCategoryMap,
   buildImageValueToNameMap,
 } from "../utils/gatherFormData";
-import { resolveContainerRef } from "../utils/buildSpawnPayload";
 import GenericFieldBlock from "../components/GenericFieldBlock";
 import type { SpawnOptions } from "@src-types/spawnOptions";
 import type { GenericField } from "@src-types/spawnOptions";
@@ -147,21 +146,10 @@ export function ImageSelectionSectionTabs({
 
       const category = findImageCategory(strippedVal, imageToCategoryMap);
       if (category) {
-        const legacyPostKey = image.categories.find(
-          (candidate) => candidate.key === category,
-        )?.legacy_post_key;
         setSelectedCategory(category);
         setSelectedImage(strippedVal);
         onImageChange?.({
           images: category,
-          ...(legacyPostKey
-            ? {
-                [legacyPostKey]: resolveContainerRef(
-                  strippedVal,
-                  image.registry_prefix,
-                ),
-              }
-            : {}),
         });
       } else {
         setCustomImageValue(imgVal || "");
@@ -208,22 +196,11 @@ export function ImageSelectionSectionTabs({
       }
     }
 
-    const legacyPostKey = image.categories.find(
-      (candidate) => candidate.key === actualCategory,
-    )?.legacy_post_key;
     setSelectedImage(imageValue);
     setSelectedCategory(actualCategory);
 
     onImageChange?.({
       images: actualCategory,
-      ...(legacyPostKey
-        ? {
-            [legacyPostKey]: resolveContainerRef(
-              imageValue,
-              image.registry_prefix,
-            ),
-          }
-        : {}),
       customimage: "",
     });
   };

@@ -24,10 +24,7 @@ import {
   cpuOptions as legacyCpuOptions,
   memOptions as legacyMemOptions,
 } from "../data/formData";
-import {
-  formImagesName as legacyFormImagesName,
-  sectionTitles as legacySectionTitles,
-} from "../data/formData";
+import { sectionTitles as legacySectionTitles } from "../data/formData";
 import { DELETE_HOME_DEFAULTS } from "./presets";
 
 /** Hub's registry prefix; bare catalog values get it prepended (Review Focus #1). */
@@ -125,8 +122,6 @@ function legacyCategories(
     key,
     name: legacySectionTitles[key as keyof typeof legacySectionTitles] ?? key,
     images: legacyImagesOf(source[key]),
-    legacy_post_key:
-      legacyFormImagesName[key as keyof typeof legacyFormImagesName],
   }));
 }
 

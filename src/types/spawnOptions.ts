@@ -43,8 +43,6 @@ export interface ImageCategory {
   key: string;
   name: string;
   images: ImageEntry[];
-  /** Legacy per-category POST key (e.g. `simplenbname`); omitted = not sent. */
-  legacy_post_key?: string;
 }
 
 /**

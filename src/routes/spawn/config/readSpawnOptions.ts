@@ -266,9 +266,6 @@ function imageCategories(
       name: nonEmptyString(item.name) ? item.name : item.key,
       images,
     };
-    if (nonEmptyString(item.legacy_post_key)) {
-      category.legacy_post_key = item.legacy_post_key;
-    }
     categories.push(category);
   });
   return categories;

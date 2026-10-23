@@ -162,20 +162,11 @@ export const SECTION_MODULES: readonly SectionModule[] = [
 export function buildPayload(
   ctx: SubmitCtx,
 ): SpawnFormPayload | { error: string } {
-  // Base payload: the category key, the container image and — for legacy
-  // backends — the category's legacy per-category POST key.
+  // Base payload: the category key and the container image.
   let payload: SpawnFormPayload = {
     images: ctx.imageCategory || "",
     container_image: ctx.containerImage,
   };
-  if (!ctx.isCustomImage && ctx.imageCategory) {
-    const category = ctx.options.image.categories.find(
-      (candidate) => candidate.key === ctx.imageCategory,
-    );
-    if (category?.legacy_post_key) {
-      payload[category.legacy_post_key] = ctx.containerImage;
-    }
-  }
 
   for (const module of SECTION_MODULES) {
     if (!module.enabled(ctx.options)) continue;
