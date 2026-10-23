@@ -133,12 +133,33 @@ create_configmap() {
 
   if [[ "$DRY_RUN" == true ]]; then
     echo "[dry-run] kubectl apply --server-side --force-conflicts --namespace $NAMESPACE -f -  (configmap $name from $path, ${size_kb} KiB)"
+    echo "[dry-run]   on 'Too long' error: delete + create $name (see note below)"
     rm -f "$tmp"
   elif [[ "$LOCAL" == true ]]; then
     mv "$tmp" "${name}.yaml"
     echo "Generated ${name}.yaml"
   else
-    kubectl apply --server-side --force-conflicts -f "$tmp" --namespace "$NAMESPACE"
+    # Server-side apply merges but does not prune keys owned by other field
+    # managers — switching artifacts (all-new hashed filenames) on top of an
+    # existing ConfigMap therefore grows the object by the union of both
+    # file sets and can cross the 1 MiB API limit even when the fresh YAML
+    # is well below it. When that happens, replace the ConfigMap outright:
+    # `kubectl create` stores no last-applied annotation, so it has no
+    # client-side size limit. Applying asset ConfigMaps first and
+    # static-files (templates) last keeps any replacement window short.
+    if ! kubectl apply --server-side --force-conflicts -f "$tmp" --namespace "$NAMESPACE" 2> "$tmp.err"; then
+      if grep -q "Too long" "$tmp.err"; then
+        echo "ConfigMap $name exceeded 1 MiB after server-side merge (stale keys from the previous artifact)."
+        echo "Replacing $name via delete + create."
+        kubectl delete configmap "$name" --namespace "$NAMESPACE" --ignore-not-found
+        kubectl create configmap "$name" --from-file="$path" --namespace "$NAMESPACE"
+      else
+        cat "$tmp.err" >&2
+        rm -f "$tmp.err" "$tmp"
+        exit 1
+      fi
+    fi
+    rm -f "$tmp.err"
     rm -f "$tmp"
   fi
 }
