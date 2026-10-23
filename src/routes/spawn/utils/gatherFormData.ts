@@ -15,6 +15,21 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
+ * The instance's default image as a full reference — the registry prefix is
+ * applied to bare values only, mirroring `resolveContainerRef` (inlined here
+ * because buildSpawnPayload imports this module). Used when `user_options`
+ * carry no saved image: fresh spawns see the configured default preselected;
+ * when the backend configured none, the reader already resolved the default
+ * to the first available image.
+ */
+function defaultContainerRef(options: SpawnOptions): string | null {
+  const value = options.image.default;
+  if (!value) return null;
+  if (value.includes("/") || !options.image.registry_prefix) return value;
+  return `${options.image.registry_prefix}${value}`;
+}
+
+/**
  * Builds the default form data: `user_options` prefill where present,
  * `options` defaults everywhere else. Never bails early — a missing
  * `user_options` key falls back to the resolved option default.
@@ -92,7 +107,9 @@ export function gatherFormData(options: SpawnOptions): DefaultFormData {
     // Image & Access
     notebookImage: {
       containerImage:
-        typeof opts.container_image === "string" ? opts.container_image : null,
+        typeof opts.container_image === "string" && opts.container_image !== ""
+          ? opts.container_image
+          : defaultContainerRef(options),
       sshAccess: Boolean(opts.ssh),
       type:
         opts.images === "custom" ? "customnb" : (opts.images as string) || null,
