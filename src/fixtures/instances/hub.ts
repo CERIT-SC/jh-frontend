@@ -12,6 +12,10 @@ import type { InstanceFixture } from "./index";
 
 export const hub: InstanceFixture = {
   transport: "legacy-global",
+  // `instance: {}` mirrors production: the root templates always emit
+  // #instance-config, and a hub without template_vars["instance"] renders
+  // `{}` — which must behave as "no instance config" (legacy widgets on).
+  instance: {},
   wire: {
     user_options: {
       container_image: "cerit.io/hubs/datasciencenb:26-09-2024",

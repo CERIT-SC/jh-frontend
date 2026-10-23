@@ -27,7 +27,10 @@ function resolveInstanceConfig(wire: InstanceConfigWire | undefined): {
   source: ConfigSource;
   problems: ConfigProblem[];
 } {
-  if (!isRecord(wire)) {
+  // An empty wire ({} — what the templates render when the backend sets no
+  // instance block) means "no instance config": legacy behavior, every
+  // widget on. Only a non-empty object is a real backend configuration.
+  if (!isRecord(wire) || Object.keys(wire).length === 0) {
     return { config: LEGACY_INSTANCE_CONFIG, source: "legacy", problems: [] };
   }
 
