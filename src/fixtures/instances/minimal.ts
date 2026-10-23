@@ -5,11 +5,9 @@
  */
 
 import type { SpawnWire } from "@src-types/spawnOptions";
-import type { InstanceConfigWire } from "@src-types/instanceConfig";
 import type { InstanceFixture } from "./index";
 
 export const minimal: InstanceFixture = {
-  transport: "json-script",
   wire: {
     user_options: {},
     spawn_options: {
@@ -38,9 +36,4 @@ export const minimal: InstanceFixture = {
       },
     },
   } satisfies SpawnWire,
-  instance: {
-    version: 1,
-    brand: "origin",
-    pages: { home: { gpu_indicators: false, resource_usage: false } },
-  } satisfies InstanceConfigWire,
 };

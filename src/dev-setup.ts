@@ -4,12 +4,11 @@
  * JupyterHub's Jinja2 rendering.
  *
  * The fixture is selected by `?instance=<name>`, then `VITE_INSTANCE`, then
- * `hub` (the legacy wire — exercises the legacy adapter). Injection mirrors
- * the two backend transports: `legacy-global` sets `window.spawnOptions`
- * (today's hub backend); `json-script` creates the
+ * `hub`. Injection mirrors the backend exactly: the wire goes into the
  * `<script type="application/json" id="spawn-options">` element the strict
- * reader consumes. The `instance` block goes into `#instance-config` on
- * every page.
+ * reader consumes; the `instance` block into `#instance-config`. A fixture
+ * without `spawn_options` renders the blocked, empty form — the same
+ * observable failure a page without backend emission gets in production.
  */
 
 import { FIXTURES, type InstanceFixture } from "./fixtures/instances";
@@ -22,17 +21,14 @@ interface DevSpawner {
   ready: boolean;
 }
 
-/** Dev-only window globals (mocked appConfig + spawnOptions). */
+/** Dev-only window globals (mocked appConfig). */
 interface DevWindow extends Window {
   appConfig?: Record<string, unknown>;
-  spawnOptions?: Record<string, unknown>;
 }
 
 function getDevWindow(): DevWindow {
   return window as DevWindow;
 }
-
-/** Creates or replaces a JSON script element with the given content. */
 function injectJsonScript(id: string, content: unknown): void {
   let element = document.getElementById(id);
   if (!(element instanceof HTMLScriptElement)) {
@@ -46,12 +42,7 @@ function injectJsonScript(id: string, content: unknown): void {
 }
 
 function injectFixture(fixture: InstanceFixture): void {
-  const devWindow = getDevWindow();
-  if (fixture.transport === "legacy-global") {
-    devWindow.spawnOptions = fixture.wire as Record<string, unknown>;
-  } else {
-    injectJsonScript("spawn-options", fixture.wire);
-  }
+  injectJsonScript("spawn-options", fixture.wire);
   if (fixture.instance !== undefined) {
     injectJsonScript("instance-config", fixture.instance);
   }

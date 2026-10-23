@@ -13,7 +13,6 @@ import type { InstanceConfigWire } from "@src-types/instanceConfig";
 import type { InstanceFixture } from "./index";
 
 export const cas: InstanceFixture = {
-  transport: "json-script",
   wire: {
     user_options: {
       container_image: "cerit.io/cerit/rstudio-bioconductor:4.3.1",

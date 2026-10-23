@@ -10,7 +10,6 @@ import type { SpawnWire } from "@src-types/spawnOptions";
 import type { InstanceFixture } from "./index";
 
 export const broken: InstanceFixture = {
-  transport: "json-script",
   wire: {
     spawn_options: {
       version: 2,

@@ -1,9 +1,10 @@
 /**
- * @fileoverview Per-instance dev fixtures (decision 19: instances are
- * configuration ports reviewed via dev fixtures, not Storybook stories).
+ * @fileoverview Dev fixtures: per-instance configuration ports (decision 19:
+ * instances are reviewed via dev fixtures, not Storybook stories).
  *
- * Selected by `?instance=<name>` or `VITE_INSTANCE`; `hub` (the legacy wire)
- * is the default. See `src/dev-setup.ts` for the injection mechanics.
+ * Every fixture carries the wire EXACTLY as the backend emits it — there is
+ * no fallback in the frontend, so a fixture without `spawn_options` renders
+ * the blocked, empty form (that is the observable failure mode).
  */
 
 import type { SpawnWire } from "@src-types/spawnOptions";
@@ -14,18 +15,11 @@ import { minimal } from "./minimal";
 import { broken } from "./broken";
 import { elter } from "./elter";
 
-/** How dev-setup injects the fixture's wire into the page. */
 export interface InstanceFixture {
-  /** Content of #spawn-options (or the legacy global). */
+  /** Content of #spawn-options — what the backend emitted for this page. */
   wire: SpawnWire;
-  /** Content of #instance-config; undefined → legacy (everything on). */
+  /** Content of #instance-config; undefined → nothing injected (legacy widgets). */
   instance?: InstanceConfigWire;
-  /**
-   * - "legacy-global": set `window.spawnOptions` (mirrors today's hub backend).
-   * - "json-script": create/replace <script type="application/json"
-   *   id="spawn-options">.
-   */
-  transport: "json-script" | "legacy-global";
 }
 
 export const FIXTURES: Record<string, InstanceFixture> = {

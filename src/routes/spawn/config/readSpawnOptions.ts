@@ -26,10 +26,6 @@ import type {
 import { DEFAULT_BADGES, SPAWN_OPTIONS_VERSION } from "@src-types/spawnOptions";
 import { readJsonScript } from "@utils/readJsonScript";
 import { DELETE_HOME_DEFAULTS } from "./presets";
-import { fromLegacyWire } from "./legacyAdapter";
-
-/** Legacy backend emission: `const spawnOptions = {...}` (dual-emit transition). */
-declare const spawnOptions: Record<string, unknown> | undefined;
 
 const GENERIC_FIELD_SECTIONS: GenericField["section"][] = [
   "image",
@@ -422,10 +418,55 @@ function warnUnknownKeys(
   }
 }
 
+/** A spawn-options-less page renders no form: every group off, no images. */
+function emptySpawnOptions(): SpawnOptions {
+  return {
+    version: SPAWN_OPTIONS_VERSION,
+    image: {
+      registry_prefix: "",
+      default: null,
+      categories: [],
+      badge_config: { ...DEFAULT_BADGES },
+      custom: { enabled: false, placeholder: "" },
+      ssh: { enabled: false, dns_domain: "" },
+    },
+    storage: {
+      persistent_home: { enabled: false, existing: [] },
+      metacentrum: { enabled: false, homes: [] },
+      projects: { enabled: false },
+      s3: {
+        enabled: false,
+        buckets: [],
+        default_endpoint: "",
+        console_url: "",
+      },
+      delete_home: {
+        enabled: false,
+        label: DELETE_HOME_DEFAULTS.label,
+        warning: DELETE_HOME_DEFAULTS.warning,
+      },
+    },
+    resources: {
+      cpu: { enabled: false, options: [], default: 0 },
+      memory: { enabled: false, options: [], default: 0 },
+      gpu: {
+        enabled: false,
+        options: [],
+        default: "",
+        mig_default_amount: 1,
+        live_status: false,
+      },
+    },
+    fields: [],
+    docs: { image: null, storage: null, resources: null },
+  };
+}
+
 /**
  * Resolves the spawn wire into fully-populated options. Pure; used by dev
- * fixtures too. Never throws — an internal failure degrades to the legacy
- * adapter with a blocking problem.
+ * fixtures too. Never throws — an internal failure degrades to an empty,
+ * fully-disabled form with a blocking problem (no fallback data exists:
+ * the form is driven only by real backend configuration).
  */
 export function resolveSpawnOptions(
   wire: SpawnWire | undefined,
@@ -435,13 +476,13 @@ export function resolveSpawnOptions(
   } catch (error) {
     console.error("Failed to resolve spawn options:", error);
     return {
-      options: fromLegacyWire(wire),
+      options: emptySpawnOptions(),
       userOptions: isRecord(wire?.user_options) ? wire.user_options : {},
-      source: "legacy",
+      source: "missing",
       problems: [
         {
           message:
-            "Spawn options could not be read — showing the legacy form. Start is disabled.",
+            "Spawn options could not be read — the form is disabled. Check the backend emission.",
           blocking: true,
         },
       ],
@@ -456,15 +497,22 @@ function resolve(wire: SpawnWire | undefined): ResolvedSpawn {
 
   const raw = wire?.spawn_options;
   if (!isRecord(raw)) {
-    // `spawn_options` absent → legacy adapter (today's hub, exact parity).
+    // No fallback data exists: without backend configuration there is no
+    // form. Surface it loudly instead of rendering anything.
     console.warn(
-      "spawn_options missing on the wire — using the legacy adapter.",
+      "spawn_options missing on the page — the form cannot be rendered.",
     );
     return {
-      options: fromLegacyWire(wire),
+      options: emptySpawnOptions(),
       userOptions,
-      source: "legacy",
-      problems: [],
+      source: "missing",
+      problems: [
+        {
+          message:
+            "Spawn options are missing on this page — the form cannot be rendered. Is the backend emitting the #spawn-options script?",
+          blocking: true,
+        },
+      ],
     };
   }
 
@@ -673,15 +721,11 @@ function resolve(wire: SpawnWire | undefined): ResolvedSpawn {
   return { options, userOptions, source: "backend", problems };
 }
 
-/** Content of the `#spawn-options` JSON script, else the legacy global. */
+/** Content of the `#spawn-options` JSON script emitted by the backend. */
 export function readSpawnWire(): SpawnWire | undefined {
   const fromScript = readJsonScript<SpawnWire>("spawn-options");
   if (isRecord(fromScript)) {
     return fromScript;
-  }
-  // Legacy dual-emit: the backend also injects `const spawnOptions = {...}`.
-  if (typeof spawnOptions !== "undefined" && isRecord(spawnOptions)) {
-    return spawnOptions as SpawnWire;
   }
   return undefined;
 }

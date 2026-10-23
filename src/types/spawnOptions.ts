@@ -134,23 +134,16 @@ export type DeepPartial<T> = {
 export type SpawnOptionsWire = DeepPartial<SpawnOptions>;
 
 /**
- * Content of the `#spawn-options` JSON script (or the legacy global).
- * The legacy top-level keys are read only by the legacy adapter.
+ * Content of the `#spawn-options` JSON script emitted by the backend.
+ * There is no legacy wire: a page without this script renders no form.
  */
 export interface SpawnWire {
   user_options?: Record<string, unknown>;
   spawn_options?: SpawnOptionsWire;
-  // legacy top-level keys — read only by the legacy adapter:
-  images?: unknown;
-  gpu_instances?: unknown;
-  mhomes?: unknown;
-  phomes?: unknown;
-  s3buckets?: unknown;
-  ssh_dns_domain?: string;
 }
 
 /** Where the resolved options came from. */
-export type ConfigSource = "legacy" | "backend";
+export type ConfigSource = "legacy" | "backend" | "missing";
 
 /** A schema problem surfaced to the user; blocking ones disable Start. */
 export interface ConfigProblem {

@@ -21,7 +21,6 @@ import type { InstanceConfigWire } from "@src-types/instanceConfig";
 import type { InstanceFixture } from "./index";
 
 export const elter: InstanceFixture = {
-  transport: "json-script",
   wire: {
     user_options: {},
     spawn_options: {
