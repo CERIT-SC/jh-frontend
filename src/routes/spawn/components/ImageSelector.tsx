@@ -19,6 +19,7 @@ import {
 import type { SpawnOptions } from "@src-types/spawnOptions";
 import {
   BADGE_KEYWORDS,
+  BADGE_COLOR_STYLES,
   BADGE_STYLES,
   DEFAULT_BADGES,
   DEFAULT_BADGE_STYLE,
@@ -122,6 +123,7 @@ function extractImageBadge(
   const foundFeatures: Array<{
     abbr: string;
     fullName: string;
+    description?: string;
     style: string;
   }> = [];
 
@@ -137,12 +139,7 @@ function extractImageBadge(
 
   // The FE registry is always part of the lookup (backend badge_config is
   // merged per key over it; the legacy adapter ships an empty config).
-  const mergedConfig: Record<string, { name: string; description: string }> =
-    Object.fromEntries(
-      Object.entries({ ...DEFAULT_BADGES, ...badgeConfig }).map(
-        ([key, def]) => [key, { name: def.name, description: def.description }],
-      ),
-    );
+  const mergedConfig = { ...DEFAULT_BADGES, ...badgeConfig };
 
   if (entry.badges !== undefined) {
     // Explicit mode: badges come from the schema only.
@@ -152,9 +149,12 @@ function extractImageBadge(
         continue; // unknown key — skipped (resolver reports the problem)
       }
       foundFeatures.push({
-        abbr: key,
+        abbr: def.abbr,
         fullName: def.name,
-        style: BADGE_STYLES[key] ?? DEFAULT_BADGE_STYLE,
+        description: def.description,
+        style: def.color
+          ? (BADGE_COLOR_STYLES[def.color] ?? DEFAULT_BADGE_STYLE)
+          : (BADGE_STYLES[key] ?? DEFAULT_BADGE_STYLE),
       });
     }
   } else {
@@ -167,9 +167,12 @@ function extractImageBadge(
           continue;
         }
         foundFeatures.push({
-          abbr,
+          abbr: def.abbr,
           fullName: def.name,
-          style: BADGE_STYLES[abbr] ?? DEFAULT_BADGE_STYLE,
+          description: def.description,
+          style: def.color
+            ? (BADGE_COLOR_STYLES[def.color] ?? DEFAULT_BADGE_STYLE)
+            : (BADGE_STYLES[abbr] ?? DEFAULT_BADGE_STYLE),
         });
       }
     }
@@ -190,9 +193,9 @@ function extractImageBadge(
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-xs">
             <p className="font-semibold">{feature.fullName}</p>
-            {mergedConfig[feature.abbr]?.description && (
+            {feature.description && (
               <p className="text-xs mt-1 text-muted-foreground">
-                {mergedConfig[feature.abbr].description}
+                {feature.description}
               </p>
             )}
           </TooltipContent>

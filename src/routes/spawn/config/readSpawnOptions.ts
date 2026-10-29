@@ -23,7 +23,12 @@ import type {
   SpawnOptions,
   SpawnWire,
 } from "@src-types/spawnOptions";
-import { DEFAULT_BADGES, SPAWN_OPTIONS_VERSION } from "@src-types/spawnOptions";
+import {
+  BADGE_COLORS,
+  DEFAULT_BADGES,
+  SPAWN_OPTIONS_VERSION,
+} from "@src-types/spawnOptions";
+import type { BadgeColor } from "@src-types/spawnOptions";
 import { readJsonScript } from "@utils/readJsonScript";
 import { DELETE_HOME_DEFAULTS } from "./presets";
 
@@ -291,6 +296,13 @@ function badgeConfig(
       continue;
     }
     const fallback = merged[key];
+    const validColor = BADGE_COLORS.includes(value.color as BadgeColor);
+    if (value.color !== undefined && !validColor) {
+      problems.push({
+        message: `Unknown badge color for "${key}" — using neutral.`,
+        blocking: false,
+      });
+    }
     merged[key] = {
       abbr: nonEmptyString(value.abbr) ? value.abbr : (fallback?.abbr ?? key),
       name: nonEmptyString(value.name) ? value.name : (fallback?.name ?? key),
@@ -298,6 +310,9 @@ function badgeConfig(
         typeof value.description === "string"
           ? value.description
           : (fallback?.description ?? ""),
+      ...(value.color !== undefined && {
+        color: validColor ? (value.color as BadgeColor) : "neutral",
+      }),
     };
   }
   return merged;

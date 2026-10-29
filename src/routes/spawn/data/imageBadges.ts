@@ -3,12 +3,13 @@
  *
  * `DEFAULT_BADGES` (definitions) lives in `src/types/spawnOptions.ts` and is
  * re-exported here; the chip STYLES live only in this file, keyed by badge
- * id. Backend config may override abbr/name/description per key — never
- * colors. Per-image `badges: []` short-circuits the name-keyword heuristic;
+ * id. Backend config may override abbr/name/description and select a fixed
+ * color preset, never arbitrary CSS. Per-image `badges: []` disables the heuristic;
  * `version` shows the verbatim version chip.
  */
 
 import { DEFAULT_BADGES } from "@src-types/spawnOptions";
+import type { BadgeColor } from "@src-types/spawnOptions";
 
 export { DEFAULT_BADGES };
 
@@ -29,6 +30,16 @@ export const VERSION_CHIP_STYLE = "bg-surface text-text ring-1 ring-border";
 
 /** Fallback chip style for badge keys outside the FE registry. */
 export const DEFAULT_BADGE_STYLE = "bg-surface-raised text-text border-border";
+
+/** Fixed classes ensure Tailwind emits every preset; names are theme-neutral. */
+export const BADGE_COLOR_STYLES: Record<BadgeColor, string> = {
+  neutral: DEFAULT_BADGE_STYLE,
+  "accent-1": "bg-chart-1/50 text-text",
+  "accent-2": "bg-chart-2/50 text-text",
+  "accent-3": "bg-chart-3/50 text-text",
+  "accent-4": "bg-chart-4/50 text-text",
+  "accent-5": "bg-chart-5/50 text-text",
+};
 
 /** Keywords per badge id for the legacy name-keyword heuristic (hub parity). */
 export const BADGE_KEYWORDS: Record<string, string[]> = {

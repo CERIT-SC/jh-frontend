@@ -31,11 +31,24 @@ export interface ImageEntry {
   version?: string;
 }
 
-/** Badge definition: styling stays in FE code, keyed by id. */
+/** Approved theme-aware badge colors; CSS remains frontend-owned. */
+export const BADGE_COLORS = [
+  "neutral",
+  "accent-1",
+  "accent-2",
+  "accent-3",
+  "accent-4",
+  "accent-5",
+] as const;
+export type BadgeColor = (typeof BADGE_COLORS)[number];
+
+/** Badge content and optional color preset, configured by the backend. */
 export interface BadgeDef {
   abbr: string;
   name: string;
   description: string;
+  /** Omitted: preserve the built-in badge style, or neutral for new IDs. */
+  color?: BadgeColor;
 }
 
 /** An image category: ordered; rendered as one tab of the image selector. */

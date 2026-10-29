@@ -65,6 +65,7 @@ export default function ResourceSelectionSection({
 
   // Fetch GPU indicators — only when the instance offers a live status widget
   const fetchGPUStatus = useCallback(async () => {
+    if (!resources.gpu.enabled || !resources.gpu.live_status) return;
     setLoading(true);
     setError(null);
     try {
@@ -87,7 +88,7 @@ export default function ResourceSelectionSection({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [resources.gpu.enabled, resources.gpu.live_status]);
 
   useEffect(() => {
     if (resources.gpu.enabled && resources.gpu.live_status) {

@@ -37,16 +37,17 @@ export const cas: InstanceFixture = {
               {
                 value: "cerit.io/cerit/rstudio-bioconductor:4.3.1",
                 name: "RStudio with R 4.3.1",
-                badges: ["RSt"],
+                badges: ["rstudio"],
               },
             ],
           },
         ],
         badge_config: {
-          RSt: {
+          rstudio: {
             abbr: "RSt",
             name: "RStudio",
             description: "RStudio IDE pre-installed.",
+            color: "accent-1",
           },
         },
       },

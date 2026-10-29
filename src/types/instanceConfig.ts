@@ -18,7 +18,7 @@ export interface InstanceConfig {
   brand: string;
   pages: {
     home: {
-      /** GPU status badges on the home page. */
+      /** Reserved legacy wire key; home does not render/fetch GPU availability. */
       gpu_indicators: boolean;
       /** Resource-usage badge on the home page. */
       resource_usage: boolean;
