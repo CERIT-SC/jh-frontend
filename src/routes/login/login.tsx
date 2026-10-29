@@ -3,6 +3,11 @@ import { createRoot } from "react-dom/client";
 import "@fontsource/montserrat/600.css";
 import "../../styles/index.css";
 import { ThemeProvider } from "@components/layout";
+import initDev from "../../dev-setup";
+
+if (import.meta.env.DEV) {
+  initDev();
+}
 
 const root = createRoot(document.getElementById("root")!);
 root.render(

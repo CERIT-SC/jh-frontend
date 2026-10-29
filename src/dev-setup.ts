@@ -46,6 +46,12 @@ function injectFixture(fixture: InstanceFixture): void {
   if (fixture.instance !== undefined) {
     injectJsonScript("instance-config", fixture.instance);
   }
+  // Dev parity for Jinja-rendered pages: the backend sets <html data-theme>
+  // from instance.brand; mirror that for the injected fixture (dev HTML ships
+  // an unrendered Jinja placeholder). No palette imports happen here.
+  const brand = fixture.instance?.brand;
+  document.documentElement.dataset.theme =
+    typeof brand === "string" && brand !== "" ? brand : "origin";
 }
 
 export default function initDev() {

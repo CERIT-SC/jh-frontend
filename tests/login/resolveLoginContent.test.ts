@@ -130,7 +130,10 @@ describe("resolveLoginContent — links", () => {
   });
 
   test("rejects a non-array links value", () => {
-    const result = resolveLoginContent({ links: "https://docs.example" }, PAGE_URL);
+    const result = resolveLoginContent(
+      { links: "https://docs.example" },
+      PAGE_URL,
+    );
     expect(result.content?.links).toEqual([]);
     expect(result.problems.length).toBeGreaterThan(0);
   });
@@ -155,7 +158,9 @@ describe("resolveLoginContent — logo", () => {
       { logo: { src: "images/logo.svg", alt: "Logo" } },
       PAGE_URL,
     );
-    expect(result.content?.logo?.src).toBe("https://hub.example/hub/images/logo.svg");
+    expect(result.content?.logo?.src).toBe(
+      "https://hub.example/hub/images/logo.svg",
+    );
   });
 
   test("accepts an absolute same-origin URL with optional dark variant", () => {
@@ -169,7 +174,9 @@ describe("resolveLoginContent — logo", () => {
       },
       PAGE_URL,
     );
-    expect(result.content?.logo?.dark_src).toBe(`https://hub.example${LOGO_PATH}`);
+    expect(result.content?.logo?.dark_src).toBe(
+      `https://hub.example${LOGO_PATH}`,
+    );
   });
 
   test.each([
@@ -180,7 +187,10 @@ describe("resolveLoginContent — logo", () => {
     "javascript:void(0)",
     "   ",
   ])("rejects logo src %p and omits the logo", (src) => {
-    const result = resolveLoginContent({ logo: { src, alt: "Logo" } }, PAGE_URL);
+    const result = resolveLoginContent(
+      { logo: { src, alt: "Logo" } },
+      PAGE_URL,
+    );
     expect(result.content?.logo).toBeUndefined();
     expect(result.problems.length).toBeGreaterThan(0);
     expectNonblocking(result.problems);

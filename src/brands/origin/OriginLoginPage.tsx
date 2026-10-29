@@ -22,7 +22,11 @@ export const OriginLoginPage: React.FC<LoginPageProps> = ({
     <LoginCard
       heading="Welcome to JupyterHub"
       subtitle="Sign in to access your JupyterHub workspace"
-      logo={{ src: originLogos.light, dark_src: originLogos.dark, alt: "e-INFRA CZ" }}
+      logo={{
+        src: originLogos.light,
+        dark_src: originLogos.dark,
+        alt: "e-INFRA CZ",
+      }}
       info={
         <P className="text-center text-sm leading-relaxed">
           You need to be a valid member of{" "}

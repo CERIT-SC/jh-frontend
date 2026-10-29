@@ -14,9 +14,7 @@
  * Pure and DOM-free: the page URL is passed in by the caller.
  */
 
-import type {
-  LoginContent,
-} from "@src-types/instanceConfig";
+import type { LoginContent } from "@src-types/instanceConfig";
 import type { ConfigProblem } from "@src-types/spawnOptions";
 
 /** Defaults of the generic configured page (`{}` opts into these). */
@@ -80,8 +78,7 @@ export function resolveLoginContent(
   } else if (value.subtitle !== undefined) {
     content.subtitle = DEFAULTS.subtitle;
     problems.push({
-      message:
-        "instance.pages.login.subtitle is invalid — using the default.",
+      message: "instance.pages.login.subtitle is invalid — using the default.",
       blocking: false,
     });
   }
@@ -99,7 +96,8 @@ export function resolveLoginContent(
 
   content.paragraphs = stringList(value.paragraphs, problems, "paragraphs");
 
-  const links = isRecord(value) && Array.isArray(value.links) ? value.links : [];
+  const links =
+    isRecord(value) && Array.isArray(value.links) ? value.links : [];
   if (value.links !== undefined && !Array.isArray(value.links)) {
     problems.push({
       message: "instance.pages.login.links is not a list — links omitted.",
@@ -213,10 +211,7 @@ function asLogo(
     });
     return undefined;
   }
-  if (
-    !nonEmptyString(value.alt) ||
-    !nonEmptyString(value.src)
-  ) {
+  if (!nonEmptyString(value.alt) || !nonEmptyString(value.src)) {
     problems.push({
       message: "instance.pages.login.logo is invalid — logo omitted.",
       blocking: false,
@@ -232,7 +227,13 @@ function asLogo(
     alt: value.alt.trim(),
   };
   if (nonEmptyString(value.dark_src)) {
-    const dark = asHttpUrl(value.dark_src, pageUrl, "logo.dark_src", problems, true);
+    const dark = asHttpUrl(
+      value.dark_src,
+      pageUrl,
+      "logo.dark_src",
+      problems,
+      true,
+    );
     if (dark) {
       logo.dark_src = dark.toString();
     }

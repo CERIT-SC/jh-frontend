@@ -74,6 +74,25 @@ export const cas: InstanceFixture = {
   instance: {
     version: 1,
     brand: "origin",
-    pages: { home: { gpu_indicators: false, resource_usage: false } },
+    pages: {
+      home: { gpu_indicators: false, resource_usage: false },
+      // Login content mirrors the planned values.yaml block for cas: the
+      // bioconductor logo (bundled at public/static/custom-images/), the
+      // legacy membership paragraph, and the MUNI sign-in label. The brand
+      // stays "origin" — same palette and layout, instance-specific content.
+      login: {
+        heading: "Welcome to JupyterHub",
+        subtitle: "Sign in to access your JupyterHub workspace",
+        logo: {
+          src: "/static/custom-images/bioconductor_logo.svg",
+          alt: "Bioconductor",
+        },
+        paragraphs: [
+          "It is necessary to be a valid member of bioconductor group to access the service. If you are not a member, you will be automatically presented an application upon login. The application will be reviewed by course professors or instructors.",
+        ],
+        links: [],
+        button_text: "Sign in with MUNI",
+      },
+    },
   } satisfies InstanceConfigWire,
 };
