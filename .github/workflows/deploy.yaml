@@ -24,6 +24,9 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
+      - name: Login config tests
+        run: bun test tests/login
+
       - name: Build Application
         run: bun run build:hub
 

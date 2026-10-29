@@ -36,7 +36,9 @@ storybook-static
 static-files-*
 static-files.yaml
 TODO.md
-/docs
+/docs/*
+!/docs/badges-and-gpu-indicators.md
+!/docs/per-instance-login.md
 
 # AI assistant configs
 .claude/
