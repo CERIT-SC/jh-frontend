@@ -23,7 +23,26 @@ export interface InstanceConfig {
       /** Resource-usage badge on the home page. */
       resource_usage: boolean;
     };
+    /**
+     * Optional per-instance login-page content. Absent → the brand's own
+     * login slot; present (even `{}`) → the shared generic login card.
+     */
+    login?: LoginContent;
   };
+}
+
+/** Configured content of the shared login card (all fields validated). */
+export interface LoginContent {
+  heading: string;
+  /** Empty string hides the subtitle. */
+  subtitle: string;
+  /** Same-origin image URLs only (page CSP is `img-src 'self' data: blob:`). */
+  logo?: { src: string; dark_src?: string; alt: string };
+  /** Plain text paragraphs, rendered escaped — no HTML. */
+  paragraphs: string[];
+  /** HTTP(S) links (any origin); relative hrefs are resolved against the page. */
+  links: { label: string; href: string }[];
+  button_text: string;
 }
 
 /** What a backend sends inside the `instance` key. */

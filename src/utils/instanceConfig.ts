@@ -17,6 +17,10 @@ import {
   LEGACY_INSTANCE_CONFIG,
 } from "@src-types/instanceConfig";
 import { readJsonScript } from "./readJsonScript";
+import {
+  FALLBACK_PAGE_URL,
+  resolveLoginContent,
+} from "../routes/login/config/resolveLoginContent";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -55,6 +59,15 @@ function resolveInstanceConfig(wire: InstanceConfigWire | undefined): {
   const pages = isRecord(wire.pages) ? wire.pages : {};
   const home = isRecord(pages.home) ? pages.home : {};
 
+  // Login content resolves against the real page URL (same-origin logo rule);
+  // without a browser (SSR/tests) a deterministic fallback is used.
+  const pageUrl =
+    typeof location !== "undefined" && location.href
+      ? location.href
+      : FALLBACK_PAGE_URL;
+  const login = resolveLoginContent(pages.login, pageUrl);
+  problems.push(...login.problems);
+
   const config: InstanceConfig = {
     version: version ?? INSTANCE_CONFIG_VERSION,
     brand,
@@ -64,6 +77,7 @@ function resolveInstanceConfig(wire: InstanceConfigWire | undefined): {
         gpu_indicators: home.gpu_indicators === true,
         resource_usage: home.resource_usage === true,
       },
+      login: login.content,
     },
   };
 
