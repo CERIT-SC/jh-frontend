@@ -72,11 +72,15 @@ export const LoginCard: React.FC<LoginCardProps> = ({
         <CardHeader className="flex flex-col items-center gap-4 pb-2 pt-8">
           {logo && (
             <>
+              {/* Without a dark variant the one logo shows in both modes;
+                  with one, the light image yields in dark mode. */}
               <img
                 src={logo.src}
                 alt={logo.alt}
                 onError={hideOnError}
-                className="block h-16 w-auto max-w-full object-contain dark:hidden sm:h-12"
+                className={`block h-16 w-auto max-w-full object-contain sm:h-12${
+                  logo.dark_src ? " dark:hidden" : ""
+                }`}
               />
               {logo.dark_src && (
                 <img

@@ -202,6 +202,21 @@ describe("resolveLoginContent — logo", () => {
     expect(result.problems.length).toBeGreaterThan(0);
   });
 
+  test("accepts a same-origin protocol-relative logo URL", () => {
+    const result = resolveLoginContent(
+      {
+        logo: {
+          src: "//hub.example/static/custom-images/logo.svg",
+          alt: "Logo",
+        },
+      },
+      PAGE_URL,
+    );
+    expect(result.content?.logo?.src).toBe(
+      "https://hub.example/static/custom-images/logo.svg",
+    );
+  });
+
   test("invalid dark_src falls back to the light logo with a problem", () => {
     const result = resolveLoginContent(
       {
