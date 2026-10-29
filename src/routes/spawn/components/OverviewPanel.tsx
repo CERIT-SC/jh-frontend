@@ -36,6 +36,7 @@ import { triggerShineById } from "@utils";
 import type { SpawnFormData } from "@src-types/spawnForm";
 import type { SpawnOptions } from "@src-types/spawnOptions";
 import { effectiveFields } from "../sections/registry";
+import { overviewFieldWarning } from "./overviewFieldWarning";
 
 interface OverviewPanelProps {
   children?: React.ReactNode;
@@ -361,6 +362,7 @@ function OverviewSections({
               const value = fieldValues?.[field.name];
               const isSet =
                 field.type === "checkbox" ? value === true : Boolean(value);
+              const overviewWarning = overviewFieldWarning(field);
               return (
                 <div key={field.name} className="grid grid-cols-2 items-start">
                   <div className="flex items-center gap-2">
@@ -378,9 +380,9 @@ function OverviewSections({
                         ? String(value)
                         : "-"}
                   </P>
-                  {field.type === "checkbox" && isSet && field.warning && (
+                  {field.type === "checkbox" && isSet && overviewWarning && (
                     <Small className="block text-amber-600 mt-0.5 pl-5 col-span-2">
-                      ⚠ {field.warning}
+                      ⚠ {overviewWarning}
                     </Small>
                   )}
                 </div>
