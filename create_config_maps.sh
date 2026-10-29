@@ -179,7 +179,6 @@ if [[ "$DRY_RUN" != true && "$LOCAL" != true ]]; then
   DEPLOYED_BY="$(git config user.name 2>/dev/null || echo unknown)"
   echo
   echo "Deployed build: ${BUILD_SHA} (${BUILD_DATE})"
-  echo "Ready-to-paste docs/deployments.md row:"
   echo "| ${NAMESPACE} | ${BUILD_TARGET} | ${BUILD_SHA} | ${BUILD_DATE} | ${DEPLOYED_BY} |  |"
 fi
 
