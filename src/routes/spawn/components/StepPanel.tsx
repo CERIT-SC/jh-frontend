@@ -24,8 +24,8 @@ interface StepPanelProps {
   title: string;
   /** Optional description rendered below the title. */
   description?: string;
-  /** Documentation URL opened by the help button. */
-  helpUrl: string;
+  /** Documentation URL opened by the help button; null/undefined → no button. */
+  helpUrl?: string | null;
   /** Panel body. */
   children: React.ReactNode;
 }
@@ -38,7 +38,9 @@ function StepPanel({
   helpUrl,
   children,
 }: StepPanelProps) {
-  const openHelp = () => window.open(helpUrl, "_blank");
+  const openHelp = () => {
+    if (helpUrl) window.open(helpUrl, "_blank");
+  };
 
   // Two title layout variants: with description uses top padding + margin,
   // without description uses uniform padding (preserves original styling).
@@ -48,14 +50,16 @@ function StepPanel({
 
   return (
     <Panel id={id} className="scroll-mt-20 p-0 bg-background relative">
-      <Button
-        variant="ghost"
-        size="icon-lg"
-        className="absolute top-4 right-4"
-        onClick={openHelp}
-      >
-        <CircleQuestionMark size={52} />
-      </Button>
+      {helpUrl && (
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          className="absolute top-4 right-4"
+          onClick={openHelp}
+        >
+          <CircleQuestionMark size={52} />
+        </Button>
+      )}
       <PanelTitle className={titleClassName}>
         Step {stepNumber}: {title}
       </PanelTitle>

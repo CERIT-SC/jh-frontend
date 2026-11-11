@@ -10,7 +10,6 @@ import type {
   SpawnFormPayload,
   ValidationResult,
 } from "@src-types/spawnForm";
-import { REQUIRED_PAYLOAD_KEYS } from "../data/formConstants";
 
 /** Validate the "existing S3 bucket" flow. */
 export function validateExistingS3(
@@ -40,8 +39,9 @@ export function validateNewS3(formData: SpawnFormData): ValidationResult {
 /** Validate that all required payload keys are present and non-empty. */
 export function validateRequiredFields(
   payload: SpawnFormPayload,
+  requiredKeys: readonly string[],
 ): ValidationResult {
-  const missing = REQUIRED_PAYLOAD_KEYS.filter((key) => {
+  const missing = requiredKeys.filter((key) => {
     if (!(key in payload)) return true;
     const value = payload[key];
     if (value === undefined || value === "") return true;

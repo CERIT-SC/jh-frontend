@@ -8,7 +8,14 @@
 import type React from "react";
 import { JupyterHubHeader, Footer } from "@components/layout";
 import { Alert, Announcement } from "@components/ui";
-import { Content, ContentBody, ContentHeading } from "@e-infra/design-system";
+import {
+  Alert as DSAlert,
+  Content,
+  ContentBody,
+  ContentHeading,
+} from "@e-infra/design-system";
+import { AlertTriangle } from "lucide-react";
+import type { ConfigProblem } from "@src-types/spawnOptions";
 import type { AlertItem } from "@components/ui/Alert/Alert";
 
 interface SpawnFormLayoutProps {
@@ -22,6 +29,8 @@ interface SpawnFormLayoutProps {
   alerts: AlertItem[];
   /** Called when the user dismisses an alert. */
   onRemoveAlert: (id: string) => void;
+  /** Persistent schema problems (blocking ones mean Start is disabled). */
+  problems?: ConfigProblem[];
   /** Page body (the form sections + overview). */
   children: React.ReactNode;
 }
@@ -32,6 +41,7 @@ function SpawnFormLayout({
   serverName,
   alerts,
   onRemoveAlert,
+  problems,
   children,
 }: SpawnFormLayoutProps) {
   return (
@@ -44,6 +54,20 @@ function SpawnFormLayout({
           message={announcement}
           variant="warning"
         />
+      )}
+      {problems && problems.length > 0 && (
+        <div className="mx-auto w-full max-w-7xl px-2 pt-4 lg:container md:px-6 lg:px-8 xl:px-10">
+          {problems.map((problem, index) => (
+            <DSAlert
+              key={`${index}-${problem.message}`}
+              variant={problem.blocking ? "error" : "warning"}
+              className="mb-2"
+            >
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm">{problem.message}</span>
+            </DSAlert>
+          ))}
+        </div>
       )}
       <Content className="py-8 px-2 lg:container">
         <ContentHeading className="max-w-full">

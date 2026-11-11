@@ -1,4 +1,3 @@
-import React from "react";
 import NotRunning from "./NotRunning";
 import { createRoot } from "react-dom/client";
 import "../../styles/index.css";

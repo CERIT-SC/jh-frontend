@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useRef, useCallback } from "react";
-import { Alert, type AlertItem } from "./Alert";
+import { AlertStack, type AlertItem } from "./Alert";
 import { useAlerts, MAX_VISIBLE_ALERTS } from "@hooks/useAlerts";
 
 // ── Mock Data Helpers ────────────────────────────────────────────────────
@@ -30,9 +30,9 @@ const mockAlerts: AlertItem[] = [
 
 // ── Main Meta ─────────────────────────────────────────────────────────────
 
-const meta: Meta<typeof Alert> = {
+const meta: Meta<typeof AlertStack> = {
   title: "Components/Alert",
-  component: Alert,
+  component: AlertStack,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -89,7 +89,7 @@ removal and plays a smooth exit animation before unmounting the evicted card.
 };
 
 export default meta;
-type Story = StoryObj<typeof Alert>;
+type Story = StoryObj<typeof AlertStack>;
 
 // ── Alert Stories ────────────────────────────────────────────────────────
 
@@ -128,7 +128,7 @@ function AlertLimitDemo() {
 
   return (
     <div className="min-h-screen bg-background p-8 flex flex-col items-center justify-end pb-16">
-      <Alert alerts={alerts} onRemove={removeAlert} />
+      <AlertStack alerts={alerts} onRemove={removeAlert} />
       <div className="flex flex-col items-center gap-4 w-full max-w-md">
         <p className="text-text-muted text-sm text-center">
           Max visible alerts: <strong>{MAX_VISIBLE_ALERTS}</strong> · Current:{" "}

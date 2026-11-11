@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="{{ (instance | default({})).brand | default('origin') }}">
   <head>
     <meta charset="UTF-8" />
     <link />
@@ -25,6 +25,7 @@
         userName: "{{ user.name }}",
       };
     </script>
+    <script type="application/json" id="instance-config">{{ instance | default({}) | tojson }}</script>
     <script
       type="module"
       src="/src/routes/not-running/not_running.jsx"

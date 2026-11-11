@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="{{ (instance | default({})).brand | default('origin') }}">
   <head>
     <meta charset="UTF-8" />
     <link />
@@ -51,6 +51,7 @@
           "{{ token_expires_in_max_seconds | safe }}",
       };
     </script>
+    <script type="application/json" id="instance-config">{{ instance | default({}) | tojson }}</script>
     <script type="module" src="/src/routes/token/token.jsx"></script>
   </body>
 </html>

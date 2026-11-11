@@ -7,7 +7,6 @@
  */
 
 import { useState, useCallback } from "react";
-import { validateDockerImage } from "@utils";
 import { buildImageValueToCategoryMap } from "../utils/gatherFormData";
 import { validateS3Credentials } from "../utils/validateS3Credentials";
 import { formatS3ErrorMessage } from "../utils/s3ErrorMessages";
@@ -19,15 +18,8 @@ import {
 import {
   resolveImageCategory,
   resolveContainerImage,
-  buildBasePayload,
-  applyImageFields,
-  applySshAccess,
-  applyStorage,
-  applyPersistentHome,
-  applyMigGpu,
-  applyProjectDirectories,
-  applyS3Fields,
 } from "../utils/buildSpawnPayload";
+import { buildPayload, buildRequiredKeys } from "../sections/registry";
 import {
   validateExistingS3,
   validateNewS3,
@@ -35,11 +27,13 @@ import {
   getMissingS3Fields,
 } from "../utils/validateSpawnForm";
 import { submitSpawnForm } from "../utils/submitSpawnForm";
+import { getSpawnOptions } from "../config/readSpawnOptions";
 import type {
   DefaultFormData,
   SpawnFormData,
   SpawnFormPayload,
 } from "@src-types/spawnForm";
+import type { SpawnOptions } from "@src-types/spawnOptions";
 import type { PushAlertFn } from "./useSpawnFormState";
 
 /** Context object passed to `submit`. */
@@ -50,6 +44,8 @@ export interface SubmitContext {
   s3values: Record<string, string>;
   defaultFormData: DefaultFormData;
   postUrl: string;
+  /** Resolved spawn options; defaults to the memoized reader when omitted. */
+  options?: SpawnOptions;
 }
 
 interface UseSpawnFormSubmitArgs {
@@ -102,8 +98,10 @@ async function runSubmitPipeline(ctx: {
   checkedS3Storage: boolean;
   s3values: Record<string, string>;
   postUrl: string;
+  options?: SpawnOptions;
 }): Promise<{ ok: true; warning?: string } | { ok: false; error: string }> {
   const { formData, selectedImage, checkedS3Storage, s3values, postUrl } = ctx;
+  const options = ctx.options ?? getSpawnOptions().options;
   const isCustomImage = formData.images === "custom";
 
   // 1. Resolve image category (O(1) lookup)
@@ -117,53 +115,29 @@ async function runSubmitPipeline(ctx: {
     isCustomImage,
     formData,
     selectedImage,
+    options,
   );
   if (!containerResult.ok) {
     return { ok: false, error: containerResult.error };
   }
-  // Additional docker-image validation for custom images.
-  if (isCustomImage && !validateDockerImage(containerResult.image)) {
-    return {
-      ok: false,
-      error: `Invalid Docker image name: "${containerResult.image}". Please provide a valid image reference.`,
-    };
-  }
 
-  // 3. Build payload via pure apply* helpers (each may fail validation).
-  let payload: SpawnFormPayload = buildBasePayload(
+  // 3. Build the payload via the section registry (pure; may fail validation).
+  const built = buildPayload({
     formData,
-    imageCategory,
-    containerResult.image,
-  );
-  payload = applyImageFields(
-    payload,
+    options,
     isCustomImage,
     imageCategory,
-    containerResult.image,
-  );
-  payload = applySshAccess(payload, formData.sshAccess);
-
-  const storageResult = applyStorage(payload, formData);
-  if ("error" in storageResult)
-    return { ok: false, error: storageResult.error };
-  payload = storageResult;
-
-  const phResult = applyPersistentHome(payload, formData);
-  if ("error" in phResult) return { ok: false, error: phResult.error };
-  payload = phResult;
-
-  const migResult = applyMigGpu(payload, formData);
-  if ("error" in migResult) return { ok: false, error: migResult.error };
-  payload = migResult;
-
-  payload = applyProjectDirectories(payload, formData.projectCheck);
-  payload = applyS3Fields(payload, formData, checkedS3Storage);
+    containerImage: containerResult.image,
+    checkedS3Storage,
+  });
+  if ("error" in built) return { ok: false, error: built.error };
+  const payload: SpawnFormPayload = built;
 
   // 4. S3-specific validation (possibly async — validates credentials).
   // TEMPORARY HOTFIX (CORS): set when validation is skipped because the
   // browser blocked the check; the form then submits with a warning.
   let s3CorsWarning: string | undefined;
-  if (checkedS3Storage) {
+  if (options.storage.s3.enabled && checkedS3Storage) {
     const s3Sel = formData.s3selection || "existing";
     if (s3Sel === "existing") {
       const r = validateExistingS3(formData, s3values);
@@ -199,8 +173,8 @@ async function runSubmitPipeline(ctx: {
     }
   }
 
-  // 5. Required fields check
-  const required = validateRequiredFields(payload);
+  // 5. Required fields check (keys derived from the enabled modules)
+  const required = validateRequiredFields(payload, buildRequiredKeys(options));
   if (!required.ok) return { ok: false, error: required.error };
 
   // 6. Submit

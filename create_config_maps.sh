@@ -9,6 +9,10 @@ Usage: $0 --namespace <ns> [--target <target>] [--skip-build] [--dry-run] [--loc
 
 Build a hub frontend and publish its static files as Kubernetes ConfigMaps.
 
+Targets share builds: 'hub' and 'cas' both build and publish dist_hub/
+(cas is the first adopter of the shared build); 'elter-ri' builds its own
+dist_elter-ri/. 'c9088' is not yet migrated.
+
 Options:
   --namespace <ns>   Kubernetes namespace to apply ConfigMaps to (required)
   --target <target>  Build target: ${VALID_BUILD_TARGETS[*]} (default: hub)
@@ -75,40 +79,107 @@ if [[ -z "$NAMESPACE" ]]; then
 fi
 
 BASE_DIR="./dist_${BUILD_TARGET}"
+BUILD_SCRIPT="build:${BUILD_TARGET}"
+
+# Target → dist dir / build script mapping (decoupled: cas uses the shared
+# hub build; c9088 is not yet migrated).
+case "$BUILD_TARGET" in
+  hub)
+    BASE_DIR="./dist_hub"
+    BUILD_SCRIPT="build:hub"
+    ;;
+  cas)
+    BASE_DIR="./dist_hub"
+    BUILD_SCRIPT="build:hub"
+    ;;
+  elter-ri)
+    BASE_DIR="./dist_elter-ri"
+    BUILD_SCRIPT="build:elter-ri"
+    ;;
+  c9088)
+    echo "Error: target 'c9088' is not yet migrated to the shared build." >&2
+    exit 1
+    ;;
+esac
 
 if [[ "$SKIP_BUILD" == true ]]; then
   echo "Skipping build; using existing $BASE_DIR"
 else
   echo "Running build for target: $BUILD_TARGET"
   bun install
-  bun run "build:$BUILD_TARGET"
+  bun run "$BUILD_SCRIPT"
 fi
 
 create_configmap() {
   local name=$1
   local path=$2
 
+  # Render the ConfigMap up front (client-side dry-run) so its size can be
+  # checked before any apply — client-side apply stores a 256 KiB-limited
+  # annotation, and server-side apply rejects objects above ~1 MiB.
+  local tmp
+  tmp=$(mktemp)
+  kubectl create configmap "$name" --from-file="$path" --namespace "$NAMESPACE" --dry-run=client -o yaml > "$tmp"
+
+  local size_kb
+  size_kb=$(( $(wc -c < "$tmp") / 1024 ))
+  if (( size_kb > 1000 )); then
+    echo "Error: ConfigMap $name is ${size_kb} KiB — exceeds the 1000 KiB limit. Reduce the assets in $path." >&2
+    rm -f "$tmp"
+    exit 1
+  elif (( size_kb > 900 )); then
+    echo "Warning: ConfigMap $name is ${size_kb} KiB — approaching the 1000 KiB limit." >&2
+  fi
+
   if [[ "$DRY_RUN" == true ]]; then
-    if [[ "$LOCAL" == true ]]; then
-      echo "[dry-run] kubectl create configmap $name --from-file=$path --namespace $NAMESPACE --dry-run=client -o yaml > ${name}.yaml"
-    else
-      echo "[dry-run] kubectl delete configmap $name --namespace $NAMESPACE --ignore-not-found"
-      echo "[dry-run] kubectl create configmap $name --from-file=$path --namespace $NAMESPACE"
-    fi
+    echo "[dry-run] kubectl apply --server-side --force-conflicts --namespace $NAMESPACE -f -  (configmap $name from $path, ${size_kb} KiB)"
+    echo "[dry-run]   on 'Too long' error: delete + create $name (see note below)"
+    rm -f "$tmp"
   elif [[ "$LOCAL" == true ]]; then
-    kubectl create configmap "$name" --from-file="$path" --namespace "$NAMESPACE" --dry-run=client -o yaml > "${name}.yaml"
+    mv "$tmp" "${name}.yaml"
     echo "Generated ${name}.yaml"
   else
-    kubectl delete configmap "$name" --namespace "$NAMESPACE" --ignore-not-found
-    kubectl create configmap "$name" --from-file="$path" --namespace "$NAMESPACE"
+    # Server-side apply merges but does not prune keys owned by other field
+    # managers — switching artifacts (all-new hashed filenames) on top of an
+    # existing ConfigMap therefore grows the object by the union of both
+    # file sets and can cross the 1 MiB API limit even when the fresh YAML
+    # is well below it. When that happens, replace the ConfigMap outright:
+    # `kubectl create` stores no last-applied annotation, so it has no
+    # client-side size limit. Applying asset ConfigMaps first and
+    # static-files (templates) last keeps any replacement window short.
+    if ! kubectl apply --server-side --force-conflicts -f "$tmp" --namespace "$NAMESPACE" 2> "$tmp.err"; then
+      if grep -q "Too long" "$tmp.err"; then
+        echo "ConfigMap $name exceeded 1 MiB after server-side merge (stale keys from the previous artifact)."
+        echo "Replacing $name via delete + create."
+        kubectl delete configmap "$name" --namespace "$NAMESPACE" --ignore-not-found
+        kubectl create configmap "$name" --from-file="$path" --namespace "$NAMESPACE"
+      else
+        cat "$tmp.err" >&2
+        rm -f "$tmp.err" "$tmp"
+        exit 1
+      fi
+    fi
+    rm -f "$tmp.err"
+    rm -f "$tmp"
   fi
 }
 
-create_configmap "static-files" "$BASE_DIR"
+# Apply asset ConfigMaps first and the templates bundle (static-files) last,
+# so a partially-updated cluster never serves new HTML with old assets.
 create_configmap "static-files-js" "$BASE_DIR/static/custom-js"
 create_configmap "static-files-css" "$BASE_DIR/static/custom-css"
 create_configmap "static-files-woff" "$BASE_DIR/static/woff"
 create_configmap "static-files-woff2" "$BASE_DIR/static/woff2"
 create_configmap "static-files-images" "$BASE_DIR/static/custom-images"
+create_configmap "static-files" "$BASE_DIR"
+
+if [[ "$DRY_RUN" != true && "$LOCAL" != true ]]; then
+  BUILD_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  DEPLOYED_BY="$(git config user.name 2>/dev/null || echo unknown)"
+  echo
+  echo "Deployed build: ${BUILD_SHA} (${BUILD_DATE})"
+  echo "| ${NAMESPACE} | ${BUILD_TARGET} | ${BUILD_SHA} | ${BUILD_DATE} | ${DEPLOYED_BY} |  |"
+fi
 
 echo "All ConfigMaps processed successfully."
