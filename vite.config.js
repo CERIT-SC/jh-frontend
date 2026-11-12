@@ -58,7 +58,7 @@ export default defineConfig({
           if (/\.(css)$/.test(name ?? "")) {
             return "static/custom-css/[name]-[hash][extname]";
           } else if (/\.(png|jpe?g|gif|svg)$/.test(name ?? "")) {
-            return "static/custom-css/[name]-[hash][extname]";
+            return "static/custom-images/[name]-[hash][extname]";
           }
           return "static/[ext]/[name]-[hash][extname]";
         },

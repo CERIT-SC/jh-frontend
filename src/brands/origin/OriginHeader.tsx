@@ -30,8 +30,8 @@ import {
 } from "@e-infra/design-system";
 import { Book, LogOut, Menu } from "lucide-react";
 import { ModeToggle } from "@components/ui/ModeToggle";
-import HubLogo from "../../../public/static/custom-images/hub-rectangle.svg";
-import HubLogoDark from "../../../public/static/custom-images/hub-rectangle-dark.svg";
+import HubLogo from "@assets/images/hub-rectangle.svg";
+import HubLogoDark from "@assets/images/hub-rectangle-dark.svg";
 import { originCopy } from "./copy";
 import type { JupyterHubHeaderProps } from "../types";
 

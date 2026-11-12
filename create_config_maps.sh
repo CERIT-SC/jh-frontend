@@ -114,6 +114,13 @@ create_configmap() {
   local name=$1
   local path=$2
 
+  # Asset directories may not exist for a given build (e.g. fonts were
+  # dropped from the bundle) — skip instead of failing the whole run.
+  if [[ ! -e "$path" ]]; then
+    echo "Skipping $name: $path does not exist in this build"
+    return 0
+  fi
+
   # Render the ConfigMap up front (client-side dry-run) so its size can be
   # checked before any apply — client-side apply stores a 256 KiB-limited
   # annotation, and server-side apply rejects objects above ~1 MiB.

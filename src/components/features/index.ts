@@ -1,4 +1,3 @@
-export { default as AnouncmentMessage } from "./AnouncmentMessage/AnouncmentMessage";
 export {
   GPUStatusIndicator,
   GPUSquare,

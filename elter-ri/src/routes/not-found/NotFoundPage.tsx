@@ -3,7 +3,7 @@ import { Card, CardContent } from "@e-infra/design-system";
 import { Footer, JupyterHubHeader } from "@components/layout";
 import { Button } from "@components/ui";
 import { Home } from "lucide-react";
-import { notFound } from "../../../../public/static/custom-images";
+import { notFound } from "@assets/images";
 /**
  * Global config injected by JupyterHub's Jinja2 template (not_found.html).
  */
