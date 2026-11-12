@@ -600,7 +600,7 @@ function HomePage() {
                     variant={"secondary"}
                     className={cn(
                       "px-4 py-2 text-md justify-center text-center",
-                      "cursor-pointer transition-all duration-200 bg-tertiary",
+                      "cursor-pointer transition-all duration-200 bg-tertiary border-border",
                       " hover:border-primary dark:hover:border-primary ",
                     )}
                     onClick={() => setIsAddServerModalOpen(true)}
