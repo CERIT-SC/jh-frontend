@@ -85,6 +85,16 @@ export function useEventSource({
     reconnectTimerRef.current = setTimeout(() => {
       if (isDisposedRef.current) return;
 
+      // An empty URL would resolve EventSource against the current page
+      // (requesting the page itself); report the error instead.
+      if (!url) {
+        setConnectionState("error");
+        const noUrlError = new Error("No SSE URL provided");
+        setError(noUrlError);
+        onErrorRef.current?.(noUrlError);
+        return;
+      }
+
       const es = new EventSource(url, { withCredentials });
       eventSourceRef.current = es;
 

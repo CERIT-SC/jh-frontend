@@ -1,5 +1,5 @@
 import "./SpawnPending.css";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 /**
  * Global config injected by JupyterHub's Jinja2 template (spawn_pending.html).
@@ -67,13 +67,27 @@ const SpawnPending: React.FC = () => {
     // Error is displayed in event log
   }, []);
 
-  const { progress, message, eventLog, connectionState, reconnectAttempts } =
-    useSpawnProgress({
-      url: progressUrl,
-      withCredentials: true,
-      onReady: handleReady,
-      onFailed: handleFailed,
-    });
+  const {
+    progress,
+    message,
+    eventLog,
+    connectionState,
+    reconnectAttempts,
+    isFailed,
+  } = useSpawnProgress({
+    url: progressUrl,
+    withCredentials: true,
+    onReady: handleReady,
+    onFailed: handleFailed,
+  });
+
+  // Surface a failed spawn: the hub then serves the not-running page with
+  // the actual failure reason (this page hangs silently otherwise).
+  useEffect(() => {
+    if (!isFailed) return;
+    const timer = setTimeout(() => window.location.reload(), 1500);
+    return () => clearTimeout(timer);
+  }, [isFailed]);
 
   // Strip server-side timestamp and level prefixes to avoid duplication with our own UI
   const cleanMessage = useMemo(
@@ -99,19 +113,27 @@ const SpawnPending: React.FC = () => {
         <Panel className="bg-background my-auto mx-auto w-full max-w-7xl">
           <PanelHeader>
             <PanelTitle>
-              Starting your server
-              <span className="inline-block animate-bounce [animation-delay:0ms]">
-                .
-              </span>
-              <span className="inline-block animate-bounce [animation-delay:150ms]">
-                .
-              </span>
-              <span className="inline-block animate-bounce [animation-delay:300ms]">
-                .
-              </span>
+              {isFailed ? (
+                "Server failed to start"
+              ) : (
+                <>
+                  Starting your server
+                  <span className="inline-block animate-bounce [animation-delay:0ms]">
+                    .
+                  </span>
+                  <span className="inline-block animate-bounce [animation-delay:150ms]">
+                    .
+                  </span>
+                  <span className="inline-block animate-bounce [animation-delay:300ms]">
+                    .
+                  </span>
+                </>
+              )}
             </PanelTitle>
             <PanelDescription className="truncate">
-              Name: {serverName}
+              {isFailed
+                ? "Redirecting to the error details…"
+                : `Name: ${serverName}`}
             </PanelDescription>
           </PanelHeader>
 
