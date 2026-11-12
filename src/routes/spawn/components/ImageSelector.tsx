@@ -349,8 +349,8 @@ export function SelectingCardsTabs({
               className={cn(
                 "cursor-pointer px-3 py-1 text-xs transition-all duration-200",
                 "bg-surface-raised border-surface-raised text-text",
-                "hover:bg-primary/10 hover:border-primary",
-                isCustomCategory && "bg-secondary",
+                "hover:bg-primary/10 hover:border-primary dark:hover:text-primary-foreground",
+                isCustomCategory && "bg-tertiary dark:text-tertiary-foreground",
                 isActive &&
                   "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
               )}
@@ -417,7 +417,7 @@ export function SelectingCardsTabs({
                     <>
                       <span
                         aria-hidden
-                        className="pointer-events-none absolute top-0 right-0 -z-10 size-24 bg-secondary [clip-path:polygon(100%_0,0_0,100%_100%)] dark:bg-surface-raised"
+                        className="pointer-events-none absolute top-0 right-0 -z-10 size-24 bg-surface-raised [clip-path:polygon(100%_0,0_0,100%_100%)] dark:bg-surface-raised"
                       />
                       <span
                         aria-hidden
