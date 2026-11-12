@@ -2,17 +2,20 @@
  * Extracts the server name from the current URL path.
  *
  * JupyterHub spawn URLs follow the pattern `/spawn/{userName}/{serverName}`.
- * The server name is the last path segment; this fn returns null when no
- * server name is present (i.e., "Start a new server" flow).
+ * The default server has no name segment (`/hub/spawn`,
+ * `/hub/spawn/{userName}`) — that is the "Start a new server" flow.
  *
- * @returns The decoded server name, or null if not present.
+ * @returns The decoded server name, or null when the URL carries none.
  */
 export function getServerName(): string | null {
-  const pathParts = window.location.pathname.split("/");
-  // /spawn/{userName}/{serverName}
+  // `/hub/spawn/{userName}`
+  const match = window.location.pathname.match(/\/spawn\/[^/]+\/([^/?#]+)/);
+  if (!match) {
+    return null;
+  }
   try {
-    return decodeURIComponent(pathParts[pathParts.length - 1]) || null;
+    return decodeURIComponent(match[1]) || null;
   } catch {
-    return pathParts[pathParts.length - 1] || null;
+    return match[1];
   }
 }
