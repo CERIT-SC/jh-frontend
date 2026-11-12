@@ -29,6 +29,11 @@ export interface InstanceConfig {
      */
     login?: LoginContent;
     /**
+     * Optional per-instance header branding. Absent → the brand's own
+     * header assets (bundled logos and copy).
+     */
+    header?: HeaderContent;
+    /**
      * Optional per-instance footer branding. Absent → the brand's own
      * footer assets (bundled logos and copy).
      */
@@ -41,6 +46,12 @@ export interface ConfigLogo {
   src: string;
   dark_src?: string;
   alt: string;
+}
+
+/** Configured header branding (all fields validated). */
+export interface HeaderContent {
+  /** Same-origin image URLs only (page CSP is `img-src 'self' data: blob:`). */
+  logo?: ConfigLogo;
 }
 
 /** Configured footer branding (all fields validated). */

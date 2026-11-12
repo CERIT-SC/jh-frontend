@@ -35,8 +35,18 @@ import HubLogoDark from "@assets/images/hub-rectangle-dark.svg";
 import { originCopy } from "./copy";
 import type { JupyterHubHeaderProps } from "../types";
 
-export const OriginHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
+export const OriginHeader: React.FC<JupyterHubHeaderProps> = ({
+  userName,
+  logo,
+}) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Configured logo (`instance.pages.header.logo`) wins; without a dark
+  // variant the light source shows in both modes. Absent → the bundled
+  // JupyterHub rectangle logos.
+  const lightSrc = logo?.src ?? HubLogo;
+  const darkSrc = logo?.dark_src ?? logo?.src ?? HubLogoDark;
+  const alt = logo?.alt ?? "Logo";
 
   const handleLogout = () => {
     window.location.href = "/hub/logout";
@@ -51,13 +61,13 @@ export const OriginHeader: React.FC<JupyterHubHeaderProps> = ({ userName }) => {
             <a href="/hub/home">
               <img
                 className="h-8 w-auto object-contain block dark:hidden"
-                src={HubLogo}
-                alt="Logo"
+                src={lightSrc}
+                alt={alt}
               />
               <img
                 className="h-8 w-auto object-contain dark:block hidden"
-                src={HubLogoDark}
-                alt="Logo"
+                src={darkSrc}
+                alt={alt}
               />
             </a>
           </div>

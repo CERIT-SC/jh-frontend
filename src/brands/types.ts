@@ -14,6 +14,8 @@ import type { ConfigLogo } from "@src-types/instanceConfig";
 /** Props of the hub header slot. */
 export interface JupyterHubHeaderProps {
   userName: string;
+  /** Configured logo override (`instance.pages.header.logo`); absent → the brand's bundled logos. */
+  logo?: ConfigLogo;
 }
 
 /** Props of the footer slot. */

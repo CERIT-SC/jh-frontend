@@ -6,10 +6,15 @@
 import React from "react";
 import type { JupyterHubHeaderProps } from "../../brands/types";
 import { getBrand } from "../../brands/registry";
+import { getInstanceConfig } from "@utils/instanceConfig";
 
 export const JupyterHubHeader: React.FC<JupyterHubHeaderProps> = ({
   userName,
+  logo,
 }) => {
   const BrandHeader = getBrand().slots.Header;
-  return <BrandHeader userName={userName} />;
+  // Configured header logo (`instance.pages.header.logo`) overrides the
+  // brand's bundled one; absent/invalid → the brand assets render unchanged.
+  const resolved = logo ?? getInstanceConfig().config.pages.header?.logo;
+  return <BrandHeader userName={userName} logo={resolved} />;
 };

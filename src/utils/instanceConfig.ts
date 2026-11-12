@@ -9,6 +9,7 @@
 
 import type {
   FooterContent,
+  HeaderContent,
   InstanceConfig,
   InstanceConfigWire,
 } from "@src-types/instanceConfig";
@@ -70,23 +71,28 @@ function resolveInstanceConfig(wire: InstanceConfigWire | undefined): {
   const login = resolveLoginContent(pages.login, pageUrl);
   problems.push(...login.problems);
 
-  let footerContent: FooterContent | undefined;
-  if (pages.footer !== undefined) {
-    if (isRecord(pages.footer)) {
-      const footerLogo = resolveConfigLogo(
-        pages.footer.logo,
-        pageUrl,
-        "instance.pages.footer.logo",
-        problems,
-      );
-      footerContent = footerLogo ? { logo: footerLogo } : {};
-    } else {
+  // Header/footer branding: same same-origin logo rule as the login card.
+  // A non-object block is ignored with a problem (absent → brand assets).
+  const branding: { header?: HeaderContent; footer?: FooterContent } = {};
+  for (const section of ["header", "footer"] as const) {
+    const block = pages[section];
+    if (block === undefined) {
+      continue;
+    }
+    if (!isRecord(block)) {
       problems.push({
-        message:
-          "instance.pages.footer is present but not an object — footer branding ignored.",
+        message: `instance.pages.${section} is present but not an object — ${section} branding ignored.`,
         blocking: false,
       });
+      continue;
     }
+    const logo = resolveConfigLogo(
+      block.logo,
+      pageUrl,
+      `instance.pages.${section}.logo`,
+      problems,
+    );
+    branding[section] = logo ? { logo } : {};
   }
 
   const config: InstanceConfig = {
@@ -99,7 +105,8 @@ function resolveInstanceConfig(wire: InstanceConfigWire | undefined): {
         resource_usage: home.resource_usage === true,
       },
       login: login.content,
-      footer: footerContent,
+      header: branding.header,
+      footer: branding.footer,
     },
   };
 
