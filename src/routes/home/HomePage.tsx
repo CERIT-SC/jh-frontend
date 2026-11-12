@@ -562,10 +562,12 @@ function HomePage() {
     <div className="min-h-screen flex flex-col">
       <Alert alerts={alerts} onRemove={removeAlert} />
       <JupyterHubHeader userName={appConfig.userName}></JupyterHubHeader>
-      <div className="container grow  mx-auto">
+      {/* Same content width + responsive padding as the spawn page's Content
+          (max-w-7xl, px-4 → xl:px-10); `container` alone has no padding. */}
+      <div className="grow mx-auto w-full max-w-7xl px-4 pb-8 md:px-6 lg:px-8 xl:px-10">
         {getAnnouncement() && (
           <Announcement
-            className="mx-auto w-full max-w-7xl space-y-8 pt-4 px-2 lg:container"
+            className="w-full space-y-8 pt-4"
             message={getAnnouncement()}
             variant="warning"
           />
