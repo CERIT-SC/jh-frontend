@@ -25,7 +25,7 @@ import {
 } from "@e-infra/design-system";
 import { Book, LogOut, Menu } from "lucide-react";
 import { ModeToggle } from "../ui/ModeToggle";
-import { elterDatalabsLogo } from "../../../public/static/custom-images/index";
+import { elterDatalabsLogo } from "@assets/images";
 interface JupyterHubHeaderProps {
   userName: string;
 }

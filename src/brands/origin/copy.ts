@@ -2,8 +2,7 @@
  * @fileoverview The origin brand's copy and primary logos.
  */
 
-import { einfraLogo } from "../../../public/static/custom-images";
-import { einfraLogoDark } from "../../../public/static/custom-images";
+import { einfraLogo, einfraLogoDark } from "@assets/images";
 
 export const originLogos = {
   light: einfraLogo,

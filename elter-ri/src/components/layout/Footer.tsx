@@ -1,5 +1,5 @@
 import React from "react";
-import { elterDatalabsLogo } from "../../../public/static/custom-images/index";
+import { elterDatalabsLogo } from "@assets/images";
 import {
   Button,
   cn,

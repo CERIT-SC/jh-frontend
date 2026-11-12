@@ -1,5 +1,3 @@
-import { elterLogo } from "../../../../public/static/custom-images";
-
 // Fallback options
 export const selectOptionsStorage = {
   "brno12-cerit": "brno12-cerit",

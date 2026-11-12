@@ -1,7 +1,6 @@
 import React from "react";
 import SpawnPending from "./SpawnPending";
 import { createRoot } from "react-dom/client";
-import "@fontsource/montserrat/600.css";
 import "../../styles/index.css";
 import { ThemeProvider } from "@components/layout";
 

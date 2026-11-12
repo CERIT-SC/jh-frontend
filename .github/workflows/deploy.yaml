@@ -44,6 +44,12 @@ jobs:
             local name=$1
             local path=$2
 
+            # Asset directories may not exist for a given build — skip them.
+            if [ ! -e "$path" ]; then
+              echo "Skipping $name: $path does not exist in this build"
+              return 0
+            fi
+
             kubectl create configmap $name --from-file=$path --dry-run=client -o yaml > $name.yaml
           }
 

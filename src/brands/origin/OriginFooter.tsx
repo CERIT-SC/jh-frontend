@@ -7,8 +7,7 @@
 import React from "react";
 import { Button, cn } from "@e-infra/design-system";
 import { Mail, FileText, ArrowUpRight } from "lucide-react";
-import { einfraLogo } from "../../../public/static/custom-images";
-import { einfraLogoDark } from "../../../public/static/custom-images";
+import { einfraLogo, einfraLogoDark } from "@assets/images";
 import { originCopy, originLogos } from "./copy";
 
 export const OriginFooter: React.FC<{ className?: string }> = ({

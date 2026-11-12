@@ -1,6 +1,5 @@
 import LoginPage from "./LoginPage";
 import { createRoot } from "react-dom/client";
-import "@fontsource/montserrat/600.css";
 import "../../styles/index.css";
 import { ThemeProvider } from "@components/layout";
 import initDev from "../../dev-setup";
