@@ -37,7 +37,16 @@ export async function submitSpawnForm(
       body: formData,
     });
     if (response.ok) {
-      const pendingUrl = postUrl.replace("/spawn/", "/spawn-pending/");
+      // The hub redirects the POST to the spawn-pending page; the followed
+      // redirect's final URL is that page — correct for both the default
+      // server (`/hub/spawn-pending/{user}`) and named servers
+      // (`/hub/spawn-pending/{user}/{server}`). The previous string replace
+      // was a no-op for `/hub/spawn` (no trailing segment) and sent the
+      // browser back to the spawn form.
+      const pendingUrl =
+        response.url && response.url.includes("/spawn-pending/")
+          ? response.url
+          : postUrl.replace("/spawn/", "/spawn-pending/");
       window.location.href = pendingUrl;
       return { ok: true };
     }
