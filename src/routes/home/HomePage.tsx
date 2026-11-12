@@ -242,7 +242,7 @@ function HomePage() {
       await apiClient
         .stopNamedServer(appConfig.userName, name, false)
         .then(() => {
-          pushAlert(`Server ${name} stopped successfully`, {
+          pushAlert(`Server ${name || "default"} stopped successfully`, {
             variant: "success",
           });
         });
@@ -337,7 +337,7 @@ function HomePage() {
         });
 
         setServerProgress((prev) => ({ ...prev, [name]: 100 }));
-        pushAlert(`Server ${name} started successfully`, {
+        pushAlert(`Server ${name || "default"} started successfully`, {
           variant: "success",
         });
 
@@ -361,7 +361,7 @@ function HomePage() {
           error instanceof Error ? error.message : error,
         );
         if (showError) {
-          pushAlert(`Failed to start server ${name}`, {
+          pushAlert(`Failed to start server ${name || "default"}`, {
             variant: "error",
           });
         }
@@ -463,7 +463,7 @@ function HomePage() {
         delete updated[name];
         return updated;
       });
-      pushAlert(`Server ${name} deleted successfully`, {
+      pushAlert(`Server ${name || "default"} deleted successfully`, {
         variant: "success",
       });
     } catch (error) {
@@ -715,7 +715,9 @@ function HomePage() {
                 /> */}
             {sortedSpawners.map(([name, spawner]) => (
               <ServerCardType
-                title={name}
+                // The default server is keyed "" in the API response; keep
+                // the raw name for handlers, display "default" only.
+                title={name || "default"}
                 key={name}
                 spawnerUrl={spawner.url}
                 lastActivity={spawner.last_activity}
