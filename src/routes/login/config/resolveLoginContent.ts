@@ -195,7 +195,6 @@ function asLink(
     pageUrl,
     "instance.pages.login.links",
     problems,
-    false,
   );
   if (!url) {
     return undefined;

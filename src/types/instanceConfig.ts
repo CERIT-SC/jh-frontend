@@ -41,7 +41,7 @@ export interface InstanceConfig {
   };
 }
 
-/** Same-origin image URL pair (page CSP is `img-src 'self' data: blob:`). */
+/** Same-origin-or-https image URL pair (page CSP is `img-src 'self' data: blob: https:`). */
 export interface ConfigLogo {
   src: string;
   dark_src?: string;
