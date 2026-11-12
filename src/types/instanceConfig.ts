@@ -11,11 +11,18 @@ import type { DeepPartial } from "./spawnOptions";
 /** Schema version of the `instance` wire format. */
 export const INSTANCE_CONFIG_VERSION = 1;
 
+export interface ServerPolicy {
+  default_server: boolean;
+  /** 0 disables named creation; null means unlimited. */
+  named_servers: number | null;
+}
+
 /** Page-wide configuration for one instance. */
 export interface InstanceConfig {
   version: number;
   /** Brand registry key; also the `<html data-theme>` value. */
   brand: string;
+  servers?: ServerPolicy;
   pages: {
     home: {
       /** Reserved legacy wire key; home does not render/fetch GPU availability. */

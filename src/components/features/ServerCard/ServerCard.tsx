@@ -92,6 +92,7 @@ interface CardProps {
   handleStop?: () => void;
 
   handleDelete?: () => void;
+  showDeleteButton?: boolean;
 
   handleStart?: () => void;
 
@@ -344,6 +345,7 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
   handleOpen = () => {},
   handleStop = () => {},
   handleDelete = () => {},
+  showDeleteButton = true,
   handleStart = () => {},
   handleQuickStart = () => {},
 }) => {
@@ -478,30 +480,34 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
               </div>
             </div>
             {actionButtons}
-            <Separator
-              className="data-[orientation=vertical]:h-6"
-              orientation="vertical"
-              decorative={true}
-            />
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="group  hover:bg-surface-raised"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash
-                    className=" group-hover:text-error transition-colors duration-400"
-                    size={16}
-                    strokeWidth={2.5}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Delete server</p>
-              </TooltipContent>
-            </Tooltip>
+            {showDeleteButton && (
+              <Separator
+                className="data-[orientation=vertical]:h-6"
+                orientation="vertical"
+                decorative={true}
+              />
+            )}
+            {showDeleteButton && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="group  hover:bg-surface-raised"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    <Trash
+                      className=" group-hover:text-error transition-colors duration-400"
+                      size={16}
+                      strokeWidth={2.5}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Delete server</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </Card>
         {renderDeleteDialog()}
@@ -547,30 +553,34 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
               </div>
             </div>
             {actionButtons}
-            <Separator
-              className="data-[orientation=vertical]:h-6"
-              orientation="vertical"
-              decorative={true}
-            />
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="group  hover:bg-surface-raised"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash
-                    className=" group-hover:text-error transition-colors duration-400"
-                    size={16}
-                    strokeWidth={2.5}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Delete server</p>
-              </TooltipContent>
-            </Tooltip>
+            {showDeleteButton && (
+              <Separator
+                className="data-[orientation=vertical]:h-6"
+                orientation="vertical"
+                decorative={true}
+              />
+            )}
+            {showDeleteButton && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="group  hover:bg-surface-raised"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    <Trash
+                      className=" group-hover:text-error transition-colors duration-400"
+                      size={16}
+                      strokeWidth={2.5}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Delete server</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </Card>
         {renderDeleteDialog()}
@@ -605,25 +615,27 @@ const BaseServerCard: React.FC<BaseServerCardProps> = ({
                 <p>{title}</p>
               </TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="group  hover:bg-surface-raised flex-shrink-0"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash
-                    className=" group-hover:text-error transition-colors duration-400"
-                    size={16}
-                    strokeWidth={2.5}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Delete server</p>
-              </TooltipContent>
-            </Tooltip>
+            {showDeleteButton && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="group  hover:bg-surface-raised flex-shrink-0"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    <Trash
+                      className=" group-hover:text-error transition-colors duration-400"
+                      size={16}
+                      strokeWidth={2.5}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Delete server</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </CardTitle>
         {description && <CardDescription>{description}</CardDescription>}

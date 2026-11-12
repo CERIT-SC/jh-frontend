@@ -19,6 +19,7 @@ import {
   LEGACY_INSTANCE_CONFIG,
 } from "@src-types/instanceConfig";
 import { readJsonScript } from "./readJsonScript";
+import { resolveServerPolicy } from "./serverPolicy";
 import { resolveConfigLogo } from "./configLogo";
 import {
   FALLBACK_PAGE_URL,
@@ -98,6 +99,7 @@ function resolveInstanceConfig(wire: InstanceConfigWire | undefined): {
   const config: InstanceConfig = {
     version: version ?? INSTANCE_CONFIG_VERSION,
     brand,
+    servers: resolveServerPolicy(wire.servers),
     pages: {
       home: {
         // Omitted widgets are off (strict semantics; legacy is all-on).

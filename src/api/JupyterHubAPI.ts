@@ -141,7 +141,9 @@ export class JupyterHubApiClient {
     spawnOptions?: Record<string, unknown>,
   ): Promise<ApiResponse> {
     const response = await fetch(
-      `/hub/api/users/${username}/servers/${serverName}`,
+      serverName
+        ? `/hub/api/users/${username}/servers/${serverName}`
+        : `/hub/api/users/${username}/server`,
       {
         method: "POST",
         headers: {
@@ -412,8 +414,14 @@ export class JupyterHubApiClient {
   ): Promise<ApiResponse> {
     const config = remove ? { data: { remove: true } } : undefined;
 
+    if (!serverName && remove) {
+      throw new Error("The default server cannot be deleted.");
+    }
+
     const response = await this.client.delete<ApiResponse>(
-      `/users/${username}/servers/${serverName}?_xsrf=${this.xsrf}`,
+      serverName
+        ? `/users/${username}/servers/${serverName}?_xsrf=${this.xsrf}`
+        : `/users/${username}/server?_xsrf=${this.xsrf}`,
       config,
     );
     return response.data;

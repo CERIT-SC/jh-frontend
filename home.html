@@ -23,7 +23,7 @@
 
   <body>
     {% block main %} {% set named_spawners =
-    user.all_spawners(include_default=False)|list %}
+    user.all_spawners(include_default=(instance | default({})).get('servers', {}).get('default_server', False))|list %}
     <div id="root"></div>
     <script>
       const appConfig = {

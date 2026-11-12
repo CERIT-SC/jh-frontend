@@ -8,6 +8,10 @@ import type { SpawnWire } from "@src-types/spawnOptions";
 import type { InstanceFixture } from "./index";
 
 export const minimal: InstanceFixture = {
+  instance: {
+    version: 1,
+    servers: { default_server: true, named_servers: 0 },
+  },
   wire: {
     user_options: {},
     spawn_options: {

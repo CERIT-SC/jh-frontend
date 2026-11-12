@@ -12,6 +12,12 @@ import {
 } from "@components/features";
 import initDev from "../../dev-setup";
 import { getInstanceConfig, getAnnouncement } from "@utils/instanceConfig";
+import {
+  resolveServerPolicy,
+  homeServers,
+  namedServerCount,
+  canCreateNamedServer,
+} from "@utils/serverPolicy";
 import { Alert, Announcement } from "@components/ui";
 import { useAlerts, useMediaQuery } from "@hooks";
 import {
@@ -77,7 +83,6 @@ interface EventSourceItem {
 /**
  * Maximum number of servers a user can create.
  */
-const maxServers = 15;
 
 /**
  * Maximum length for server names to comply with Kubernetes label limits.
@@ -91,9 +96,16 @@ function HomePage() {
   }
 
   const { alerts, pushAlert, removeAlert } = useAlerts();
-  const [spawners, setSpawners] = useState<Record<string, SpawnerData>>(
-    appConfig.spawners as Record<string, SpawnerData>,
+  const serverPolicy = resolveServerPolicy(getInstanceConfig().config.servers);
+  const [spawners, setSpawners] = useState<Record<string, SpawnerData>>(() =>
+    homeServers(
+      appConfig.spawners as Record<string, SpawnerData>,
+      serverPolicy,
+    ),
   );
+  const namedCount = namedServerCount(spawners);
+  const maxServers = serverPolicy.named_servers;
+  const canCreateNamed = canCreateNamedServer(serverPolicy, namedCount);
   // Mirror spawners in a ref so fetchUsage can read current server names
   const spawnersRef = useRef(spawners);
   useEffect(() => {
@@ -275,17 +287,28 @@ function HomePage() {
         appConfig.userName,
       )) as unknown as Record<string, ApiSpawnerData>;
 
-      if (Object.keys(data).length !== 0) {
+      {
         // Batch all spawner updates into a single setSpawners call
         setSpawners((prevSpawners) => {
           const next = { ...prevSpawners };
           let changed = false;
+
+          if (next[""] && !data[""]) {
+            next[""] = {
+              ...next[""],
+              active: false,
+              ready: false,
+              pending: null,
+            };
+            changed = true;
+          }
 
           for (const [name, spawner] of Object.entries(data)) {
             const existing = next[name];
             const needsUpdate =
               !existing ||
               existing.active !== spawner.active ||
+              existing.ready !== spawner.ready ||
               existing.pending !== spawner.pending ||
               (!existing.url && spawner.url);
 
@@ -453,6 +476,7 @@ function HomePage() {
   }, [spawners]);
 
   const handleDeleteServer = async (name: string) => {
+    if (!name) return;
     abortProgressTracking(name);
 
     try {
@@ -488,6 +512,7 @@ function HomePage() {
   };
 
   const handleAddServer = () => {
+    if (!canCreateNamed) return;
     const trimmedName = serverName.trim();
     if (trimmedName.length > SERVER_NAME_MAX_LENGTH) {
       pushAlert(
@@ -497,7 +522,10 @@ function HomePage() {
       return;
     }
     window
-      .open(`/spawn/${appConfig.userName}/${trimmedName}`, "_self")
+      .open(
+        `/hub/spawn/${encodeURIComponent(appConfig.userName)}/${encodeURIComponent(trimmedName)}`,
+        "_self",
+      )
       ?.focus();
     setServerName("");
     setIsAddServerModalOpen(false);
@@ -506,7 +534,14 @@ function HomePage() {
     }, 500);
   };
   const handleStartServer = (name: string) => {
-    window.open(`/spawn/${appConfig.userName}/${name}`, "_self")?.focus();
+    window
+      .open(
+        name
+          ? `/hub/spawn/${encodeURIComponent(appConfig.userName)}/${encodeURIComponent(name)}`
+          : `/hub/spawn/${encodeURIComponent(appConfig.userName)}`,
+        "_self",
+      )
+      ?.focus();
   };
 
   /**
@@ -581,119 +616,137 @@ function HomePage() {
                 <Small
                   className={cn(
                     "pl-2",
-                    Object.keys(spawners).length >= maxServers
+                    maxServers !== null &&
+                      namedCount >= maxServers &&
+                      maxServers > 0
                       ? "text-error/80"
-                      : Object.keys(spawners).length >= maxServers - 2
+                      : maxServers !== null &&
+                          maxServers > 0 &&
+                          namedCount >= maxServers - 2
                         ? "text-warning-600"
                         : "",
                   )}
                 >
-                  {Object.keys(spawners).length} / {maxServers}
+                  {maxServers === 0
+                    ? Object.keys(spawners).length
+                    : maxServers === null
+                      ? namedCount
+                      : `${namedCount} / ${maxServers}`}
                 </Small>
               </Badge>
-              <Dialog
-                open={isAddServerModalOpen}
-                onOpenChange={setIsAddServerModalOpen}
-              >
-                <DialogTrigger asChild>
-                  <Badge
-                    variant={"secondary"}
-                    className={cn(
-                      "px-4 py-2 text-md justify-center text-center",
-                      "cursor-pointer transition-all duration-200 bg-tertiary border-border",
-                      " hover:border-primary dark:hover:border-primary ",
-                    )}
-                    onClick={() => setIsAddServerModalOpen(true)}
-                  >
-                    + New Server{" "}
-                  </Badge>
-                </DialogTrigger>
-                <DialogContent>
-                  {Object.keys(spawners).length >= maxServers ? (
-                    <DialogHeader>
-                      <DialogTitle>Server Limit Reached</DialogTitle>
-                      <DialogDescription>
-                        You have reached the maximum number of servers (
-                        {maxServers}). Please delete an existing server before
-                        creating a new one.
-                      </DialogDescription>
-                    </DialogHeader>
-                  ) : (
-                    <>
+              {maxServers !== 0 && (
+                <Dialog
+                  open={isAddServerModalOpen}
+                  onOpenChange={setIsAddServerModalOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Badge
+                      variant={"secondary"}
+                      className={cn(
+                        "px-4 py-2 text-md justify-center text-center",
+                        "cursor-pointer transition-all duration-200 bg-tertiary border-border",
+                        " hover:border-primary dark:hover:border-primary ",
+                      )}
+                      onClick={() => setIsAddServerModalOpen(true)}
+                    >
+                      + New Server{" "}
+                    </Badge>
+                  </DialogTrigger>
+                  <DialogContent>
+                    {!canCreateNamed ? (
                       <DialogHeader>
-                        <DialogTitle>Name Your Server</DialogTitle>
+                        <DialogTitle>Server Limit Reached</DialogTitle>
                         <DialogDescription>
-                          Choose a unique name for your new server. This name
-                          will be used to identify your server in the list.
+                          You have reached the maximum number of servers (
+                          {maxServers}). Please delete an existing server before
+                          creating a new one.
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="flex flex-col gap-1">
-                        <Input
-                          type="text"
-                          id="newServerName"
-                          value={serverName}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setServerName(e.target.value)
-                          }
-                          placeholder="e.g. ml-experiment, thesis-analysis"
-                          maxLength={SERVER_NAME_MAX_LENGTH}
-                          className={cn(
-                            "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
-                            "placeholder:text-muted-foreground/70",
-                            (isDuplicate || isTooLong) &&
-                              "border-error focus-visible:ring-error",
-                          )}
-                          aria-invalid={isDuplicate || isTooLong}
-                          aria-describedby="server-name-error"
-                          autoFocus
-                        />
-                        <div className="flex justify-end">
-                          <Small
+                    ) : (
+                      <>
+                        <DialogHeader>
+                          <DialogTitle>Name Your Server</DialogTitle>
+                          <DialogDescription>
+                            Choose a unique name for your new server. This name
+                            will be used to identify your server in the list.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex flex-col gap-1">
+                          <Input
+                            type="text"
+                            id="newServerName"
+                            value={serverName}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>,
+                            ) => setServerName(e.target.value)}
+                            placeholder="e.g. ml-experiment, thesis-analysis"
+                            maxLength={SERVER_NAME_MAX_LENGTH}
                             className={cn(
-                              "text-xs",
-                              isTooLong
-                                ? "text-error"
-                                : "text-muted-foreground",
+                              "w-full bg-surface-raised/80 border-border/60 focus:border-primary focus:bg-surface-raised transition-colors duration-200",
+                              "placeholder:text-muted-foreground/70",
+                              (isDuplicate || isTooLong) &&
+                                "border-error focus-visible:ring-error",
                             )}
+                            aria-invalid={isDuplicate || isTooLong}
+                            aria-describedby="server-name-error"
+                            autoFocus
+                          />
+                          <div className="flex justify-end">
+                            <Small
+                              className={cn(
+                                "text-xs",
+                                isTooLong
+                                  ? "text-error"
+                                  : "text-muted-foreground",
+                              )}
+                            >
+                              {serverName.length} / {SERVER_NAME_MAX_LENGTH}
+                            </Small>
+                          </div>
+                          <div
+                            id="server-name-error"
+                            className={`flex items-center gap-2 text-sm text-error min-h-[1.25rem] ${isDuplicate || isTooLong ? "visible" : "invisible"}`}
+                            role="alert"
+                            aria-live="polite"
                           >
-                            {serverName.length} / {SERVER_NAME_MAX_LENGTH}
-                          </Small>
+                            <AlertCircle size={16} className="flex-shrink-0" />
+                            <span className="truncate">
+                              {isTooLong
+                                ? `Server name is too long (max ${SERVER_NAME_MAX_LENGTH} characters)`
+                                : isDuplicate
+                                  ? `Server name "${serverName}" is already in use`
+                                  : "\u00A0"}
+                            </span>
+                          </div>
                         </div>
-                        <div
-                          id="server-name-error"
-                          className={`flex items-center gap-2 text-sm text-error min-h-[1.25rem] ${isDuplicate || isTooLong ? "visible" : "invisible"}`}
-                          role="alert"
-                          aria-live="polite"
-                        >
-                          <AlertCircle size={16} className="flex-shrink-0" />
-                          <span className="truncate">
-                            {isTooLong
-                              ? `Server name is too long (max ${SERVER_NAME_MAX_LENGTH} characters)`
-                              : isDuplicate
-                                ? `Server name "${serverName}" is already in use`
-                                : "\u00A0"}
-                          </span>
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button
-                          variant="secondary"
-                          onClick={() => {
-                            setIsAddServerModalOpen(false);
-                            setServerName("");
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAddServer} disabled={isEmpty}>
-                          <Plus size={16} strokeWidth={3} />
-                          Add Server
-                        </Button>
-                      </DialogFooter>
-                    </>
-                  )}
-                </DialogContent>
-              </Dialog>
+                        <DialogFooter>
+                          <Button
+                            variant="secondary"
+                            onClick={() => {
+                              setIsAddServerModalOpen(false);
+                              setServerName("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleAddServer}
+                            disabled={
+                              isEmpty ||
+                              isDuplicate ||
+                              isTooLong ||
+                              !canCreateNamed
+                            }
+                          >
+                            <Plus size={16} strokeWidth={3} />
+                            Add Server
+                          </Button>
+                        </DialogFooter>
+                      </>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           </div>
           <div
@@ -726,6 +779,7 @@ function HomePage() {
                 handleOpen={() => handleOpenServer(spawner.url)}
                 handleStop={() => handleStopServer(name)}
                 handleDelete={() => handleDeleteServer(name)}
+                showDeleteButton={name !== ""}
                 handleStart={() => handleStartServer(name)}
                 handleQuickStart={() => handleQuickStart(name)}
                 progress={serverProgress[name]}
@@ -734,7 +788,7 @@ function HomePage() {
                 memoryLimit={resourceUsage[name]?.memory_limit_bytes}
               />
             ))}
-            {Object.keys(spawners).length < maxServers && (
+            {canCreateNamed && (
               <EmptyServerCard
                 onClick={() => setIsAddServerModalOpen(true)}
                 variant={isMultiColumn ? "default" : "inline"}
