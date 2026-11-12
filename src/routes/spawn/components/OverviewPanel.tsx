@@ -255,7 +255,8 @@ function OverviewSections({
           )}
         </div>
       </div>
-      <Separator />
+      {/* Divider on top of the storage section — only when it renders. */}
+      {hasStorageContent && <Separator />}
 
       {/* Storage Section — only when the instance offers storage options */}
       {hasStorageContent && (
@@ -392,7 +393,8 @@ function OverviewSections({
         </div>
       )}
 
-      {hasStorageContent && <Separator />}
+      {/* Divider on top of the resources section — only when it renders. */}
+      {hasResourceContent && <Separator />}
       {/* Resources Section — only when the instance offers resource options */}
       {hasResourceContent && (
         <div className="px-6">

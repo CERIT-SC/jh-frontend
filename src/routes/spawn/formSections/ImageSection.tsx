@@ -232,7 +232,9 @@ export function ImageSelectionSectionTabs({
         image={image}
       />
 
-      <Separator />
+      {/* Divider between the image cards and the SSH toggle — only when the
+          toggle renders, otherwise it divides nothing. */}
+      {image.ssh.enabled && <Separator />}
 
       {/* SSH Option — rendered only when the instance offers SSH */}
       {image.ssh.enabled && (

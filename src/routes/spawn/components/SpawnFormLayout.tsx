@@ -45,7 +45,7 @@ function SpawnFormLayout({
   children,
 }: SpawnFormLayoutProps) {
   return (
-    <div className="">
+    <div className="min-h-screen flex flex-col">
       <JupyterHubHeader userName={userName} />
       <Alert alerts={alerts} onRemove={onRemoveAlert} />
       {announcement && (
@@ -69,7 +69,7 @@ function SpawnFormLayout({
           ))}
         </div>
       )}
-      <Content className="py-8 px-2 lg:container">
+      <Content className="grow py-8 px-2 lg:container">
         <ContentHeading className="max-w-full">
           {serverName ? (
             <span className="truncate inline-block max-w-full">
@@ -81,7 +81,7 @@ function SpawnFormLayout({
         </ContentHeading>
         <ContentBody>{children}</ContentBody>
       </Content>
-      <Footer />
+      <Footer className="flex-none" />
     </div>
   );
 }
