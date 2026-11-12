@@ -5,6 +5,7 @@
 
 import React from "react";
 import { getBrand } from "../../brands/registry";
+import { getInstanceConfig } from "@utils/instanceConfig";
 
 interface FooterProps {
   className?: string;
@@ -12,7 +13,9 @@ interface FooterProps {
 
 function FooterComponent({ className }: FooterProps): React.ReactElement {
   const BrandFooter = getBrand().slots.Footer;
-  return <BrandFooter className={className} />;
+  // Configured footer logo (`instance.pages.footer.logo`) overrides the
+  const logo = getInstanceConfig().config.pages.footer?.logo;
+  return <BrandFooter className={className} logo={logo} />;
 }
 
 export const Footer = React.memo(FooterComponent);

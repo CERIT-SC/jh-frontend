@@ -9,10 +9,18 @@
  */
 
 import type { ComponentType } from "react";
+import type { ConfigLogo } from "@src-types/instanceConfig";
 
 /** Props of the hub header slot. */
 export interface JupyterHubHeaderProps {
   userName: string;
+}
+
+/** Props of the footer slot. */
+export interface FooterProps {
+  className?: string;
+  /** Configured logo override (`instance.pages.footer.logo`); absent → the brand's bundled logos. */
+  logo?: ConfigLogo;
 }
 
 /** Props of the login page slot (the route entry supplies them). */
@@ -36,7 +44,7 @@ export interface BrandDefinition {
   };
   slots: {
     Header: ComponentType<JupyterHubHeaderProps>;
-    Footer: ComponentType<{ className?: string }>;
+    Footer: ComponentType<FooterProps>;
     LoginPage: ComponentType<LoginPageProps>;
   };
 }

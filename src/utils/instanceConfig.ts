@@ -8,6 +8,7 @@
  */
 
 import type {
+  FooterContent,
   InstanceConfig,
   InstanceConfigWire,
 } from "@src-types/instanceConfig";
@@ -17,6 +18,7 @@ import {
   LEGACY_INSTANCE_CONFIG,
 } from "@src-types/instanceConfig";
 import { readJsonScript } from "./readJsonScript";
+import { resolveConfigLogo } from "./configLogo";
 import {
   FALLBACK_PAGE_URL,
   resolveLoginContent,
@@ -68,6 +70,25 @@ function resolveInstanceConfig(wire: InstanceConfigWire | undefined): {
   const login = resolveLoginContent(pages.login, pageUrl);
   problems.push(...login.problems);
 
+  let footerContent: FooterContent | undefined;
+  if (pages.footer !== undefined) {
+    if (isRecord(pages.footer)) {
+      const footerLogo = resolveConfigLogo(
+        pages.footer.logo,
+        pageUrl,
+        "instance.pages.footer.logo",
+        problems,
+      );
+      footerContent = footerLogo ? { logo: footerLogo } : {};
+    } else {
+      problems.push({
+        message:
+          "instance.pages.footer is present but not an object — footer branding ignored.",
+        blocking: false,
+      });
+    }
+  }
+
   const config: InstanceConfig = {
     version: version ?? INSTANCE_CONFIG_VERSION,
     brand,
@@ -78,6 +99,7 @@ function resolveInstanceConfig(wire: InstanceConfigWire | undefined): {
         resource_usage: home.resource_usage === true,
       },
       login: login.content,
+      footer: footerContent,
     },
   };
 

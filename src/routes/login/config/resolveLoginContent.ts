@@ -16,6 +16,7 @@
 
 import type { LoginContent } from "@src-types/instanceConfig";
 import type { ConfigProblem } from "@src-types/spawnOptions";
+import { asHttpUrl, resolveConfigLogo } from "@utils/configLogo";
 
 /** Defaults of the generic configured page (`{}` opts into these). */
 const DEFAULTS = {
@@ -112,7 +113,12 @@ export function resolveLoginContent(
     }
   }
 
-  const logo = asLogo(value.logo, pageUrl, problems);
+  const logo = resolveConfigLogo(
+    value.logo,
+    pageUrl,
+    "instance.pages.login.logo",
+    problems,
+  );
   if (logo) {
     content.logo = logo;
   }
@@ -184,113 +190,15 @@ function asLink(
     });
     return undefined;
   }
-  const url = asHttpUrl(value.href, pageUrl, "links", problems, false);
+  const url = asHttpUrl(
+    value.href,
+    pageUrl,
+    "instance.pages.login.links",
+    problems,
+    false,
+  );
   if (!url) {
     return undefined;
   }
   return { label: value.label.trim(), href: url.toString() };
-}
-
-/**
- * Resolves the logo against `pageUrl`; same-origin HTTP(S) without
- * credentials only. An invalid primary logo omits the logo; an invalid
- * `dark_src` falls back to the light source.
- */
-function asLogo(
-  value: unknown,
-  pageUrl: string,
-  problems: ConfigProblem[],
-): LoginContent["logo"] | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-  if (!isRecord(value)) {
-    problems.push({
-      message: "instance.pages.login.logo is invalid — logo omitted.",
-      blocking: false,
-    });
-    return undefined;
-  }
-  if (!nonEmptyString(value.alt) || !nonEmptyString(value.src)) {
-    problems.push({
-      message: "instance.pages.login.logo is invalid — logo omitted.",
-      blocking: false,
-    });
-    return undefined;
-  }
-  const src = asHttpUrl(value.src, pageUrl, "logo", problems, true);
-  if (!src) {
-    return undefined;
-  }
-  const logo: LoginContent["logo"] = {
-    src: src.toString(),
-    alt: value.alt.trim(),
-  };
-  if (nonEmptyString(value.dark_src)) {
-    const dark = asHttpUrl(
-      value.dark_src,
-      pageUrl,
-      "logo.dark_src",
-      problems,
-      true,
-    );
-    if (dark) {
-      logo.dark_src = dark.toString();
-    }
-    // An invalid dark source keeps the light source (asHttpUrl already
-    // recorded the problem).
-  } else if (value.dark_src !== undefined) {
-    problems.push({
-      message:
-        "instance.pages.login.logo.dark_src is invalid — using the light logo.",
-      blocking: false,
-    });
-  }
-  return logo;
-}
-
-/**
- * Shared URL rule: resolves `raw` against `pageUrl`; must resolve to
- * HTTP(S) without credentials. When `sameOrigin` is true the resolved origin
- * must equal the page's origin (logos); links may point anywhere HTTP(S).
- */
-function asHttpUrl(
-  raw: string,
-  pageUrl: string,
-  what: string,
-  problems: ConfigProblem[],
-  sameOrigin: boolean,
-): URL | undefined {
-  let url: URL;
-  try {
-    url = new URL(raw, pageUrl);
-  } catch {
-    problems.push({
-      message: `Invalid URL ignored in instance.pages.login.${what}.`,
-      blocking: false,
-    });
-    return undefined;
-  }
-  if (url.protocol !== "http:" && url.protocol !== "https:") {
-    problems.push({
-      message: `Only http(s) URLs are allowed in instance.pages.login.${what}.`,
-      blocking: false,
-    });
-    return undefined;
-  }
-  if (url.username !== "" || url.password !== "") {
-    problems.push({
-      message: `URLs with credentials are not allowed in instance.pages.login.${what}.`,
-      blocking: false,
-    });
-    return undefined;
-  }
-  if (sameOrigin && url.origin !== new URL(pageUrl).origin) {
-    problems.push({
-      message: `instance.pages.login.${what} must be same-origin (page CSP is img-src 'self').`,
-      blocking: false,
-    });
-    return undefined;
-  }
-  return url;
 }

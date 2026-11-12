@@ -94,6 +94,16 @@ export const cas: InstanceFixture = {
         links: [],
         button_text: "Sign in with MUNI",
       },
+      // Footer logo override — the same ops-managed pattern as the login
+      // logo: a same-origin static path; absent/invalid → the brand's own
+      // footer logo (e-INFRA). Without dark_src the light image shows in
+      // both modes.
+      footer: {
+        logo: {
+          src: "/static/custom-images/bioconductor_logo.svg",
+          alt: "Bioconductor",
+        },
+      },
     },
   } satisfies InstanceConfigWire,
 };

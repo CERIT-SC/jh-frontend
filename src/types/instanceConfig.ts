@@ -28,7 +28,25 @@ export interface InstanceConfig {
      * login slot; present (even `{}`) → the shared generic login card.
      */
     login?: LoginContent;
+    /**
+     * Optional per-instance footer branding. Absent → the brand's own
+     * footer assets (bundled logos and copy).
+     */
+    footer?: FooterContent;
   };
+}
+
+/** Same-origin image URL pair (page CSP is `img-src 'self' data: blob:`). */
+export interface ConfigLogo {
+  src: string;
+  dark_src?: string;
+  alt: string;
+}
+
+/** Configured footer branding (all fields validated). */
+export interface FooterContent {
+  /** Same-origin image URLs only (page CSP is `img-src 'self' data: blob:`). */
+  logo?: ConfigLogo;
 }
 
 /** Configured content of the shared login card (all fields validated). */
@@ -37,7 +55,7 @@ export interface LoginContent {
   /** Empty string hides the subtitle. */
   subtitle: string;
   /** Same-origin image URLs only (page CSP is `img-src 'self' data: blob:`). */
-  logo?: { src: string; dark_src?: string; alt: string };
+  logo?: ConfigLogo;
   /** Plain text paragraphs, rendered escaped — no HTML. */
   paragraphs: string[];
   /** HTTP(S) links (any origin); relative hrefs are resolved against the page. */

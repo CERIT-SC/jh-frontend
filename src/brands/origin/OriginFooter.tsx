@@ -9,10 +9,15 @@ import { Button, cn } from "@e-infra/design-system";
 import { Mail, FileText, ArrowUpRight } from "lucide-react";
 import { einfraLogo, einfraLogoDark } from "@assets/images";
 import { originCopy, originLogos } from "./copy";
+import type { FooterProps } from "../types";
 
-export const OriginFooter: React.FC<{ className?: string }> = ({
-  className,
-}) => {
+export const OriginFooter: React.FC<FooterProps> = ({ className, logo }) => {
+  // Configured logo (`instance.pages.footer.logo`) wins; without a dark
+  // variant the light source shows in both modes.
+  const lightSrc = logo?.src ?? originLogos.light ?? einfraLogo;
+  const darkSrc =
+    logo?.dark_src ?? logo?.src ?? originLogos.dark ?? einfraLogoDark;
+  const alt = logo?.alt ?? "e-INFRA CZ";
   return (
     <footer
       className={cn(
@@ -29,13 +34,13 @@ export const OriginFooter: React.FC<{ className?: string }> = ({
           {/* Left — Logo & operator */}
           <div className="flex flex-col items-center gap-1.5 sm:items-start">
             <img
-              src={originLogos.light || einfraLogo}
-              alt="e-INFRA CZ"
+              src={lightSrc}
+              alt={alt}
               className="h-8 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 block dark:hidden"
             />
             <img
-              src={originLogos.dark || einfraLogoDark}
-              alt="e-INFRA CZ"
+              src={darkSrc}
+              alt={alt}
               className="h-8 w-auto object-contain transition-opacity opacity-90 hover:opacity-100 hidden dark:block"
             />
             <p className="text-sm font-medium text-text-muted">
